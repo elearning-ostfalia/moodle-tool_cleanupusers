@@ -251,7 +251,10 @@ class tool_cleanupusers_renderer extends plugin_renderer_base {
             $userinformation = [];
             if (!empty($user)) {
                 $userinformation['username'] = $user->username;
-                $userinformation['lastaccess'] = date('d.m.Y h:i:s', $user->lastaccess);
+                if ($user->lastaccess > 0)
+                    $userinformation['lastaccess'] = date('d.m.Y h:i:s', $user->lastaccess);
+                else
+                    $userinformation['lastaccess'] = get_string('neverlogged', 'tool_cleanupusers');
 
                 $isarchivid = array_key_exists($user->id, $cleanupusers);
                 if (empty($isarchivid)) {

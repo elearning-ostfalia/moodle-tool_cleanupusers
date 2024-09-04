@@ -32,6 +32,7 @@ if ($hassiteconfig) {
         'settingsinformation',
         'userstatus_timechecker'
     ), get_string('introsettingstext', 'userstatus_timechecker')));
+
     $settings->add(new admin_setting_configtext(
         'userstatus_timechecker/suspendtime',
         get_string('suspendtime', 'userstatus_timechecker'),
@@ -45,5 +46,12 @@ if ($hassiteconfig) {
         get_string('timechecker_time_to_delete', 'userstatus_timechecker'),
         365,
         PARAM_INT
+    ));
+    $settings->add(new admin_setting_configtext(
+        'userstatus_timechecker/auth_method',
+        get_string('authmethod', 'userstatus_timechecker'),
+        get_string('authmethod_info', 'userstatus_timechecker'),
+        '',
+        PARAM_TEXT
     ));
 }

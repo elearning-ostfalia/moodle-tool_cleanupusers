@@ -238,7 +238,7 @@ class archiveduser {
         $cloneuser->secret = '';
         $cloneuser->picture = 0;
         $cloneuser->description = '';
-        $cloneuser->timemodified = '';
+        $cloneuser->timemodified = time();
         $cloneuser->timecreated = $timestamp;
         $cloneuser->imagealt = '';
         $cloneuser->lastnamephonetic = '';

@@ -63,6 +63,8 @@ $neverloggedinarray = $userstatuschecker->get_never_logged_in();
 if (empty($neverloggedinarray)) {
     echo "Currently no users have never logged in.";
 } else {
+    echo '<br>' . get_string('neverloggedininfo', 'tool_cleanupusers');
+
     $userfilter = new user_filtering();
     $userfilter->display_add();
     $userfilter->display_active();

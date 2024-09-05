@@ -51,11 +51,15 @@ class tool_cleanupusers_renderer extends plugin_renderer_base {
             $authsenabled = [];
         }
 
-        // construct the display array, with enabled auth plugins at the top, in order
-        $displayauths = array();
+        // construct the display array, with enabled pluginname plugins at the top, in order
+        $displayauths = [];
         $registrationauths = array();
         $registrationauths[''] = $txt->disable;
         $authplugins = array();
+
+        foreach ($authsenabled as $auth) {
+            $displayauths[$auth] = $auth;
+        }
 
         foreach ($authsavailable as $auth => $dir) {
             if (array_key_exists($auth, $displayauths)) {
@@ -64,14 +68,14 @@ class tool_cleanupusers_renderer extends plugin_renderer_base {
             $displayauths[$auth] = $dir->displayname;
 
 
-            // $authplugin = get_auth_plugin($auth);
-            // $authplugins[$auth] = $userstatuschecker;
-            /// Get the auth title (from core or own auth lang files)
+            // $authplugin = get_auth_plugin($pluginname);
+            // $authplugins[$pluginname] = $userstatuschecker;
+            /// Get the pluginname title (from core or own pluginname lang files)
             // $authtitle = $userstatuschecker; // $userstatuschecker->get_title();
             /// Apply titles
-            // $authsenabled[$auth] = $auth; // $authtitle;
+            // $authsenabled[$pluginname] = $pluginname; // $authtitle;
 /*            if ($userstatuschecker->can_signup()) {
-                $registrationauths[$auth] = $authtitle;
+                $registrationauths[$pluginname] = $authtitle;
             }*/
         }
 
@@ -88,44 +92,43 @@ class tool_cleanupusers_renderer extends plugin_renderer_base {
 
         // iterate through plugins and add to the display table
         $updowncount = 1;
-        $authcount = count($authsavailable); // count($authsenabled);
+        $authcount = count($authsenabled);
         $url = "index.php?sesskey=" . sesskey();
-        foreach ($displayauths as $auth => $name) {
+        foreach ($displayauths as $pluginname => $name) {
             $class = '';
-            // var_dump($auth);
-            $mysubpluginname = "\\userstatus_" . $auth . "\\" . $auth;
+            $mysubpluginname = "\\userstatus_" . $pluginname . "\\" . $pluginname;
             $userstatuschecker = new $mysubpluginname();
 
             // hide/show link
-            if (in_array($auth, $authsenabled)) {
-                $hideshow = "<a href=\"$url&amp;action=disable&amp;userstatus=$auth\">";
+            if (in_array($pluginname, $authsenabled)) {
+                $hideshow = "<a href=\"$url&amp;action=disable&amp;userstatus=$pluginname\">";
                 $hideshow .= $OUTPUT->pix_icon('t/hide', get_string('disable')) . '</a>';
                 $enabled = true;
                 $displayname = $name;
             }
             else {
-                $hideshow = "<a href=\"$url&amp;action=enable&amp;userstatus=$auth\">";
+                $hideshow = "<a href=\"$url&amp;action=enable&amp;userstatus=$pluginname\">";
                 $hideshow .= $OUTPUT->pix_icon('t/show', get_string('enable')) . '</a>';
                 $enabled = false;
                 $displayname = $name;
                 $class = 'dimmed_text';
             }
 
-            // $usercount = $DB->count_records('user', array('auth'=>$auth, 'deleted'=>0));
+            // $usercount = $DB->count_records('user', array('pluginname'=>$pluginname, 'deleted'=>0));
             $authmethod = $userstatuschecker->get_authentication_method();
 
-            // up/down link (only if auth is enabled)
+            // up/down link (only if pluginname is enabled)
             $updown = '';
             if ($enabled) {
                 if ($updowncount > 1) {
-                    $updown .= "<a href=\"$url&amp;action=up&amp;auth=$auth\">";
+                    $updown .= "<a href=\"$url&amp;action=up&amp;userstatus=$pluginname\">";
                     $updown .= $OUTPUT->pix_icon('t/up', get_string('moveup')) . '</a>&nbsp;';
                 }
                 else {
                     $updown .= $OUTPUT->spacer() . '&nbsp;';
                 }
                 if ($updowncount < $authcount) {
-                    $updown .= "<a href=\"$url&amp;action=down&amp;auth=$auth\">";
+                    $updown .= "<a href=\"$url&amp;action=down&amp;userstatus=$pluginname\">";
                     $updown .= $OUTPUT->pix_icon('t/down', get_string('movedown')) . '</a>&nbsp;';
                 }
                 else {
@@ -135,8 +138,8 @@ class tool_cleanupusers_renderer extends plugin_renderer_base {
             }
 
             // settings link
-            if (file_exists( __DIR__ . '/userstatus/'.$auth.'/settings.php')) {
-                $settings = "<a href=\"{$CFG->wwwroot}/admin/settings.php?section=cleanupusers_userstatus$auth\">{$txt->settings}</a>";
+            if (file_exists( __DIR__ . '/userstatus/'.$pluginname.'/settings.php')) {
+                $settings = "<a href=\"{$CFG->wwwroot}/admin/settings.php?section=cleanupusers_userstatus$pluginname\">{$txt->settings}</a>";
             } else {
                 $settings = '';
             }

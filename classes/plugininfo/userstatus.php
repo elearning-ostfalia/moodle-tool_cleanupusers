@@ -97,7 +97,55 @@ class userstatus extends base {
         return 'cleanupusers_userstatus' . $this->name;
     }
 
+    public static function get_enabled_plugins() {
+        global $CFG;
 
+        $enabled = [];
+        if (isset($CFG->userstatus_plugins_enabled)) {
+            foreach (array_map('trim', explode(',', $CFG->userstatus_plugins_enabled)) as $checker) {
+                if (!empty($checker)) {
+                    $enabled[$checker] = $checker;
+                }
+            }
+        }
+        return $enabled;
+    }
+
+    public static function enable_plugin(string $pluginname, int $enabled): bool {
+        global $CFG;
+
+        $haschanged = false;
+        $plugins = [];
+        if (!empty($CFG->userstatus_plugins_enabled)) {
+            $plugins = array_flip(explode(',', $CFG->userstatus_plugins_enabled));
+        }
+
+
+        // Only set visibility if it's different from the current value.
+        if ($enabled && !array_key_exists($pluginname, $plugins)) {
+            $plugins[$pluginname] = $pluginname;
+            $haschanged = true;
+        } else if (!$enabled && array_key_exists($pluginname, $plugins)) {
+            unset($plugins[$pluginname]);
+            $haschanged = true;
+        }
+
+        if ($haschanged) {
+            $new = implode(',', array_flip($plugins));
+            add_to_config_log('userstatus_plugins_enabled', !$enabled, $enabled, $pluginname);
+            set_config('userstatus_plugins_enabled', $new);
+            // Reset caches.
+            \core_plugin_manager::reset_caches();
+            // Resets all userstatus_plugins_enabled caches.
+            $syscontext = \context_system::instance();
+            $syscontext->mark_dirty();
+        }
+
+        return $haschanged;
+    }
+
+
+/*
     public static function get_enabled_plugins() {
         global $DB;
         // echo "userstatus.get_enabled_plugins <br>";
@@ -137,12 +185,6 @@ class userstatus extends base {
         $settingname = $pluginname . '_disabled';
         $oldvalue = get_config('userstatus', $settingname);
 
-/*        if ($oldvalue == null) {
-            echo "oldvalue: null<br>";
-        } else {
-            echo "oldvalue: " . $oldvalue . "<br>";
-        }
-*/
         $disabled = !$enabled;
         // Only set value if there is no config setting or if the value is different from the previous one.
         if ($oldvalue == false && $disabled) {
@@ -160,4 +202,5 @@ class userstatus extends base {
 
         return $haschanged;
     }
+*/
 }

@@ -51,32 +51,12 @@ class tool_cleanupusers_renderer extends plugin_renderer_base {
             $authsenabled = [];
         }
 
-        // core_component::get_plugin_list('auth');
-        /* get_enabled_auth_plugins(true); // fix the list of enabled auths
-        if (empty($CFG->auth)) {
-            $authsenabled = array();
-        } else {
-            $authsenabled = explode(',', $CFG->auth);
-        }
-        */
-
         // construct the display array, with enabled auth plugins at the top, in order
         $displayauths = array();
         $registrationauths = array();
         $registrationauths[''] = $txt->disable;
         $authplugins = array();
-/*        foreach ($authsenabled as $auth) {
-            $authplugin = get_auth_plugin($auth);
-            $authplugins[$auth] = $authplugin;
-            /// Get the auth title (from core or own auth lang files)
-            $authtitle = $authplugin->get_title();
-            /// Apply titles
-            $displayauths[$auth] = $authtitle;
-            if ($authplugin->can_signup()) {
-                $registrationauths[$auth] = $authtitle;
-            }
-        }
-*/
+
         foreach ($authsavailable as $auth => $dir) {
             if (array_key_exists($auth, $displayauths)) {
                 continue; //already in the list
@@ -106,17 +86,7 @@ class tool_cleanupusers_renderer extends plugin_renderer_base {
         $table->attributes['class'] = 'admintable generaltable';
         $table->id = 'manageauthtable';
 
-        //add always enabled plugins first
-        /*        $displayname = $displayauths['manual'];
-        $settings = "<a href=\"settings.php?section=authsettingmanual\">{$txt->settings}</a>";
-        $usercount = $DB->count_records('user', array('auth'=>'manual', 'deleted'=>0));
-        $table->data[] = array($displayname, $usercount, '', '', $settings, '', '');
-        $displayname = $displayauths['nologin'];
-        $usercount = $DB->count_records('user', array('auth'=>'nologin', 'deleted'=>0));
-        $table->data[] = array($displayname, $usercount, '', '', '', '', '');
-*/
-
-        // iterate through auth plugins and add to the display table
+        // iterate through plugins and add to the display table
         $updowncount = 1;
         $authcount = count($authsavailable); // count($authsenabled);
         $url = "index.php?sesskey=" . sesskey();

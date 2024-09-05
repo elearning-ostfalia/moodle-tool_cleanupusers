@@ -160,10 +160,12 @@ if (!$pluginsenabled) {
     */
 
     // Request arrays from the sub-plugin.
+    // var_dump($pluginsenabled);
     foreach ($pluginsenabled as $subplugin => $dir) {
         // var_dump($subplugin); echo '<br>';
         // var_dump($dir); echo '<br>';
         // $class::enable_plugin($auth, false);
+
 
         $mysubpluginname = "\\userstatus_" . $subplugin . "\\" . $subplugin;
         $userstatuschecker = new $mysubpluginname();
@@ -173,9 +175,11 @@ if (!$pluginsenabled) {
             $arraytodelete = $userstatuschecker->get_to_delete();
             $arrayneverloggedin = $userstatuschecker->get_never_logged_in();
             $arrayreactivate = $userstatuschecker->get_to_reactivate();
+
+            $content .= $OUTPUT->heading($subplugin, 3, 'main');
             $content .= $renderer->render_index_page($arrayreactivate, $archivearray, $arraytodelete, $arrayneverloggedin);
 		} catch (Exception $e) {
-            core\notification::warning($e->getMessage());
+            core\notification::warning($subplugin . ': '. $e->getMessage());
         }
     }
 }

@@ -61,4 +61,6 @@ interface userstatusinterface {
      * @return array of users to reactivate.
      */
     public function get_to_reactivate();
+
+    public function get_authentication_method() : string;
 }

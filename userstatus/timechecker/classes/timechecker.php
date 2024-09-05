@@ -214,4 +214,12 @@ class timechecker implements userstatusinterface {
 
         return $toactivate;
     }
+
+    /**
+     * returns the authentication method for all users being handled by this plugin
+     * @return string
+     */
+    public function get_authentication_method() :string {
+        return $this->config->auth_method;
+    }
 }

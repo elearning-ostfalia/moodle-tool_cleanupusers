@@ -96,4 +96,68 @@ class userstatus extends base {
     public function get_settings_section_name() {
         return 'cleanupusers_userstatus' . $this->name;
     }
+
+
+    public static function get_enabled_plugins() {
+        global $DB;
+        // echo "userstatus.get_enabled_plugins <br>";
+
+        $plugins = \core_plugin_manager::instance()->get_installed_plugins('userstatus');
+        if (!$plugins) {
+            return [];
+        }
+        // var_dump($plugins);
+        $installed = array();
+        foreach ($plugins as $plugin => $version) {
+            $installed[] = $plugin.'_disabled';
+        }
+
+        list($installed, $params) = $DB->get_in_or_equal($installed, SQL_PARAMS_NAMED);
+        $disabled = $DB->get_records_select('config_plugins', "name $installed AND plugin = 'userstatus'", $params, 'plugin ASC');
+        foreach ($disabled as $conf) {
+            if (empty($conf->value)) {
+                continue;
+            }
+            $name = substr($conf->name, 0, -9);
+            unset($plugins[$name]);
+        }
+
+        $enabled = array();
+        foreach ($plugins as $plugin => $version) {
+            $enabled[$plugin] = $plugin;
+        }
+
+        return $enabled;
+    }
+
+    public static function enable_plugin(string $pluginname, int $enabled): bool {
+        // echo "userstatus.enable_plugin <br>";
+        $haschanged = false;
+
+        $settingname = $pluginname . '_disabled';
+        $oldvalue = get_config('userstatus', $settingname);
+
+/*        if ($oldvalue == null) {
+            echo "oldvalue: null<br>";
+        } else {
+            echo "oldvalue: " . $oldvalue . "<br>";
+        }
+*/
+        $disabled = !$enabled;
+        // Only set value if there is no config setting or if the value is different from the previous one.
+        if ($oldvalue == false && $disabled) {
+            set_config($settingname, $disabled, 'userstatus');
+            $haschanged = true;
+        } else if ($oldvalue != false && !$disabled) {
+            unset_config($settingname, 'userstatus');
+            $haschanged = true;
+        }
+
+        if ($haschanged) {
+            add_to_config_log($settingname, $oldvalue, $disabled, 'userstatus');
+            \core_plugin_manager::reset_caches();
+        }
+
+        return $haschanged;
+    }
 }

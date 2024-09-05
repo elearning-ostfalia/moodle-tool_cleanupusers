@@ -32,6 +32,156 @@ require_once($CFG->libdir . '/tablelib.php');
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class tool_cleanupusers_renderer extends plugin_renderer_base {
+
+    public function render_subplugin_table() : string {
+        global $OUTPUT, $DB, $CFG;
+        // display strings
+        $txt = get_strings(array('authenticationplugins',
+            'settings', 'edit', 'name', 'enable', 'disable',
+            'up', 'down', 'none'));
+        $txt->updown = "$txt->up/$txt->down";
+        $txt->authmethod = get_string('authmethod', 'userstatus_timechecker');
+
+        $authsavailable = core_plugin_manager::instance()->get_plugins_of_type('userstatus');
+        // var_dump($authsavailable);
+        $class = \core_plugin_manager::resolve_plugininfo_class('userstatus');
+        $authsenabled = $class::get_enabled_plugins();
+        // $authsenabled = core_plugin_manager::instance()->get_enabled_plugins("userstatus");
+        if (!$authsenabled) {
+            $authsenabled = [];
+        }
+
+        // core_component::get_plugin_list('auth');
+        /* get_enabled_auth_plugins(true); // fix the list of enabled auths
+        if (empty($CFG->auth)) {
+            $authsenabled = array();
+        } else {
+            $authsenabled = explode(',', $CFG->auth);
+        }
+        */
+
+        // construct the display array, with enabled auth plugins at the top, in order
+        $displayauths = array();
+        $registrationauths = array();
+        $registrationauths[''] = $txt->disable;
+        $authplugins = array();
+/*        foreach ($authsenabled as $auth) {
+            $authplugin = get_auth_plugin($auth);
+            $authplugins[$auth] = $authplugin;
+            /// Get the auth title (from core or own auth lang files)
+            $authtitle = $authplugin->get_title();
+            /// Apply titles
+            $displayauths[$auth] = $authtitle;
+            if ($authplugin->can_signup()) {
+                $registrationauths[$auth] = $authtitle;
+            }
+        }
+*/
+        foreach ($authsavailable as $auth => $dir) {
+            if (array_key_exists($auth, $displayauths)) {
+                continue; //already in the list
+            }
+            $displayauths[$auth] = $dir->displayname;
+
+
+            // $authplugin = get_auth_plugin($auth);
+            // $authplugins[$auth] = $userstatuschecker;
+            /// Get the auth title (from core or own auth lang files)
+            // $authtitle = $userstatuschecker; // $userstatuschecker->get_title();
+            /// Apply titles
+            // $authsenabled[$auth] = $auth; // $authtitle;
+/*            if ($userstatuschecker->can_signup()) {
+                $registrationauths[$auth] = $authtitle;
+            }*/
+        }
+
+
+        $return = $OUTPUT->heading(get_string('actpluginshdr', 'tool_cleanupusers'), 3, 'main');
+        $return .= $OUTPUT->box_start('generalbox authsui');
+
+        $table = new html_table();
+        $table->head  = array($txt->name, $txt->authmethod, $txt->enable, $txt->updown, $txt->settings);
+        $table->colclasses = array('leftalign', 'centeralign', 'centeralign', 'centeralign', 'centeralign');
+        $table->data  = array();
+        $table->attributes['class'] = 'admintable generaltable';
+        $table->id = 'manageauthtable';
+
+        //add always enabled plugins first
+        /*        $displayname = $displayauths['manual'];
+        $settings = "<a href=\"settings.php?section=authsettingmanual\">{$txt->settings}</a>";
+        $usercount = $DB->count_records('user', array('auth'=>'manual', 'deleted'=>0));
+        $table->data[] = array($displayname, $usercount, '', '', $settings, '', '');
+        $displayname = $displayauths['nologin'];
+        $usercount = $DB->count_records('user', array('auth'=>'nologin', 'deleted'=>0));
+        $table->data[] = array($displayname, $usercount, '', '', '', '', '');
+*/
+
+        // iterate through auth plugins and add to the display table
+        $updowncount = 1;
+        $authcount = count($authsavailable); // count($authsenabled);
+        $url = "index.php?sesskey=" . sesskey();
+        foreach ($displayauths as $auth => $name) {
+            $class = '';
+            // var_dump($auth);
+            $mysubpluginname = "\\userstatus_" . $auth . "\\" . $auth;
+            $userstatuschecker = new $mysubpluginname();
+
+            // hide/show link
+            if (in_array($auth, $authsenabled)) {
+                $hideshow = "<a href=\"$url&amp;action=disable&amp;userstatus=$auth\">";
+                $hideshow .= $OUTPUT->pix_icon('t/hide', get_string('disable')) . '</a>';
+                $enabled = true;
+                $displayname = $name;
+            }
+            else {
+                $hideshow = "<a href=\"$url&amp;action=enable&amp;userstatus=$auth\">";
+                $hideshow .= $OUTPUT->pix_icon('t/show', get_string('enable')) . '</a>';
+                $enabled = false;
+                $displayname = $name;
+                $class = 'dimmed_text';
+            }
+
+            // $usercount = $DB->count_records('user', array('auth'=>$auth, 'deleted'=>0));
+            $authmethod = $userstatuschecker->get_authentication_method();
+
+            // up/down link (only if auth is enabled)
+            $updown = '';
+            if ($enabled) {
+                if ($updowncount > 1) {
+                    $updown .= "<a href=\"$url&amp;action=up&amp;auth=$auth\">";
+                    $updown .= $OUTPUT->pix_icon('t/up', get_string('moveup')) . '</a>&nbsp;';
+                }
+                else {
+                    $updown .= $OUTPUT->spacer() . '&nbsp;';
+                }
+                if ($updowncount < $authcount) {
+                    $updown .= "<a href=\"$url&amp;action=down&amp;auth=$auth\">";
+                    $updown .= $OUTPUT->pix_icon('t/down', get_string('movedown')) . '</a>&nbsp;';
+                }
+                else {
+                    $updown .= $OUTPUT->spacer() . '&nbsp;';
+                }
+                ++ $updowncount;
+            }
+
+            // settings link
+            if (file_exists( __DIR__ . '/userstatus/'.$auth.'/settings.php')) {
+                $settings = "<a href=\"{$CFG->wwwroot}/admin/settings.php?section=cleanupusers_userstatus$auth\">{$txt->settings}</a>";
+            } else {
+                $settings = '';
+            }
+
+            // Add a row to the table.
+            $row = new html_table_row(array($displayname, $authmethod, $hideshow, $updown, $settings));
+            if ($class) {
+                $row->attributes['class'] = $class;
+            }
+            $table->data[] = $row;
+        }
+        $return .= html_writer::table($table);
+        $return .= $OUTPUT->box_end();
+        return $return;
+    }
     /**
      * Function expects four arrays and renders them to separate tables.
      *
@@ -336,3 +486,4 @@ class tool_cleanupusers_renderer extends plugin_renderer_base {
         return $htmltable;
     }
 }
+

@@ -67,3 +67,4 @@ $string['e-mail-noproblem'] = 'No problems occurred in plugin tool_cleanupusers 
 $string['cronjobcomplete'] = 'tool_cleanupusers cron job complete';
 $string['cronjobwasrunning'] = 'The tool_cleanupusers cron job was running. No user was suspended or deleted.';
 $string['using-plugin'] = 'You are currently using the <b>{$a}</b> Plugin.<br>';
+$string['actpluginshdr'] = 'Available subplugins';

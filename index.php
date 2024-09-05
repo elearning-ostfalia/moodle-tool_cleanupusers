@@ -34,6 +34,10 @@ require_capability('moodle/site:config', $context);
 
 admin_externalpage_setup('cleanupusers');
 
+
+$action = optional_param('action', '', PARAM_ALPHANUMEXT);
+$userstatus   = optional_param('userstatus', '', PARAM_PLUGIN);
+
 $pagetitle = get_string('pluginname', 'tool_cleanupusers');
 $PAGE->set_title(get_string('pluginname', 'tool_cleanupusers'));
 $PAGE->set_heading(get_string('pluginname', 'tool_cleanupusers'));
@@ -46,6 +50,7 @@ echo $OUTPUT->header();
 echo $renderer->get_heading();
 $content = '';
 
+/*
 $mform = new \tool_cleanupusers\subplugin_select_form();
 if ($formdata = $mform->get_data()) {
     $arraydata = get_object_vars($formdata);
@@ -55,27 +60,126 @@ if ($formdata = $mform->get_data()) {
     }
 }
 $mform->display();
+*/
 
-// Assures right sub-plugin is used.
-$config = get_config('tool_cleanupusers', 'cleanupusers_subplugin');
-if ($config) {
-    $subplugin = $config;
-    $mysubpluginname = "\\userstatus_" . $subplugin . "\\" . $subplugin;
-    $userstatuschecker = new $mysubpluginname();
-} else {
-    $subplugin = 'timechecker';
-    $userstatuschecker = new \userstatus_timechecker\timechecker();
+
+////////////////////////////////////////////////////////////////////////////////
+// process actions
+
+/* if (!confirm_sesskey()) {
+    redirect($returnurl);
+} */
+
+switch ($action) {
+    case 'disable':
+        // Remove from enabled list.
+        $class = \core_plugin_manager::resolve_plugininfo_class('userstatus');
+        $class::enable_plugin($userstatus, false);
+        break;
+
+    case 'enable':
+        // Add to enabled list.
+        $class = \core_plugin_manager::resolve_plugininfo_class('userstatus');
+        // var_dump($class);
+        // var_dump($userstatus);
+        $class::enable_plugin($userstatus, true);
+        break;
+/*
+    case 'down':
+        $key = array_search($userstatus, $authsenabled);
+        // check auth plugin is valid
+        if ($key === false) {
+            throw new \moodle_exception('pluginnotenabled', 'auth', $returnurl, $userstatus);
+        }
+        // move down the list
+        if ($key < (count($authsenabled) - 1)) {
+            $fsave = $authsenabled[$key];
+            $authsenabled[$key] = $authsenabled[$key + 1];
+            $authsenabled[$key + 1] = $fsave;
+            $value = implode(',', $authsenabled);
+            add_to_config_log('auth', $CFG->auth, $value, 'core');
+            set_config('auth', $value);
+        }
+        break;
+
+    case 'up':
+        $key = array_search($userstatus, $authsenabled);
+        // check auth is valid
+        if ($key === false) {
+            throw new \moodle_exception('pluginnotenabled', 'auth', $returnurl, $userstatus);
+        }
+        // move up the list
+        if ($key >= 1) {
+            $fsave = $authsenabled[$key];
+            $authsenabled[$key] = $authsenabled[$key - 1];
+            $authsenabled[$key - 1] = $fsave;
+            $value = implode(',', $authsenabled);
+            add_to_config_log('auth', $CFG->auth, $value, 'core');
+            set_config('auth', $value);
+        }
+        break;
+*/
+    default:
+        break;
 }
 
-// Informs the user about the currently used plugin.
-$content .= get_string('using-plugin', 'tool_cleanupusers', $subplugin);
 
-// Request arrays from the sub-plugin.
-$archivearray = $userstatuschecker->get_to_suspend();
-$arraytodelete = $userstatuschecker->get_to_delete();
-$arrayneverloggedin = $userstatuschecker->get_never_logged_in();
-$arrayreactivate = $userstatuschecker->get_to_reactivate();
-$content .= $renderer->render_index_page($arrayreactivate, $archivearray, $arraytodelete, $arrayneverloggedin);
+////////////////////////////////////////////////////////////////////////////////
+// process actions rnd
+
+
+$content .= $renderer->render_subplugin_table();
+
+/*
+$pluginsavailable = core_plugin_manager::instance()->get_plugins_of_type('userstatus');
+foreach ($pluginsavailable as $auth => $dir) {
+    var_dump($auth); echo '<br>';
+    // var_dump($dir); echo '<br>';
+    // $class::enable_plugin($auth, false);
+}
+*/
+
+$pluginsenabled =  core_plugin_manager::instance()->get_enabled_plugins("userstatus");
+if (!$pluginsenabled) {
+    core\notification::warning("Note: no userstatus plugin enabled");
+} else {
+    /*
+    // Assures right sub-plugin is used.
+    $config = get_config('tool_cleanupusers', 'cleanupusers_subplugin');
+    if ($config) {
+        $subplugin = $config;
+        $mysubpluginname = "\\userstatus_" . $subplugin . "\\" . $subplugin;
+        $userstatuschecker = new $mysubpluginname();
+    } else {
+        $subplugin = 'timechecker';
+        $userstatuschecker = new \userstatus_timechecker\timechecker();
+    }
+
+    // Informs the user about the currently used plugin.
+    $content .= get_string('using-plugin', 'tool_cleanupusers', $subplugin);
+    */
+
+    // Request arrays from the sub-plugin.
+    foreach ($pluginsenabled as $subplugin => $dir) {
+        // var_dump($subplugin); echo '<br>';
+        // var_dump($dir); echo '<br>';
+        // $class::enable_plugin($auth, false);
+
+        $mysubpluginname = "\\userstatus_" . $subplugin . "\\" . $subplugin;
+        $userstatuschecker = new $mysubpluginname();
+
+        try {
+            $archivearray = $userstatuschecker->get_to_suspend();
+            $arraytodelete = $userstatuschecker->get_to_delete();
+            $arrayneverloggedin = $userstatuschecker->get_never_logged_in();
+            $arrayreactivate = $userstatuschecker->get_to_reactivate();
+            $content .= $renderer->render_index_page($arrayreactivate, $archivearray, $arraytodelete, $arrayneverloggedin);
+		} catch (Exception $e) {
+            core\notification::warning($e->getMessage());
+        }
+    }
+}
+
 
 echo $content;
 echo $OUTPUT->footer();

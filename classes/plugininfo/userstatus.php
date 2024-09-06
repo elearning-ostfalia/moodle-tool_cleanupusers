@@ -53,11 +53,11 @@ class userstatus extends base {
             return false;
         }
         // In case the sub-plugin is in use, sub-plugin can not be uninstalled.
-        if (!empty($subplugin = get_config('tool_cleanupusers', 'cleanupusers_subplugin'))) {
-            if ($subplugin == $this->name) {
-                return false;
-            }
+        $enabled = self::get_enabled_plugins();
+        if (isset($enabled[$this->name])) {
+            return false;
         }
+
         return true;
     }
 
@@ -97,6 +97,11 @@ class userstatus extends base {
         return 'cleanupusers_userstatus' . $this->name;
     }
 
+    /**
+     * return all enabled subplugins
+     *
+     * @return array
+     */
     public static function get_enabled_plugins() {
         global $CFG;
 
@@ -120,8 +125,7 @@ class userstatus extends base {
             $plugins = array_flip(explode(',', $CFG->userstatus_plugins_enabled));
         }
 
-
-        // Only set visibility if it's different from the current value.
+        // Only set value if it's different from the current value.
         if ($enabled && !array_key_exists($pluginname, $plugins)) {
             $plugins[$pluginname] = $pluginname;
             $haschanged = true;
@@ -178,29 +182,6 @@ class userstatus extends base {
         return $enabled;
     }
 
-    public static function enable_plugin(string $pluginname, int $enabled): bool {
-        // echo "userstatus.enable_plugin <br>";
-        $haschanged = false;
 
-        $settingname = $pluginname . '_disabled';
-        $oldvalue = get_config('userstatus', $settingname);
-
-        $disabled = !$enabled;
-        // Only set value if there is no config setting or if the value is different from the previous one.
-        if ($oldvalue == false && $disabled) {
-            set_config($settingname, $disabled, 'userstatus');
-            $haschanged = true;
-        } else if ($oldvalue != false && !$disabled) {
-            unset_config($settingname, 'userstatus');
-            $haschanged = true;
-        }
-
-        if ($haschanged) {
-            add_to_config_log($settingname, $oldvalue, $disabled, 'userstatus');
-            \core_plugin_manager::reset_caches();
-        }
-
-        return $haschanged;
-    }
 */
 }

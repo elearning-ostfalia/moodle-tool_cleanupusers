@@ -66,111 +66,56 @@ $mform->display();
 ////////////////////////////////////////////////////////////////////////////////
 // process actions
 
-/* if (!confirm_sesskey()) {
-    redirect($returnurl);
-} */
 
 // $enabled =  core_plugin_manager::instance()->get_enabled_plugins("userstatus");
 $class = \core_plugin_manager::resolve_plugininfo_class('userstatus');
 $enabled = $class::get_enabled_plugins();
 
-if ($enabled) {
-    // use numbers as indices
-    // $enabled = array_values($enabled);
-}
-
-switch ($action) {
-    case 'disable':
-        // Remove from enabled list.
-        $class = \core_plugin_manager::resolve_plugininfo_class('userstatus');
-        $class::enable_plugin($userstatus, false);
-        break;
-
-    case 'enable':
-        // Add to enabled list.
-        $class = \core_plugin_manager::resolve_plugininfo_class('userstatus');
-        $class::enable_plugin($userstatus, true);
-        break;
-    case 'down':
-/*
-        $key = array_search($userstatus, $enabled);
-        if ($key === false) {
-            throw new \moodle_exception('pluginnotenabled', 'auth', '', $userstatus);
-        }
-        echo 'found ' . $key . '<br>';
-        // move down the list
-        if ($key < (count($enabled) - 1)) {
-            // $arraycopy = $authsenabled;
-            $fsave = $enabled[$key];
-            $enabled[$key] = $enabled[$key + 1];
-            $enabled[$key + 1] = $fsave;
-
-            $value = implode(',', $enabled);
-            // add_to_config_log('userstatus', $arraycopy, $value, 'core');
-            var_dump($value);
-            set_config('userstatus_plugins_enabled', $value);
-        }
-*/
-//        var_dump($enabled);
-//        var_dump($userstatus);
-
-        if (!isset($enabled[$userstatus])) {
-            echo 'break<br>';
+if (!empty($action) && confirm_sesskey()) {
+    switch ($action) {
+        case 'disable':
+            // Remove from enabled list.
+            $class = \core_plugin_manager::resolve_plugininfo_class('userstatus');
+            $class::enable_plugin($userstatus, false);
             break;
-        }
-        $enabled = array_keys($enabled);
-        $enabled = array_flip($enabled);
-        $current = $enabled[$userstatus];
-        if ($current == count($enabled) - 1) {
-            echo $userstatus . ' is already at the end<br>';
-            break; //already at the end
-        }
-        $enabled = array_flip($enabled);
-        $enabled[$current] = $enabled[$current + 1];
-        $enabled[$current + 1] = $userstatus;
-        // var_dump(implode(',', $enabled));
-        set_config('userstatus_plugins_enabled', implode(',', $enabled));
-        break;
 
-    case 'up':
-/*
-        $key = array_search($userstatus, $authsenabled);
-        if ($key === false) {
-            throw new \moodle_exception('pluginnotenabled', 'auth', '', $userstatus);
-        }
-        echo 'found ' . $key . '<br>';
-        // move up the list
-        if ($key >= 1) {
-            // $arraycopy = $authsenabled;
-            $fsave = $authsenabled[$key];
-            $authsenabled[$key] = $authsenabled[$key - 1];
-            $authsenabled[$key - 1] = $fsave;
-
-            $value = implode(',', $authsenabled);
-            //add_to_config_log('userstatus', $arraycopy, $value, 'core');
-            var_dump($value);
-            set_config('userstatus_plugins_enabled', $value);
-        }
-*/
-        if (!isset($enabled[$userstatus])) {
-            echo 'break<br>';
+        case 'enable':
+            // Add to enabled list.
+            $class = \core_plugin_manager::resolve_plugininfo_class('userstatus');
+            $class::enable_plugin($userstatus, true);
             break;
-        }
-        $enabled = array_keys($enabled);
-        $enabled = array_flip($enabled);
-        $current = $enabled[$userstatus];
-        if ($current == 0) {
-            echo $userstatus . ' is already at the top<br>';
-            break; //already at the top
-        }
-        $enabled = array_flip($enabled);
-        $enabled[$current] = $enabled[$current - 1];
-        $enabled[$current - 1] = $userstatus;
-        // var_dump(implode(',', $enabled));
-        set_config('userstatus_plugins_enabled',implode(',', $enabled));
-        break;
-    default:
-        break;
+        case 'down':
+            if (!isset($enabled[$userstatus])) {
+                break;
+            }
+            $enabled = array_flip(array_keys($enabled));
+            $current = $enabled[$userstatus];
+            if ($current == count($enabled) - 1) {
+                break; //already at the end
+            }
+            $enabled = array_flip($enabled);
+            $enabled[$current] = $enabled[$current + 1];
+            $enabled[$current + 1] = $userstatus;
+            set_config('userstatus_plugins_enabled', implode(',', $enabled));
+            break;
+
+        case 'up':
+            if (!isset($enabled[$userstatus])) {
+                break;
+            }
+            $enabled = array_flip(array_keys($enabled));
+            $current = $enabled[$userstatus];
+            if ($current == 0) {
+                break; //already at the top
+            }
+            $enabled = array_flip($enabled);
+            $enabled[$current] = $enabled[$current - 1];
+            $enabled[$current - 1] = $userstatus;
+            set_config('userstatus_plugins_enabled', implode(',', $enabled));
+            break;
+        default:
+            break;
+    }
 }
 
 $enabled =  core_plugin_manager::instance()->get_enabled_plugins("userstatus");

@@ -114,8 +114,30 @@ class tool_cleanupusers_renderer extends plugin_renderer_base {
                 $class = 'dimmed_text';
             }
 
-            // $usercount = $DB->count_records('user', array('pluginname'=>$pluginname, 'deleted'=>0));
-            $authmethod = $userstatuschecker->get_authentication_method();
+            // Authentication method
+            $auths = \get_enabled_auth_plugins();
+            $authvalues = $userstatuschecker->get_authentication_method();
+            // look for keys in enabled auth methods and convert to json
+            $authvalue_sarray = explode(',', $authvalues);
+            $keylist = [];
+            foreach ($authvalue_sarray as $key => $authvalue) {
+                $keylist[] = array_search($authvalue, $auths);
+            }
+
+            $strkeylist = json_encode($keylist);
+            $tmpl = new \core\output\inplace_editable(
+                'tool_cleanupusers',
+                'authmethod',
+                $pluginname,
+                has_capability('moodle/site:config', context_system::instance()),
+                $authvalues,
+                $strkeylist,
+                'Type authentication method', // new lang_string('editmytestnamefield', 'tool_mytest'),
+                'Authent. method', // new lang_string('newvaluestring', 'tool_mytest', format_string($record->name))
+            );
+            $attributes = ['multiple' => true];
+            $tmpl->set_type_autocomplete($auths, $attributes);
+            $authmethod = $OUTPUT->render($tmpl);
 
             // up/down link (only if pluginname is enabled)
             $updown = '';

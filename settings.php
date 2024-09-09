@@ -27,6 +27,16 @@ defined('MOODLE_INTERNAL') || die();
 if ($hassiteconfig) {
     // Add own category for plugin's  and subplugins' settings.
     $ADMIN->add('users', new admin_category('tool_cleanupusers', get_string('pluginname', 'tool_cleanupusers')));
+
+/*
+    $settings = new admin_settingpage(manager::PLUGINNAME, get_string('settings', manager::PLUGINNAME));
+    // Log folder.
+    $settings->add(new admin_setting_configtext('tool_cleanupusers/log_folder',
+        "Folder for log files ", // get_string('auth_ldap_bind_dn_key', 'auth_ldap'),
+        "Folder for log files (must exist and be accessible)", // get_string('auth_ldap_bind_dn', 'auth_ldap'),
+        '/var/log/httpd', PARAM_RAW_TRIMMED));
+*/
+
     // Add entry for own settings.
     $ADMIN->add('tool_cleanupusers', new admin_externalpage(
         'cleanupusers',

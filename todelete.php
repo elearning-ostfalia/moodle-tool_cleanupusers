@@ -71,13 +71,14 @@ foreach ($pluginsenabled as $subplugin => $dir) {
     $deletearray = $userstatuschecker->get_to_delete();
 
     if (empty($deletearray)) {
-        echo "Currently no users will be deleted by the next cronjob";
+        echo "Currently no users will be deleted by the next cronjob for checker " . $subplugin . ".<br>";
     } else {
         $userfilter = new user_filtering();
         $userfilter->display_add();
         $userfilter->display_active();
         [$sql, $param] = $userfilter->get_sql_filter();
-        $deletetable = new \tool_cleanupusers\table\users_table('tool_cleanupusers_todelete_table', $deletearray, $sql, $param);
+        $deletetable = new \tool_cleanupusers\table\users_table('tool_cleanupusers_todelete_table',
+            $deletearray, $sql, $param, "delete");
         $deletetable->define_baseurl($PAGE->url);
         $deletetable->out(20, false);
     }

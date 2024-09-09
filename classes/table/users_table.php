@@ -41,15 +41,29 @@ class users_table extends \table_sql {
      * @param String $sqlwhere
      * @param array $param
      */
-    public function __construct($uniqueid, $users, $sqlwhere, $param) {
+    public function __construct($uniqueid, $users, $sqlwhere, $param, $intention) {
         parent::__construct($uniqueid);
 
         // Define the list of columns to show.
         $columns = ['id', 'username', 'fullname', 'lastaccess'];
         $this->define_columns($columns);
 
+        // debugging($intention);
         // Define the titles of columns to show in header.
-        $headers = [get_string('id', 'tool_cleanupusers'), get_string('Neverloggedin', 'tool_cleanupusers'),
+        switch ($intention) { // todo make enum or something like that.
+            case 'suspend':
+                $header = get_string('willbesuspended', 'tool_cleanupusers');
+                break;
+            case 'delete':
+                $header = get_string('Neverloggedin', 'tool_cleanupusers');
+                break;
+            default:
+                debugging($intention);
+                $header = get_string('Neverloggedin', 'tool_cleanupusers');
+                break;
+        }
+
+        $headers = [get_string('id', 'tool_cleanupusers'), $header,
         get_string('fullname'), get_string('lastaccess', 'tool_cleanupusers')];
         $this->define_headers($headers);
 

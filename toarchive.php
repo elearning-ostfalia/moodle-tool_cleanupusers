@@ -70,13 +70,15 @@ foreach ($pluginsenabled as $subplugin => $dir) {
     $archivearray = $userstatuschecker->get_to_suspend();
 
     if (empty($archivearray)) {
-        echo "Currently no users will be suspended by the next cronjob";
+        echo "Currently no users will be suspended by the next cronjob for checker " . $subplugin . ".<br>";
     } else {
+        // var_dump($archivearray);
         $userfilter = new user_filtering();
         $userfilter->display_add();
         $userfilter->display_active();
         [$sql, $param] = $userfilter->get_sql_filter();
-        $archivetable = new \tool_cleanupusers\table\users_table('tool_cleanupusers_toarchive_table', $archivearray, $sql, $param);
+        $archivetable = new \tool_cleanupusers\table\users_table('tool_cleanupusers_toarchive_table',
+            $archivearray, $sql, $param, "suspend");
         $archivetable->define_baseurl($PAGE->url);
         $archivetable->out(20, false);
     }

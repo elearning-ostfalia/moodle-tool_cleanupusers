@@ -25,6 +25,7 @@ namespace userstatus_timechecker;
 
 use tool_cleanupusers\archiveduser;
 use tool_cleanupusers\userstatusinterface;
+use tool_cleanupusers\userstatuschecker;
 
 /**
  * Class that checks the status of different users depending on the time they did not signed in.
@@ -33,7 +34,7 @@ use tool_cleanupusers\userstatusinterface;
  * @copyright  2016/17 N Herrmann
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class timechecker implements userstatusinterface {
+class timechecker extends userstatuschecker { // implements userstatusinterface {
     /** @var int seconds until a user should be suspended */
     private $timesuspend;
     /** @var int seconds until a user should be deleted */
@@ -44,10 +45,22 @@ class timechecker implements userstatusinterface {
      * This constructor sets timesuspend and timedelete from days to seconds.
      */
     public function __construct() {
+        // debugging("timechecker::__construct");
+
+        parent::__construct();
+
         $this->config = get_config('userstatus_timechecker');
         // Calculates days to seconds.
         $this->timesuspend = $this->config->suspendtime * 86400;
         $this->timedelete = $this->config->deletetime * 86400;
+    }
+
+    public function shall_suspend($user) : bool {
+        return true;
+    }
+
+    public function condition_sql() : array {
+        return [" lastaccess < :timelimit" , [ 'timelimit'  => time() - $this->timesuspend ]];
     }
 
     private function get_auth_sql($alias) : string {
@@ -63,6 +76,7 @@ class timechecker implements userstatusinterface {
      *
      * @return array of users to suspend
      */
+    /*
     public function get_to_suspend() {
         global $DB;
 
@@ -94,6 +108,7 @@ class timechecker implements userstatusinterface {
         }
         return $tosuspend;
     }
+    */
 
     /**
      * All users who never logged in will be returned in the array.
@@ -102,6 +117,7 @@ class timechecker implements userstatusinterface {
      *
      * @return array of users who never logged in
      */
+    /*
     public function get_never_logged_in() {
         global $DB;
         $users = $DB->get_records_sql(
@@ -126,7 +142,7 @@ class timechecker implements userstatusinterface {
         }
         return $neverloggedin;
     }
-
+*/
     /**
      * All users who should be deleted will be returned in the array.
      * The array includes merely the necessary information which comprises the userid, lastaccess, suspended, deleted

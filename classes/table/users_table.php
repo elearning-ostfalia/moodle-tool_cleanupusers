@@ -55,7 +55,7 @@ class users_table extends \table_sql {
                 $header = get_string('willbesuspended', 'tool_cleanupusers');
                 break;
             case 'delete':
-                $header = get_string('Neverloggedin', 'tool_cleanupusers');
+                $header = get_string('willbedeleted', 'tool_cleanupusers');
                 break;
             default:
                 debugging($intention);

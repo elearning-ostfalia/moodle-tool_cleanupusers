@@ -35,22 +35,12 @@ use tool_cleanupusers\userstatuschecker;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class timechecker extends userstatuschecker { // implements userstatusinterface {
-    /** @var int seconds until a user should be suspended */
-    private $timesuspend;
-    /** @var int seconds until a user should be deleted */
-    private $timedelete;
-
     /**
      * This constructor sets timesuspend and timedelete from days to seconds.
      */
     public function __construct() {
         // debugging("timechecker::__construct");
-
         parent::__construct(self::class);
-
-        // Calculates days to seconds.
-        $this->timesuspend = $this->config->suspendtime * 86400;
-        $this->timedelete = $this->config->deletetime * 86400;
     }
 
     public function shall_suspend($user) : bool {
@@ -63,7 +53,7 @@ class timechecker extends userstatuschecker { // implements userstatusinterface 
      */
     public function condition_sql() : array {
         return [" lastaccess != 0 AND lastaccess < :timelimit" ,
-            [ 'timelimit'  => time() - $this->timesuspend ]];
+            [ 'timelimit'  => time() - $this->get_suspendtime_in_sec() ]];
     }
 
     private function get_auth_sql($alias) : string {
@@ -155,6 +145,7 @@ class timechecker extends userstatuschecker { // implements userstatusinterface 
      *
      * @return array of users who should be deleted.
      */
+    /*
     public function get_to_delete() {
         global $DB;
 
@@ -187,7 +178,7 @@ class timechecker extends userstatuschecker { // implements userstatusinterface 
         }
 
         return $todelete;
-    }
+    }*/
 
     /**
      * All user that should be reactivated will be returned.
@@ -198,6 +189,7 @@ class timechecker extends userstatuschecker { // implements userstatusinterface 
      *
      * @return array of objects
      */
+    /*
     public function get_to_reactivate() {
         global $DB;
 
@@ -233,6 +225,7 @@ class timechecker extends userstatuschecker { // implements userstatusinterface 
 
         return $toactivate;
     }
+    */
 
     /**
      * returns the authentication method for all users being handled by this plugin

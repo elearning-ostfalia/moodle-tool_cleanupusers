@@ -13,6 +13,11 @@ abstract  class userstatuschecker
 
     protected $name;
 
+    /** @var int seconds until a user should be suspended */
+    // private $timesuspend;
+    /** @var int seconds until a user should be deleted */
+    // private $timedelete;
+
     public function __construct($name, $testing = false) {
 
         $this->baseconfig = get_config('tool_cleanupusers');
@@ -24,8 +29,9 @@ abstract  class userstatuschecker
         $this->config = get_config('userstatus_' . $name);
         // var_dump($this->config);
 
-//        // Calculates days to seconds.
-//        $this->timedelete = $this->config->deletetime * 86400;
+        // Calculates days to seconds.
+        // $this->timedelete = $this->config->deletetime * 86400;
+        // $this->timesuspend = $this->config->suspendtime * 86400;
 //        $this->testing = $testing;
     }
 
@@ -59,6 +65,40 @@ abstract  class userstatuschecker
      */
     public function get_authentication_method() :string {
         return $this->config->auth_method;
+    }
+
+    /**
+     * returns the period after suspension before deletion
+     * @return string
+     */
+    public function get_deletetime() : int {
+        if (!isset($this->config->deletetime) || $this->config->deletetime == null) {
+            // initial state
+            return 365;
+        }
+        return $this->config->deletetime;
+    }
+
+    public function get_suspendtime() : int {
+        if (!isset($this->config->suspendtime) || $this->config->suspendtime == null) {
+            // initial state
+            return 365;
+        }
+        return $this->config->suspendtime;
+    }
+
+    public function get_deletetime_in_sec() : int {
+        if (!isset($this->config->deletetime) || $this->config->deletetime == null) {
+            throw new \coding_exception('invalid delete time value');
+        }
+        return $this->config->deletetime * 86400;
+    }
+
+    public function get_suspendtime_in_sec() : int {
+        if (!isset($this->config->suspendtime) || $this->config->suspendtime == null) {
+            throw new \coding_exception('invalid suspend time value');
+        }
+        return $this->config->suspendtime * 86400;
     }
 
     protected function log($text) {
@@ -97,7 +137,8 @@ abstract  class userstatuschecker
                     $user->lastaccess,
                     $user->username,
                     $user->deleted,
-                    $user->auth
+                    $user->auth,
+                    $this->get_name()
                 );
                 $tosuspend[$key] = $suspenduser;
                 $this->log("[get_to_suspend] " . $user->username . " marked");
@@ -128,11 +169,78 @@ abstract  class userstatuschecker
                 $user->suspended,
                 $user->lastaccess,
                 $user->username,
-                $user->deleted);
+                $user->deleted,
+                $user->auth,
+                $this->get_name())
+            ;
             $neverloggedin[$key] = $informationuser;
         }
 
         return $neverloggedin;
+    }
+
+    /**
+     * All users who should be deleted will be returned in the array.
+     * The array includes merely the necessary information which comprises the userid, lastaccess, suspended, deleted
+     * and the username.
+     * The function checks the user table and the tool_cleanupusers_archive table. Therefore users who are suspended by
+     * the tool_cleanupusers plugin and users who are suspended manually are screened.
+     *
+     * @return array of users who should be deleted.
+     */
+    public function get_to_delete() {
+        if ($this->get_deletetime() < 0) {
+            // No delete time configured => skip.
+            return [];
+        }
+
+        global $DB;
+
+        $users = $DB->get_records_sql(
+            "SELECT tca.id, tca.suspended, tca.lastaccess, tca.username, tca.deleted, tca.auth
+                FROM {user} u
+                JOIN {tool_cleanupusers} tc ON u.id = tc.id
+                JOIN {tool_cleanupusers_archive} tca ON u.id = tca.id
+                WHERE " . $this->get_auth_sql('u.') . "
+                    u.suspended = 1
+                    AND u.deleted = 0
+                    AND tc.timestamp < :timelimit 
+                    AND tc.checker = :name",
+            [
+                'timelimit'  => time() - $this->get_deletetime(),
+                'name' => $this->get_name()
+            ]
+        );
+
+        $todelete = [];
+        foreach ($users as $key => $user) {
+            if (!is_siteadmin($user)) {
+                $deleteuser = new archiveduser(
+                    $user->id,
+                    $user->suspended,
+                    $user->lastaccess,
+                    $user->username,
+                    $user->deleted,
+                    $user->auth,
+                    $this->get_name()
+                );
+                $todelete[$key] = $deleteuser;
+            }
+        }
+
+        return $todelete;
+    }
+
+    /**
+     * All users that should be reactivated will be returned.
+     *
+     * @return array of objects
+     * @throws \dml_exception
+     * @throws \dml_exception
+     */
+    public function get_to_reactivate() {
+        debugging("TODO get_to_reactivate");
+        return [];
     }
 
 }

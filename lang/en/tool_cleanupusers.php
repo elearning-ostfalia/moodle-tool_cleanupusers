@@ -71,5 +71,7 @@ $string['actpluginshdr'] = 'Available subplugins';
 $string['authmethod'] = 'Authentication method';
 $string['authmethod_info'] = 'Only users with this authentication method are handled with this plugin. Leave empty if all users shall be handled.';
 $string['condition'] = 'Condition';
+$string['suspendtime'] = 'Time until suspension in days';
+$string['deletetime'] = 'Time until deletion in days';
 
 

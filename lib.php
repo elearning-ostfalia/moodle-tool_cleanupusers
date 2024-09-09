@@ -74,4 +74,59 @@ function tool_cleanupusers_inplace_editable($itemtype, $plugin, $newvalue1) {
         $templ->set_type_autocomplete($auths, $attributes);
         return $templ;
     }
+
+    if ($itemtype === 'deletetime') {
+        // Must call validate_context for either system, or course or course module context.
+        // This will both check access and set current context.
+        external_api::validate_context(context_system::instance());
+
+        // Check permission of the user to update this item.
+        require_login();
+        require_capability('moodle/site:config', context_system::instance());
+
+        // Clean input and update configuration.
+        $newvalue1 = clean_param($newvalue1, PARAM_NOTAGS);
+
+        set_config('deletetime', $newvalue1, 'userstatus_' . $plugin);
+
+        $templ = new \core\output\inplace_editable(
+            'tool_cleanupusers',
+            'authmethod',
+            $plugin,
+            has_capability('moodle/site:config', context_system::instance()),
+            $newvalue1,
+            $newvalue1,
+            get_string('deletetime', 'tool_cleanupusers'),
+            get_string('deletetime', 'tool_cleanupusers')
+        );
+        return $templ;
+    }
+
+    if ($itemtype === 'suspendtime') {
+        // Must call validate_context for either system, or course or course module context.
+        // This will both check access and set current context.
+        external_api::validate_context(context_system::instance());
+
+        // Check permission of the user to update this item.
+        require_login();
+        require_capability('moodle/site:config', context_system::instance());
+
+        // Clean input and update configuration.
+        $newvalue1 = clean_param($newvalue1, PARAM_NOTAGS);
+
+        set_config('deletetime', $newvalue1, 'userstatus_' . $plugin);
+
+        $templ = new \core\output\inplace_editable(
+            'tool_cleanupusers',
+            'authmethod',
+            $plugin,
+            has_capability('moodle/site:config', context_system::instance()),
+            $newvalue1,
+            $newvalue1,
+            get_string('suspendtime', 'tool_cleanupusers'),
+            get_string('suspendtime', 'tool_cleanupusers')
+        );
+        return $templ;
+    }
+
 }

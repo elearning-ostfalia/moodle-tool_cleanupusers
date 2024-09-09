@@ -43,9 +43,6 @@ defined('MOODLE_INTERNAL') || die;
 
 class ldapchecker extends userstatuschecker { // implements userstatusinterface {
 
-    /** @var int seconds until a user should be deleted */
-    private $timedelete;
-
     /** @var array lookuptable for ldap users */
     private $lookup = array();
 
@@ -59,7 +56,6 @@ class ldapchecker extends userstatuschecker { // implements userstatusinterface 
         parent::__construct(get_class(), $testing);
 
         // Calculates days to seconds.
-        $this->timedelete = $this->config->deletetime * 86400;
         $this->testing = $testing;
     }
 
@@ -216,6 +212,7 @@ class ldapchecker extends userstatuschecker { // implements userstatusinterface 
      * @return array of users who should be deleted.
      * @throws \dml_exception
      */
+    /*
     public function get_to_delete() {
         global $DB;
 
@@ -258,7 +255,7 @@ class ldapchecker extends userstatuschecker { // implements userstatusinterface 
         $this->log("[get_to_delete] marked " . count($todelete) . " users");
 
         return $todelete;
-    }
+    }*/
 
     /**
      * All users that should be reactivated will be returned.
@@ -267,6 +264,7 @@ class ldapchecker extends userstatuschecker { // implements userstatusinterface 
      * @throws \dml_exception
      * @throws \dml_exception
      */
+    /*
     public function get_to_reactivate() {
         global $DB;
         if (count($this->lookup) == 0) {
@@ -310,6 +308,7 @@ class ldapchecker extends userstatuschecker { // implements userstatusinterface 
 
         return $toactivate;
     }
+    */
 
     public function fill_ldap_response_for_testing($dummy_ldap) {
         $this->lookup = $dummy_ldap;

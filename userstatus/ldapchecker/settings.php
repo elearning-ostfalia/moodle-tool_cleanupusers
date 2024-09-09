@@ -32,11 +32,11 @@ if ($hassiteconfig) {
 
     $settings->add(new admin_setting_heading('ldapchecker_heading', get_string('settingsinformation',
         'userstatus_ldapchecker'), get_string('introsettingstext', 'userstatus_ldapchecker')));
-
+/*
     $settings->add(new admin_setting_configtext('userstatus_ldapchecker/deletetime',
         get_string('deletetime', 'userstatus_timechecker'),
         get_string('timechecker_time_to_delete', 'userstatus_timechecker'), 365, PARAM_INT));
-
+*/
     // Log folder.
 /*    $settings->add(new admin_setting_configtext('userstatus_ldapchecker/log_folder',
         "Folder for log files ", // get_string('auth_ldap_bind_dn_key', 'auth_ldap'),

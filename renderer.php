@@ -42,6 +42,8 @@ class tool_cleanupusers_renderer extends plugin_renderer_base {
         $txt->updown = "$txt->up/$txt->down";
         $txt->authmethod = get_string('authmethod', 'tool_cleanupusers');
         $txt->condition = get_string('condition', 'tool_cleanupusers');
+        $txt->deletetime = get_string('deletetime', 'tool_cleanupusers');
+        $txt->suspendtime = get_string('suspendtime', 'tool_cleanupusers');
 
         $authsavailable = core_plugin_manager::instance()->get_plugins_of_type('userstatus');
         // var_dump($authsavailable);
@@ -85,7 +87,8 @@ class tool_cleanupusers_renderer extends plugin_renderer_base {
         $return .= $OUTPUT->box_start('generalbox authsui');
 
         $table = new html_table();
-        $table->head  = array($txt->name, $txt->condition, $txt->authmethod, $txt->enable, $txt->updown, $txt->settings);
+        $table->head  = array($txt->name, $txt->condition, $txt->authmethod, $txt->suspendtime, $txt->deletetime,
+            $txt->enable, $txt->updown, $txt->settings);
         $table->colclasses = array('leftalign', 'centeralign', 'centeralign', 'centeralign', 'centeralign');
         $table->data  = array();
         $table->attributes['class'] = 'admintable generaltable';
@@ -136,12 +139,40 @@ class tool_cleanupusers_renderer extends plugin_renderer_base {
                 has_capability('moodle/site:config', context_system::instance()),
                 $authvalues,
                 $strkeylist,
-                'Type authentication method', // new lang_string('editmytestnamefield', 'tool_mytest'),
-                'Authent. method', // new lang_string('newvaluestring', 'tool_mytest', format_string($record->name))
+                get_string('authmethod_info', 'tool_cleanupusers'),
+                get_string('authmethod', 'tool_cleanupusers')
             );
             $attributes = ['multiple' => true];
             $tmpl->set_type_autocomplete($auths, $attributes);
             $authmethod = $OUTPUT->render($tmpl);
+
+            // Time to suspend
+            $timetosuspend = $userstatuschecker->get_deletetime();
+            $tmpl = new \core\output\inplace_editable(
+                'tool_cleanupusers',
+                'suspendtime',
+                $pluginname,
+                has_capability('moodle/site:config', context_system::instance()),
+                $timetosuspend,
+                $timetosuspend,
+                get_string('suspendtime', 'tool_cleanupusers'),
+                get_string('suspendtime', 'tool_cleanupusers')
+            );
+            $timetosuspend = $OUTPUT->render($tmpl);
+
+            // Time to delete
+            $timetodelete = $userstatuschecker->get_deletetime();
+            $tmpl = new \core\output\inplace_editable(
+                'tool_cleanupusers',
+                'deletetime',
+                $pluginname,
+                has_capability('moodle/site:config', context_system::instance()),
+                $timetodelete,
+                $timetodelete,
+                get_string('deletetime', 'tool_cleanupusers'),
+                get_string('deletetime', 'tool_cleanupusers')
+            );
+            $timetodelete = $OUTPUT->render($tmpl);
 
             // up/down link (only if pluginname is enabled)
             $updown = '';
@@ -171,7 +202,8 @@ class tool_cleanupusers_renderer extends plugin_renderer_base {
             }
 
             // Add a row to the table.
-            $row = new html_table_row(array($displayname, $condition, $authmethod, $hideshow, $updown, $settings));
+            $row = new html_table_row(array($displayname, $condition, $authmethod, $timetosuspend, $timetodelete,
+                $hideshow, $updown, $settings));
             if ($class) {
                 $row->attributes['class'] = $class;
             }

@@ -56,6 +56,8 @@ class archiveduser {
     /** @var int user authentication method */
     public $auth;
 
+    /** @var int user authentication method */
+    public $checker;
 
     /**
      * Archiveduser constructor.
@@ -65,13 +67,14 @@ class archiveduser {
      * @param string $username
      * @param int $deleted
      */
-    public function __construct($id, $suspended, $lastaccess, $username, $deleted, $auth) {
+    public function __construct($id, $suspended, $lastaccess, $username, $deleted, $auth, $checker = '') {
         $this->id = $id;
         $this->suspended = $suspended;
         $this->lastaccess = $lastaccess;
         $this->username = $username;
         $this->deleted = $deleted;
         $this->auth = $auth;
+        $this->checker = $checker;
     }
 
     /**

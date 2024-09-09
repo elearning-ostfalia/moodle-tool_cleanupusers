@@ -25,6 +25,8 @@
 
 require_once('../../../config.php');
 require_login();
+
+global $CFG, $DB, $PAGE, $USER;
 require_once($CFG->dirroot . '/user/lib.php');
 
 $userid         = required_param('userid', PARAM_INT);
@@ -44,6 +46,7 @@ switch ($action) {
     case 'suspend':
         // Sideadmins, the current $USER and user who are already suspended can not be handeled.
         if (!is_siteadmin($user) && $user->suspended != 1 && $USER->id != $userid) {
+            $checker        = required_param('checker', PARAM_TEXT);
             $deprovisionuser = new \tool_cleanupusers\archiveduser(
                 $userid,
                 $user->suspended,
@@ -52,7 +55,7 @@ switch ($action) {
                 $user->deleted
             );
             try {
-                $deprovisionuser->archive_me();
+                $deprovisionuser->archive_me($checker);
             } catch (\tool_cleanupusers\cleanupusers_exception $e) {
                 // Notice user could not be suspended.
                 notice(get_string('errormessagenoaction', 'tool_cleanupusers'), $url);

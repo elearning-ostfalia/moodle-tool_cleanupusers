@@ -105,5 +105,36 @@ function xmldb_tool_cleanupusers_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2023061300, 'tool', 'cleanupusers');
     }
 
+    if ($oldversion < 2024090900) {
+        $table = new xmldb_table('tool_cleanupusers');
+        $field = new xmldb_field('checker', XMLDB_TYPE_CHAR, '255', null, null, null, null, 'timestamp');
+
+        // Conditionally launch add field moodlenetprofile.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+
+            // Set value for existing rows.
+            $config = get_config('tool_cleanupusers', 'cleanupusers_subplugin');
+            if ($config) {
+                $subplugin = $config;
+            } else {
+                $subplugin = 'timechecker';
+            }
+
+            global $DB;
+            if (!$DB->execute("UPDATE {tool_cleanupusers} SET checker = :checker", ['checker' => $subplugin])) {
+                echo 'Could not set checker column in table tool_cleanupusers <br>' . PHP_EOL;
+            }
+
+            // Now make the field notnull.
+            $field = new xmldb_field('checker', XMLDB_TYPE_CHAR, '255', null, XMLDB_NOTNULL, null, null, 'timestamp');
+            $dbman->change_field_notnull($table, $field);
+        }
+
+        // Cleanupusers savepoint reached.
+        upgrade_plugin_savepoint(true, 2024090900, 'tool', 'cleanupusers');
+
+    }
+
     return true;
 }

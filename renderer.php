@@ -186,7 +186,7 @@ class tool_cleanupusers_renderer extends plugin_renderer_base {
      * @param array $usersneverloggedin
      * @return string html
      */
-    public function render_index_page($userstoreactivate, $userstosuspend, $usertodelete, $usersneverloggedin) {
+    public function render_index_page($userstoreactivate, $userstosuspend, $usertodelete, $usersneverloggedin, $checker) {
         global $DB;
 
         $cleanupusers = $DB->get_records('tool_cleanupusers', ['archived' => 1]);
@@ -212,7 +212,7 @@ class tool_cleanupusers_renderer extends plugin_renderer_base {
         if (empty($userstosuspend)) {
             $rendertosuspend = [];
         } else {
-            $rendertosuspend = $this->information_user_suspend($userstosuspend, $cleanupusers);
+            $rendertosuspend = $this->information_user_suspend($userstosuspend, $cleanupusers, $checker);
         }
 
         // Renders the information for each array in a separate html table.
@@ -390,7 +390,7 @@ class tool_cleanupusers_renderer extends plugin_renderer_base {
      * @param array $cleanupusers all users that are currently archived by the plugin.
      * @return array
      */
-    private function information_user_suspend($users, $cleanupusers) {
+    private function information_user_suspend($users, $cleanupusers, $checker) {
         $result = [];
         foreach ($users as $key => $user) {
             $userinformation = [];
@@ -410,7 +410,8 @@ class tool_cleanupusers_renderer extends plugin_renderer_base {
 
                 $userinformation['Willbe'] = get_string('willbe_archived', 'tool_cleanupusers');
 
-                $url = new moodle_url('/admin/tool/cleanupusers/handleuser.php', ['userid' => $user->id, 'action' => 'suspend']);
+                $url = new moodle_url('/admin/tool/cleanupusers/handleuser.php',
+                    ['userid' => $user->id, 'action' => 'suspend', 'checker' => $checker]);
 
                 $userinformation['link'] = \html_writer::link(
                     $url,

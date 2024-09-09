@@ -47,6 +47,7 @@ $content = '';
 echo $OUTPUT->header();
 echo $renderer->get_heading();
 
+/*
 $config = get_config('tool_cleanupusers', 'cleanupusers_subplugin');
 if ($config) {
     $subplugin = $config;
@@ -56,22 +57,29 @@ if ($config) {
     $subplugin = 'timechecker';
     $userstatuschecker = new \userstatus_timechecker\timechecker();
 }
+*/
 
-// Request arrays from the sub-plugin.
-$neverloggedinarray = $userstatuschecker->get_never_logged_in();
+$pluginsenabled =  \core_plugin_manager::instance()->get_enabled_plugins("userstatus");
+foreach ($pluginsenabled as $subplugin => $dir) {
+    $mysubpluginname = "\\userstatus_" . $subplugin . "\\" . $subplugin;
+    $userstatuschecker = new $mysubpluginname();
 
-if (empty($neverloggedinarray)) {
-    echo "Currently no users have never logged in.";
-} else {
-    echo '<br>' . get_string('neverloggedininfo', 'tool_cleanupusers');
+    // Request arrays from the sub-plugin.
+    $neverloggedinarray = $userstatuschecker->get_never_logged_in();
 
-    $userfilter = new user_filtering();
-    $userfilter->display_add();
-    $userfilter->display_active();
-    [$sql, $param] = $userfilter->get_sql_filter();
-    $neverloggedintable = new \tool_cleanupusers\table\never_logged_in_table($neverloggedinarray, $sql, $param);
-    $neverloggedintable->define_baseurl(new moodle_url('admin/tool/cleanupusers/neverloggedin.php'));
-    $neverloggedintable->out(20, false);
+    if (empty($neverloggedinarray)) {
+        echo "Currently no users have never logged in.";
+    } else {
+        echo '<br>' . get_string('neverloggedininfo', 'tool_cleanupusers');
+
+        $userfilter = new user_filtering();
+        $userfilter->display_add();
+        $userfilter->display_active();
+        [$sql, $param] = $userfilter->get_sql_filter();
+        $neverloggedintable = new \tool_cleanupusers\table\never_logged_in_table($neverloggedinarray, $sql, $param);
+        $neverloggedintable->define_baseurl(new moodle_url('admin/tool/cleanupusers/neverloggedin.php'));
+        $neverloggedintable->out(20, false);
+    }
 }
 
 echo $content;

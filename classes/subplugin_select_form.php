@@ -35,10 +35,12 @@ use core_plugin_manager;
  * @copyright 2017 N. Herrmann
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class subplugin_select_form extends moodleform {
+
+// class subplugin_select_form extends moodleform {
     /**
      * Defines the sub-plugin select form.
      */
+    /*
     public function definition() {
         global $CFG;
 
@@ -65,7 +67,7 @@ class subplugin_select_form extends moodleform {
             $mform->setDefault('subplugin', get_config('tool_cleanupusers', 'cleanupusers_subplugin'));
         }
         $mform->addElement('submit', 'reset', 'Submit');
-    }
+    }*/
 
     /**
      * Checks data for correctness
@@ -75,6 +77,7 @@ class subplugin_select_form extends moodleform {
      * @param array $files
      * @return bool|array array in case the sub-plugin is not valid, otherwise true.
      */
+/**
     public function validation($data, $files) {
         $plugins = core_plugin_manager::instance()->get_plugins_of_type('userstatus');
         $issubplugin = false;
@@ -90,3 +93,4 @@ class subplugin_select_form extends moodleform {
         return $issubplugin;
     }
 }
+*/

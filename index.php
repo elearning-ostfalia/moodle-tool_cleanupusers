@@ -177,7 +177,8 @@ if (!$pluginsenabled) {
             $arrayreactivate = $userstatuschecker->get_to_reactivate();
 
             $content .= $OUTPUT->heading($subplugin, 3, 'main');
-            $content .= $renderer->render_index_page($arrayreactivate, $archivearray, $arraytodelete, $arrayneverloggedin);
+            $content .= $renderer->render_index_page($arrayreactivate, $archivearray,
+                $arraytodelete, $arrayneverloggedin, $subplugin);
 		} catch (Exception $e) {
             core\notification::warning($subplugin . ': '. $e->getMessage());
         }

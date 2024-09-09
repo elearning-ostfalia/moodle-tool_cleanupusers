@@ -75,7 +75,7 @@ class archiveduser {
      * Throws an exception when the user is already suspended.
      * @throws cleanupusers_exception
      */
-    public function archive_me() {
+    public function archive_me($checker) {
         global $DB;
         // Get the current user.
         $user = \core_user::get_user($this->id);
@@ -98,8 +98,11 @@ class archiveduser {
             // In case there is no entry in the tool table make a new one.
             $timestamp = time();
             if (!$DB->record_exists('tool_cleanupusers', ['id' => $user->id])) {
-                $DB->insert_record_raw('tool_cleanupusers', ['id' => $user->id, 'archived' => 1,
-                    'timestamp' => $timestamp], true, false, true);
+                $DB->insert_record_raw('tool_cleanupusers', [
+                    'id' => $user->id,
+                    'archived' => 1,
+                    'timestamp' => $timestamp,
+                    'checker' => $checker], true, false, true);
             }
             // Insert copy of user in second DB and replace user in main table when entry was successful.
             if ($DB->record_exists('tool_cleanupusers_archive', ['id' => $shadowuser->id])) {

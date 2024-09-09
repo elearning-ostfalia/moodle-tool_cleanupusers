@@ -47,6 +47,8 @@ $content = '';
 echo $OUTPUT->header();
 echo $renderer->get_heading();
 
+
+/*
 $config = get_config('tool_cleanupusers', 'cleanupusers_subplugin');
 if ($config) {
     $subplugin = $config;
@@ -56,20 +58,28 @@ if ($config) {
     $subplugin = 'timechecker';
     $userstatuschecker = new \userstatus_timechecker\timechecker();
 }
+*/
 
-// Request arrays from the sub-plugin.
-$archivearray = $userstatuschecker->get_to_suspend();
+$pluginsenabled =  \core_plugin_manager::instance()->get_enabled_plugins("userstatus");
+foreach ($pluginsenabled as $subplugin => $dir) {
+    $mysubpluginname = "\\userstatus_" . $subplugin . "\\" . $subplugin;
+    $userstatuschecker = new $mysubpluginname();
 
-if (empty($archivearray)) {
-    echo "Currently no users will be suspended by the next cronjob";
-} else {
-    $userfilter = new user_filtering();
-    $userfilter->display_add();
-    $userfilter->display_active();
-    [$sql, $param] = $userfilter->get_sql_filter();
-    $archivetable = new \tool_cleanupusers\table\users_table('tool_cleanupusers_toarchive_table', $archivearray, $sql, $param);
-    $archivetable->define_baseurl($PAGE->url);
-    $archivetable->out(20, false);
+
+    // Request arrays from the sub-plugin.
+    $archivearray = $userstatuschecker->get_to_suspend();
+
+    if (empty($archivearray)) {
+        echo "Currently no users will be suspended by the next cronjob";
+    } else {
+        $userfilter = new user_filtering();
+        $userfilter->display_add();
+        $userfilter->display_active();
+        [$sql, $param] = $userfilter->get_sql_filter();
+        $archivetable = new \tool_cleanupusers\table\users_table('tool_cleanupusers_toarchive_table', $archivearray, $sql, $param);
+        $archivetable->define_baseurl($PAGE->url);
+        $archivetable->out(20, false);
+    }
 }
 
 echo $content;

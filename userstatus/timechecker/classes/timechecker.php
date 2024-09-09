@@ -40,16 +40,14 @@ class timechecker extends userstatuschecker { // implements userstatusinterface 
     /** @var int seconds until a user should be deleted */
     private $timedelete;
 
-    private $config;
     /**
      * This constructor sets timesuspend and timedelete from days to seconds.
      */
     public function __construct() {
         // debugging("timechecker::__construct");
 
-        parent::__construct();
+        parent::__construct(self::class);
 
-        $this->config = get_config('userstatus_timechecker');
         // Calculates days to seconds.
         $this->timesuspend = $this->config->suspendtime * 86400;
         $this->timedelete = $this->config->deletetime * 86400;

@@ -9,10 +9,17 @@ abstract  class userstatuschecker
 {
     protected $baseconfig;
 
-    public function __construct($testing = false) {
-        // debugging("userstatuschecker::__construct");
+    protected $config;
+
+    public function __construct($name, $testing = false) {
 
         $this->baseconfig = get_config('tool_cleanupusers');
+
+        $class_parts = explode('\\', $name);
+        $name = end($class_parts);
+
+        $this->config = get_config('userstatus_' . $name);
+        // var_dump($this->config);
 
 //        // Calculates days to seconds.
 //        $this->timedelete = $this->config->deletetime * 86400;
@@ -43,8 +50,12 @@ abstract  class userstatuschecker
 
     abstract public function condition_sql() : array;
 
-    public function get_authentication_method() : string {
-        return 'TODO';
+    /**
+     * returns the authentication method for all users being handled by this plugin
+     * @return string
+     */
+    public function get_authentication_method() :string {
+        return $this->config->auth_method;
     }
 
     protected function log($text) {

@@ -173,7 +173,8 @@ if (!$pluginsenabled) {
         try {
             $archivearray = $userstatuschecker->get_to_suspend();
             $arraytodelete = $userstatuschecker->get_to_delete();
-            $arrayneverloggedin = $userstatuschecker->get_never_logged_in();
+            $arrayneverloggedin = [];
+//            $arrayneverloggedin = $userstatuschecker->get_never_logged_in();
             $arrayreactivate = $userstatuschecker->get_to_reactivate();
 
             $content .= $OUTPUT->heading($subplugin, 3, 'main');

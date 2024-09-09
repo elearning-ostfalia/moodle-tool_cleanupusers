@@ -47,11 +47,4 @@ if ($hassiteconfig) {
         365,
         PARAM_INT
     ));
-    $settings->add(new admin_setting_configtext(
-        'userstatus_timechecker/auth_method',
-        get_string('authmethod', 'userstatus_timechecker'),
-        get_string('authmethod_info', 'userstatus_timechecker'),
-        '',
-        PARAM_TEXT
-    ));
 }

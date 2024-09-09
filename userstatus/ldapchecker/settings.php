@@ -44,13 +44,6 @@ if ($hassiteconfig) {
         '/var/log/httpd', PARAM_RAW_TRIMMED));
 */
 
-    // Authentication method.
-    $settings->add(new admin_setting_configtext('userstatus_ldapchecker/auth_method',
-        "Authentication method ", // get_string('auth_ldap_bind_dn_key', 'auth_ldap'),
-        "Authentication method for users who shall be handled by this plugin", // get_string('auth_ldap_bind_dn', 'auth_ldap'),
-        'ldap', PARAM_RAW_TRIMMED));
-
-
     // LDAP server settings.
     $settings->add(new admin_setting_heading('userstatus_ldapchecker/ldapserversettings',
         new lang_string('auth_ldap_server_settings', 'auth_ldap'), ''));

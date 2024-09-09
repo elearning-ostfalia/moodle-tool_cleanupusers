@@ -49,9 +49,19 @@ class ldapchecker extends userstatuschecker { // implements userstatusinterface 
     /** @var array lookuptable for ldap users */
     private $lookup = array();
 
-    private $config;
-
     private $testing = false;
+
+    /**
+     * This constructor sets timesuspend and timedelete from days to seconds.
+     * @throws \dml_exception
+     */
+    public function __construct($testing = false) {
+        parent::__construct(get_class(), $testing);
+
+        // Calculates days to seconds.
+        $this->timedelete = $this->config->deletetime * 86400;
+        $this->testing = $testing;
+    }
 
     private function init() {
         // Only connect to LDAP if we are not in testing case
@@ -90,23 +100,9 @@ class ldapchecker extends userstatuschecker { // implements userstatusinterface 
         }
 
     }
-    /**
-     * This constructor sets timesuspend and timedelete from days to seconds.
-     * @throws \dml_exception
-     */
-    public function __construct($testing = false) {
-        // debugging("ldapchecker::__construct");
-        parent::__construct($testing);
-
-        $this->config = get_config('userstatus_ldapchecker');
-
-        // Calculates days to seconds.
-        $this->timedelete = $this->config->deletetime * 86400;
-        $this->testing = $testing;
-    }
 
 
-    private function is_initialised() {
+    private function is_initialised() : bool {
         if (count($this->lookup) == 0) {
             $this->init();
             if (count($this->lookup) == 0) {
@@ -323,8 +319,9 @@ class ldapchecker extends userstatuschecker { // implements userstatusinterface 
      * returns the authentication method for all users being handled by this plugin
      * @return string
      */
+    /*
     public function get_authentication_method() :string {
         return $this->config->auth_method;
     }
-
+*/
 }

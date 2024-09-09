@@ -23,5 +23,6 @@
 
 $string['pluginname'] = 'LDAP Checker';
 $string['settingsinformation'] = 'Subplugin information';
+$string['condition'] = 'User is missing in LDAP';
 $string['introsettingstext'] = 'In these settings, the time until suspension and the time until deletion can be defined.<br>
 The plugin does apply this to users who were changed by the plugin and users who are manually suspended or deleted.';

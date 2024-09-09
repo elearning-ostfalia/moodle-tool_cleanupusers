@@ -45,7 +45,7 @@ class users_table extends \table_sql {
         parent::__construct($uniqueid);
 
         // Define the list of columns to show.
-        $columns = ['id', 'username', 'fullname', 'lastaccess'];
+        $columns = ['id', 'username', 'fullname', 'lastaccess', 'auth'];
         $this->define_columns($columns);
 
         // debugging($intention);
@@ -64,7 +64,8 @@ class users_table extends \table_sql {
         }
 
         $headers = [get_string('id', 'tool_cleanupusers'), $header,
-        get_string('fullname'), get_string('lastaccess', 'tool_cleanupusers')];
+            get_string('fullname'), get_string('lastaccess', 'tool_cleanupusers'),
+            get_string('authmethod', 'tool_cleanupusers')];
         $this->define_headers($headers);
 
         $idsasstring = '';
@@ -76,6 +77,6 @@ class users_table extends \table_sql {
         if ($sqlwhere != null && $sqlwhere != '') {
             $where .= ' AND ' . $sqlwhere;
         }
-        $this->set_sql('id, username, lastaccess, ' . implode(', ', fields::get_name_fields()), '{user}', $where, $param);
+        $this->set_sql('id, username, lastaccess, auth, ' . implode(', ', fields::get_name_fields()), '{user}', $where, $param);
     }
 }

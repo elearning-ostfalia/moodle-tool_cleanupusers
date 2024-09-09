@@ -43,12 +43,13 @@ if ($hassiteconfig) {
         get_string('pluginsettingstitle', 'tool_cleanupusers'),
         "$CFG->wwwroot/$CFG->admin/tool/cleanupusers/index.php"
     ));
+    /*
     // Add entry for own settings.
     $ADMIN->add('tool_cleanupusers', new admin_externalpage(
         'Manage never logged in',
         get_string('neverloggedin', 'tool_cleanupusers'),
         "$CFG->wwwroot/$CFG->admin/tool/cleanupusers/neverloggedin.php"
-    ));
+    ));*/
     // Add entry for own settings.
     $ADMIN->add('tool_cleanupusers', new admin_externalpage(
         'Manage to archive',

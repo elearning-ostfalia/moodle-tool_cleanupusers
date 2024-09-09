@@ -64,12 +64,11 @@ abstract  class userstatuschecker
         global $DB;
 
         list($sql_condition, $param_condition) = $this->condition_sql();
-        $sql = "SELECT id, suspended, lastaccess, username, deleted
+        $sql = "SELECT id, suspended, lastaccess, username, deleted, auth
                 FROM {user}
                 WHERE " . $this->get_auth_sql('') . "
                         suspended = 0
-                    AND deleted = 0
-                    AND lastaccess != 0";
+                    AND deleted = 0";
         if (!empty($sql_condition)) {
             $sql .= " AND " . $sql_condition;
         }
@@ -83,7 +82,8 @@ abstract  class userstatuschecker
                     $user->suspended,
                     $user->lastaccess,
                     $user->username,
-                    $user->deleted
+                    $user->deleted,
+                    $user->auth
                 );
                 $tosuspend[$key] = $suspenduser;
                 $this->log("[get_to_suspend] " . $user->username . " marked");
@@ -98,7 +98,7 @@ abstract  class userstatuschecker
     public function get_never_logged_in() {
         global $DB;
         $arrayofuser = $DB->get_records_sql(
-            "SELECT u.id, u.suspended, u.lastaccess, u.username, u.deleted
+            "SELECT u.id, u.suspended, u.lastaccess, u.username, u.deleted, u.auth
                 FROM {user} u
                 LEFT JOIN {tool_cleanupusers} tc ON u.id = tc.id
                 WHERE " . $this->get_auth_sql('u.') . "

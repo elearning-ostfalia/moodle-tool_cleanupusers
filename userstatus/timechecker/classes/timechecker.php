@@ -59,8 +59,13 @@ class timechecker extends userstatuschecker { // implements userstatusinterface 
         return true;
     }
 
+    /**
+     * The time since the last access is longer than the configured time period.
+     * @return array
+     */
     public function condition_sql() : array {
-        return [" lastaccess < :timelimit" , [ 'timelimit'  => time() - $this->timesuspend ]];
+        return [" lastaccess != 0 AND lastaccess < :timelimit" ,
+            [ 'timelimit'  => time() - $this->timesuspend ]];
     }
 
     private function get_auth_sql($alias) : string {

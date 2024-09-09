@@ -40,7 +40,8 @@ class tool_cleanupusers_renderer extends plugin_renderer_base {
             'settings', 'edit', 'name', 'enable', 'disable',
             'up', 'down', 'none'));
         $txt->updown = "$txt->up/$txt->down";
-        $txt->authmethod = get_string('authmethod', 'userstatus_timechecker');
+        $txt->authmethod = get_string('authmethod', 'tool_cleanupusers');
+        $txt->condition = get_string('condition', 'tool_cleanupusers');
 
         $authsavailable = core_plugin_manager::instance()->get_plugins_of_type('userstatus');
         // var_dump($authsavailable);
@@ -84,7 +85,7 @@ class tool_cleanupusers_renderer extends plugin_renderer_base {
         $return .= $OUTPUT->box_start('generalbox authsui');
 
         $table = new html_table();
-        $table->head  = array($txt->name, $txt->authmethod, $txt->enable, $txt->updown, $txt->settings);
+        $table->head  = array($txt->name, $txt->condition, $txt->authmethod, $txt->enable, $txt->updown, $txt->settings);
         $table->colclasses = array('leftalign', 'centeralign', 'centeralign', 'centeralign', 'centeralign');
         $table->data  = array();
         $table->attributes['class'] = 'admintable generaltable';
@@ -113,6 +114,9 @@ class tool_cleanupusers_renderer extends plugin_renderer_base {
                 $displayname = $name;
                 $class = 'dimmed_text';
             }
+
+            // Condition
+            $condition = $userstatuschecker->get_condition_text();
 
             // Authentication method
             $auths = \get_enabled_auth_plugins();
@@ -167,7 +171,7 @@ class tool_cleanupusers_renderer extends plugin_renderer_base {
             }
 
             // Add a row to the table.
-            $row = new html_table_row(array($displayname, $authmethod, $hideshow, $updown, $settings));
+            $row = new html_table_row(array($displayname, $condition, $authmethod, $hideshow, $updown, $settings));
             if ($class) {
                 $row->attributes['class'] = $class;
             }

@@ -11,6 +11,8 @@ abstract  class userstatuschecker
 
     protected $config;
 
+    protected $name;
+
     public function __construct($name, $testing = false) {
 
         $this->baseconfig = get_config('tool_cleanupusers');
@@ -18,6 +20,7 @@ abstract  class userstatuschecker
         $class_parts = explode('\\', $name);
         $name = end($class_parts);
 
+        $this->name = $name;
         $this->config = get_config('userstatus_' . $name);
         // var_dump($this->config);
 
@@ -33,11 +36,11 @@ abstract  class userstatuschecker
      * @return string
      */
     public function get_condition_text() : string {
-        return 'TODO condition ';
+        return get_string('condition', 'userstatus_' . $this->name);
     }
 
     public function get_name() : string {
-        return 'TODO name';
+        return $this->name;
     }
 
     /**

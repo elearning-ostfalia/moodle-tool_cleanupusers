@@ -113,17 +113,11 @@ abstract  class userstatuschecker
     }
 
     public function get_deletetime_in_sec() : int {
-        if (!isset($this->config->deletetime) || $this->config->deletetime == null) {
-            throw new \coding_exception('invalid delete time value');
-        }
-        return $this->config->deletetime * 86400;
+        return $this->get_deletetime() * 86400;
     }
 
     public function get_suspendtime_in_sec() : int {
-        if (!isset($this->config->suspendtime) || $this->config->suspendtime == null) {
-            throw new \coding_exception('invalid suspend time value');
-        }
-        return $this->config->suspendtime * 86400;
+        return $this->get_suspendtime() * 86400;
     }
 
     protected function log($text) {

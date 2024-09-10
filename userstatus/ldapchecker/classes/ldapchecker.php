@@ -121,6 +121,11 @@ class ldapchecker extends userstatuschecker { // implements userstatusinterface 
     }
 
 
+    /** does not use suspend time value */
+    public function needs_suspendtime() : bool {
+        return false;
+    }
+
     /**
      * All users who are not suspended and not deleted are selected. If a user did not sign in for the hitherto
      * determined suspendtime he/she will be returned.

@@ -68,6 +68,13 @@ abstract  class userstatuschecker
     }
 
     /**
+     * whether or not the suspendtime field is needed
+     * @return bool
+     */
+    public function needs_suspendtime() : bool {
+        return true;
+    }
+    /**
      * returns the period after suspension before deletion
      * @return string
      */

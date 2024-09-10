@@ -3,8 +3,8 @@
     width: 190px;
 }
 .cleanupusers .c1 {
-    max-width: 200px;
-    width: 280px;
+    max-width: 300px;
+    width: 380px;
 }
 .cleanupusers .c2 {
     max-width: 200px;
@@ -17,4 +17,16 @@
 .cleanupusers .c4 {
     max-width: 200px;
     width: 60px;
+}
+
+/* decrease size of numeric inplace input fields */
+/* TODO: does not work */
+/* .cleanupusers .c4 input .ignoredirty {*/
+/* table.cleanupusers input.ignoredirty { */
+.cleanupusers input.ignoredirty {
+    max-width: 100px;
+    width: 30px;
+/*
+    max-width: 10em;
+    width: 6em;*/
 }

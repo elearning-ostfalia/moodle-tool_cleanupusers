@@ -114,7 +114,7 @@ function tool_cleanupusers_inplace_editable($itemtype, $plugin, $newvalue1) {
         // Clean input and update configuration.
         $newvalue1 = clean_param($newvalue1, PARAM_NOTAGS);
 
-        set_config('deletetime', $newvalue1, 'userstatus_' . $plugin);
+        set_config('suspendtime', $newvalue1, 'userstatus_' . $plugin);
 
         $templ = new \core\output\inplace_editable(
             'tool_cleanupusers',

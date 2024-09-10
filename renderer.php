@@ -147,18 +147,23 @@ class tool_cleanupusers_renderer extends plugin_renderer_base {
             $authmethod = $OUTPUT->render($tmpl);
 
             // Time to suspend
-            $timetosuspend = $userstatuschecker->get_deletetime();
-            $tmpl = new \core\output\inplace_editable(
-                'tool_cleanupusers',
-                'suspendtime',
-                $pluginname,
-                has_capability('moodle/site:config', context_system::instance()),
-                $timetosuspend,
-                $timetosuspend,
-                get_string('suspendtime', 'tool_cleanupusers'),
-                get_string('suspendtime', 'tool_cleanupusers')
-            );
-            $timetosuspend = $OUTPUT->render($tmpl);
+            if ($userstatuschecker->needs_suspendtime()) {
+                $timetosuspend = $userstatuschecker->get_suspendtime();
+                $tmpl = new \core\output\inplace_editable(
+                    'tool_cleanupusers',
+                    'suspendtime',
+                    $pluginname,
+                    has_capability('moodle/site:config', context_system::instance()),
+                    $timetosuspend,
+                    $timetosuspend,
+                    get_string('suspendtime', 'tool_cleanupusers'),
+                    get_string('suspendtime', 'tool_cleanupusers')
+                );
+                $timetosuspend = $OUTPUT->render($tmpl);
+            } else {
+                // No suspendtime input
+                $timetosuspend = ''; // 'N/A';
+            }
 
             // Time to delete
             $timetodelete = $userstatuschecker->get_deletetime();

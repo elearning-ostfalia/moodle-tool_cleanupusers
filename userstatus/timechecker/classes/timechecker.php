@@ -43,16 +43,17 @@ class timechecker extends userstatuschecker { // implements userstatusinterface 
         parent::__construct(self::class);
     }
 
-    public function shall_suspend($user) : bool {
-        return true;
-    }
-
     /**
      * The time since the last access is longer than the configured time period.
      * @return array
      */
-    public function condition_sql() : array {
+    public function condition_suspend_sql() : array {
         return [" lastaccess != 0 AND lastaccess < :timelimit" ,
+            [ 'timelimit'  => time() - $this->get_suspendtime_in_sec() ]];
+    }
+
+    public function condition_reactivate_sql($tca, $tc) : array {
+        return ["{$tca}.lastaccess >= :timelimit" ,
             [ 'timelimit'  => time() - $this->get_suspendtime_in_sec() ]];
     }
 

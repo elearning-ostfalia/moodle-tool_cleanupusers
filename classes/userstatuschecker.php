@@ -53,11 +53,29 @@ abstract  class userstatuschecker
      * check if the given user fulfills the suspension condition
      *
      * @param $user
-     * @return false
+     * @return true
      */
-    abstract public function shall_suspend($user) : bool;
+    public function shall_suspend($user) : bool {
+        return true;
+    }
 
-    abstract public function condition_sql() : array;
+    /**
+     * check if the given user fulfills the reactivation condition
+     *
+     * @param $user
+     * @return true
+     */
+    public function shall_reactivate($user) : bool {
+        return true;
+    }
+
+    public function condition_suspend_sql() : array {
+        return ["" , null];
+    }
+
+    public function condition_reactivate_sql($tca, $tc) {
+        return ['', null];
+    }
 
     /**
      * returns the authentication method for all users being handled by this plugin
@@ -124,7 +142,7 @@ abstract  class userstatuschecker
     public function get_to_suspend() {
         global $DB;
 
-        list($sql_condition, $param_condition) = $this->condition_sql();
+        list($sql_condition, $param_condition) = $this->condition_suspend_sql();
         $sql = "SELECT id, suspended, lastaccess, username, deleted, auth
                 FROM {user}
                 WHERE " . $this->get_auth_sql('') . "
@@ -246,8 +264,41 @@ abstract  class userstatuschecker
      * @throws \dml_exception
      */
     public function get_to_reactivate() {
-        debugging("TODO get_to_reactivate");
-        return [];
+        global $DB;
+
+        list($sql_condition, $param_condition) = $this->condition_reactivate_sql('tca', 'tc');
+        $sql = "SELECT tca.id, tca.suspended, tca.lastaccess, tca.username, tca.deleted, tca.auth
+                FROM {user} u
+                JOIN {tool_cleanupusers} tc ON u.id = tc.id
+                JOIN {tool_cleanupusers_archive} tca ON u.id = tca.id
+                WHERE " . $this->get_auth_sql('u.') . "
+                    u.suspended = 1
+                    AND u.deleted = 0
+                    AND tca.username NOT IN
+                        (SELECT username FROM {user} WHERE username IS NOT NULL)";
+        if (!empty($sql_condition)) {
+            $sql .= " AND " . $sql_condition;
+        }
+
+        $users = $DB->get_records_sql($sql, $param_condition);
+
+        $toactivate = [];
+        foreach ($users as $key => $user) {
+            if (!is_siteadmin($user)) {
+                $activateuser = new archiveduser(
+                    $user->id,
+                    $user->suspended,
+                    $user->lastaccess,
+                    $user->username,
+                    $user->deleted,
+                    $user->auth,
+                    ''
+                );
+                $toactivate[$key] = $activateuser;
+            }
+        }
+
+        return $toactivate;
     }
 
 }

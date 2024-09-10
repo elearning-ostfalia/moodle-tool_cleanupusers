@@ -108,16 +108,19 @@ class ldapchecker extends userstatuschecker { // implements userstatusinterface 
         return true;
     }
 
-    public function condition_sql() : array {
-        return ["" , null];
-    }
-
     public function shall_suspend($user) : bool {
         // check initialisation state (todo: should not be checked for every user!)
         if (!$this->is_initialised()) {
             return false;
         }
         return (array_key_exists($user->username, $this->lookup));
+    }
+
+    public function shall_reactivate($user) : bool {
+        if (!$this->is_initialised()) {
+            throw new \moodle_exception('No users from LDAP available');
+        }
+        return array_key_exists($user->username, $this->lookup);
     }
 
 

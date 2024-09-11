@@ -70,7 +70,7 @@ abstract  class userstatuschecker
      * @return true
      */
     public function shall_reactivate($user) : bool {
-        return !$this->shall_suspend($user);
+        return true;
     }
 
     public function condition_suspend_sql() : array {
@@ -225,19 +225,21 @@ abstract  class userstatuschecker
         $users = $DB->get_records_sql(
             "SELECT tca.id, tca.suspended, tca.lastaccess, tca.username, tca.deleted, tca.auth
                 FROM {user} u
-                JOIN {tool_cleanupusers} tc ON u.id = tc.id
+                JOIN {tool_cleanupusers} tc ON u.id = tc.id AND tc.checker = :name
                 JOIN {tool_cleanupusers_archive} tca ON u.id = tca.id
                 WHERE " . $this->get_auth_sql('u.') . "
                     u.suspended = 1
                     AND u.deleted = 0
-                    AND tc.timestamp < :timelimit 
-                    AND tc.checker = :name",
+                    AND tc.timestamp < :timelimit",
             [
-                'timelimit'  => time() - $this->get_deletetime(),
+                'timelimit'  => time() - $this->get_deletetime_in_sec(),
                 'name' => $this->get_name()
             ]
         );
 
+        // debugging($this->name);
+        // debugging("get_to_delete 1");
+        // var_dump($users);
         $todelete = [];
         foreach ($users as $key => $user) {
             if (!is_siteadmin($user) && !isguestuser($user)) {
@@ -254,6 +256,20 @@ abstract  class userstatuschecker
             }
         }
 
+        // get all users who need to be reactivated by this plugin
+        // and remove them from the list of users to be deleted.
+        // => prevent users from deletion if they shall be reactivated
+        if (count($todelete) > 0) {
+            $toreactivate = $this->get_to_reactivate();
+            foreach ($todelete as $key => $user) {
+                if (array_key_exists($key, $toreactivate)) {
+                    unset($todelete[$key]);
+                }
+            }
+            // $todelete = array_diff($todelete, $toreactivate);
+            var_dump($todelete);
+        }
+
         return $todelete;
     }
 
@@ -267,7 +283,6 @@ abstract  class userstatuschecker
     public function get_to_reactivate() {
         global $DB;
 
-        $params = ["checker" => $this->name];
         list($sql_condition, $param_condition) = $this->condition_reactivate_sql('tca', 'tc');
         $sql = "SELECT tca.id, tca.suspended, tca.lastaccess, tca.username, tca.deleted, tca.auth
                 FROM {user} u
@@ -281,11 +296,18 @@ abstract  class userstatuschecker
         if (!empty($sql_condition)) {
             $sql .= " AND " . $sql_condition;
         }
-
+        $params = [
+            "checker" => $this->name
+        ];
         if (is_array($param_condition)) {
             $params = array_merge($params, $param_condition);
         }
+        // debugging("get_to_reactivate");
+        // debugging($params);
         $users = $DB->get_records_sql($sql, $params);
+        // debugging($this->name);
+
+        // var_dump($users);
 
         $toactivate = [];
         foreach ($users as $key => $user) {
@@ -297,11 +319,14 @@ abstract  class userstatuschecker
                     $user->username,
                     $user->deleted,
                     $user->auth,
-                    ''
+                    $this->get_name()
                 );
                 $toactivate[$key] = $activateuser;
             }
         }
+
+        // debugging("get_to_reactivate");
+        // var_dump($toactivate);
 
         return $toactivate;
     }

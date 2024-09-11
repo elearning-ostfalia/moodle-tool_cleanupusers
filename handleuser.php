@@ -52,7 +52,9 @@ switch ($action) {
                 $user->suspended,
                 $user->lastaccess,
                 $user->username,
-                $user->deleted
+                $user->deleted,
+                $user->auth,
+                $checker
             );
             try {
                 $deprovisionuser->archive_me($checker);
@@ -75,7 +77,9 @@ switch ($action) {
                 $user->suspended,
                 $user->lastaccess,
                 $user->username,
-                $user->deleted
+                $user->deleted,
+                $user->auth,
+                ''
             );
             try {
                 $deprovisionuser->activate_me();
@@ -98,7 +102,9 @@ switch ($action) {
                 $user->suspended,
                 $user->lastaccess,
                 $user->username,
-                $user->deleted
+                $user->deleted,
+                $user->auth,
+                ''
             );
             try {
                 $deprovisionuser->delete_me();

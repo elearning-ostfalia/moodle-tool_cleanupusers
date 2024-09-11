@@ -113,6 +113,7 @@ class ldapchecker extends userstatuschecker { // implements userstatusinterface 
         if (!$this->is_initialised()) {
             throw new \moodle_exception('No users from LDAP available');
         }
+        // var_dump($this->lookup);
         return (!array_key_exists($user->username, $this->lookup));
     }
 

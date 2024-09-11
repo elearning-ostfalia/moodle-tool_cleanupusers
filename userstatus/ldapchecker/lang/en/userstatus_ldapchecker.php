@@ -24,4 +24,8 @@
 $string['pluginname'] = 'LDAP Checker';
 $string['settingsinformation'] = 'Subplugin information';
 $string['condition'] = 'User is missing in LDAP';
+$string['ldap_username'] = 'LDAP username attribute';
+$string['ldap_username_info'] = 'The LDAP attribute that is mapped to Moodle username';
+$string['ldap_filter'] = 'LDAP search filter';
+$string['ldap_filter_info'] = 'LDAP search filter used for retrieving active moodle users handles with this plugin';
 $string['introsettingstext'] = 'In these settings, the LDAP connection parameters will be set.';

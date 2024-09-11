@@ -94,14 +94,14 @@ if ($hassiteconfig) {
 
     // Search filter.
     $settings->add(new admin_setting_configtext('userstatus_ldapchecker/search_filter',
-        "LDAP search filter", // get_string('auth_ldap_bind_dn_key', 'auth_ldap'),
-        "LDAP search filter", // get_string('auth_ldap_bind_dn', 'auth_ldap'),
+        get_string('ldap_filter', 'userstatus_ldapchecker'),
+        get_string('ldap_filter_info', 'userstatus_ldapchecker'),
         '', PARAM_RAW_TRIMMED));
 
     // LDAP username attribute.
     $settings->add(new admin_setting_configtext('userstatus_ldapchecker/ldap_username_attribute',
-        "LDAP username attribute", // get_string('auth_ldap_bind_dn_key', 'auth_ldap'),
-        "The LDAP attribute that is mapped to Moodle username", // get_string('auth_ldap_bind_dn', 'auth_ldap'),
+        get_string('ldap_username', 'userstatus_ldapchecker'),
+        get_string('ldap_username_info', 'userstatus_ldapchecker'),
         'cn', PARAM_RAW_TRIMMED));
 
 

@@ -70,7 +70,7 @@ abstract  class userstatuschecker
      * @return true
      */
     public function shall_reactivate($user) : bool {
-        return true;
+        return !$this->shall_suspend($user);
     }
 
     public function condition_suspend_sql() : array {
@@ -168,11 +168,14 @@ abstract  class userstatuschecker
             }
         }
 
+        if (empty($sql_condition) && (count($users) == count($tosuspend))) {
+            throw new \moodle_exception("warning: all current users shall be suspended => suspension aborted");
+        }
         $this->log("[get_to_suspend] marked " . count($tosuspend) . " users");
         return $tosuspend;
     }
 
-
+/*
     public function get_never_logged_in() {
         global $DB;
         $arrayofuser = $DB->get_records_sql(
@@ -200,7 +203,7 @@ abstract  class userstatuschecker
         }
 
         return $neverloggedin;
-    }
+    }*/
 
     /**
      * All users who should be deleted will be returned in the array.
@@ -282,7 +285,7 @@ abstract  class userstatuschecker
 
         $toactivate = [];
         foreach ($users as $key => $user) {
-            if (!is_siteadmin($user)) {
+            if (!is_siteadmin($user) && $this->shall_reactivate($user)) {
                 $activateuser = new archiveduser(
                     $user->id,
                     $user->suspended,

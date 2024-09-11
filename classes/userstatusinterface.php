@@ -36,31 +36,31 @@
  */
 namespace tool_cleanupusers;
 
-interface userstatusinterface {
+// interface userstatusinterface {
     /**
      * Function which returns an array of all users to be suspended by the next cron-job.
      *
      * @return array of users that are supposed to be suspended.
      */
-    public function get_to_suspend();
+//    public function get_to_suspend();
     /**
      * Function which returns an array of all users to be deleted by the next cron-job.
      *
      * @return array of users that are supposed to be deleted.
      */
-    public function get_to_delete();
+//    public function get_to_delete();
     /**
      * Function which returns an array of all users that never signed in.
      *
      * @return array of users that never signed in.
      */
-    public function get_never_logged_in();
+//    public function get_never_logged_in();
     /**
      * Function which returns an array of all users that should be reactivated in the next cron-job.
      *
      * @return array of users to reactivate.
      */
-    public function get_to_reactivate();
+//    public function get_to_reactivate();
 
-    public function get_authentication_method() : string;
-}
+//    public function get_authentication_method() : string;
+//}

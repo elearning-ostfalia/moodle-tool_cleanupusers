@@ -89,6 +89,9 @@ function tool_cleanupusers_inplace_editable($itemtype, $plugin, $newvalue1) {
 
         set_config('deletetime', $newvalue1, 'userstatus_' . $plugin);
 
+        $mysubpluginname = "\\userstatus_" . $plugin . "\\" . $plugin;
+        $userstatuschecker = new $mysubpluginname();
+
         $templ = new \core\output\inplace_editable(
             'tool_cleanupusers',
             'authmethod',
@@ -96,7 +99,7 @@ function tool_cleanupusers_inplace_editable($itemtype, $plugin, $newvalue1) {
             has_capability('moodle/site:config', context_system::instance()),
             $newvalue1,
             $newvalue1,
-            get_string('deletetime', 'tool_cleanupusers'),
+            $userstatuschecker->get_suspend_hint(),
             get_string('deletetime', 'tool_cleanupusers')
         );
         return $templ;

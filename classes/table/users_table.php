@@ -79,4 +79,12 @@ class users_table extends \table_sql {
         }
         $this->set_sql('id, username, lastaccess, auth, ' . implode(', ', fields::get_name_fields()), '{user}', $where, $param);
     }
+
+    public function col_lastaccess($row) {
+        debugging('col_lastaccess');
+        if ($row->lastaccess > 0)
+            return date('d.m.Y h:i:s', $row->lastaccess);
+        else
+            return get_string('neverlogged', 'tool_cleanupusers');
+    }
 }

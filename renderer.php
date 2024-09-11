@@ -156,7 +156,7 @@ class tool_cleanupusers_renderer extends plugin_renderer_base {
                     has_capability('moodle/site:config', context_system::instance()),
                     $timetosuspend,
                     $timetosuspend,
-                    get_string('suspendtime', 'tool_cleanupusers'),
+                    $userstatuschecker->get_suspend_hint(),
                     get_string('suspendtime', 'tool_cleanupusers')
                 );
                 $timetosuspend = $OUTPUT->render($tmpl);
@@ -245,11 +245,12 @@ class tool_cleanupusers_renderer extends plugin_renderer_base {
         } else {
             $rendertodelete = $this->information_user_delete($usertodelete, $cleanupusers);
         }
+        /*
         if (empty($usersneverloggedin)) {
             $renderneverloggedin = [];
         } else {
             $renderneverloggedin = $this->information_user_notloggedin($usersneverloggedin, $cleanupusers);
-        }
+        }*/
         if (empty($userstosuspend)) {
             $rendertosuspend = [];
         } else {
@@ -261,22 +262,27 @@ class tool_cleanupusers_renderer extends plugin_renderer_base {
         if (!empty($rendertoreactivate)) {
             $output .= $this->render_table_of_users($rendertoreactivate, [get_string('willbereactivated', 'tool_cleanupusers'),
                 get_string('lastaccess', 'tool_cleanupusers'), get_string('Archived', 'tool_cleanupusers'),
+                get_string('authmethod', 'tool_cleanupusers'),
                 get_string('Willbe', 'tool_cleanupusers')]);
         }
-        if (!empty($renderneverloggedin)) {
+/*        if (!empty($renderneverloggedin)) {
             $output .= $this->render_table_of_users($renderneverloggedin, [get_string('Neverloggedin', 'tool_cleanupusers'),
                 get_string('lastaccess', 'tool_cleanupusers'), get_string('Archived', 'tool_cleanupusers'),
                 get_string('Willbe', 'tool_cleanupusers')]);
-        }
+        }*/
         if (!empty($rendertosuspend)) {
             $output .= $this->render_table_of_users($rendertosuspend, [get_string('willbesuspended', 'tool_cleanupusers'),
                 get_string('lastaccess', 'tool_cleanupusers'),
-                get_string('Archived', 'tool_cleanupusers'), get_string('Willbe', 'tool_cleanupusers')]);
+                get_string('Archived', 'tool_cleanupusers'),
+                get_string('authmethod', 'tool_cleanupusers'),
+                get_string('Willbe', 'tool_cleanupusers')]);
         }
         if (!empty($rendertodelete)) {
             $output .= $this->render_table_of_users($rendertodelete, [get_string('willbedeleted', 'tool_cleanupusers'),
                 get_string('lastaccess', 'tool_cleanupusers'),
-                get_string('Archived', 'tool_cleanupusers'), get_string('Willbe', 'tool_cleanupusers')]);
+                get_string('Archived', 'tool_cleanupusers'),
+                get_string('authmethod', 'tool_cleanupusers'),
+                get_string('Willbe', 'tool_cleanupusers')]);
         }
 
         return $output;
@@ -321,6 +327,7 @@ class tool_cleanupusers_renderer extends plugin_renderer_base {
      * @return bool|string
      * @throws coding_exception
      */
+    /*
     public function render_neverloggedin_page($usersneverloggedin) {
         global $DB, $CFG;
         if (empty($usersneverloggedin)) {
@@ -339,6 +346,7 @@ class tool_cleanupusers_renderer extends plugin_renderer_base {
             return $tableobject;
         }
     }
+    */
     /**
      * Functions returns the heading for the tool_cleanupusers.
      *
@@ -362,15 +370,7 @@ class tool_cleanupusers_renderer extends plugin_renderer_base {
             $userinformation = [];
 
             if (!empty($user)) {
-                $userinformation['username'] = $user->username;
-                $userinformation['lastaccess'] = date('d.m.Y h:i:s', $user->lastaccess);
-
-                $isarchivid = array_key_exists($user->id, $cleanupusers);
-                if (empty($isarchivid)) {
-                    $userinformation['archived'] = get_string('No', 'tool_cleanupusers');
-                } else {
-                    $userinformation['archived'] = get_string('Yes', 'tool_cleanupusers');
-                }
+                $userinformation = $this->set_user_information_for_table($user, $userinformation, $cleanupusers);
                 $userinformation['Willbe'] = get_string('shouldbedelted', 'tool_cleanupusers');
                 $url = new moodle_url('/admin/tool/cleanupusers/handleuser.php', ['userid' => $user->id, 'action' => 'delete']);
                 $userinformation['link'] = \html_writer::link(
@@ -400,14 +400,7 @@ class tool_cleanupusers_renderer extends plugin_renderer_base {
             $userinformation = [];
 
             if (!empty($user)) {
-                $userinformation['username'] = $user->username;
-                $userinformation['lastaccess'] = date('d.m.Y h:i:s', $user->lastaccess);
-                $isarchivid = array_key_exists($user->id, $cleanupusers);
-                if (empty($isarchivid)) {
-                    $userinformation['archived'] = get_string('No', 'tool_cleanupusers');
-                } else {
-                    $userinformation['archived'] = get_string('Yes', 'tool_cleanupusers');
-                }
+                $userinformation = $this->set_user_information_for_table($user, $userinformation, $cleanupusers);
                 $userinformation['Willbe'] = 'Reactivated';
                 $url = new moodle_url('/admin/tool/cleanupusers/handleuser.php', ['userid' => $user->id, 'action' => 'reactivate']);
                 $userinformation['link'] = \html_writer::link(
@@ -436,21 +429,9 @@ class tool_cleanupusers_renderer extends plugin_renderer_base {
         foreach ($users as $key => $user) {
             $userinformation = [];
             if (!empty($user)) {
-                $userinformation['username'] = $user->username;
-                if ($user->lastaccess > 0)
-                    $userinformation['lastaccess'] = date('d.m.Y h:i:s', $user->lastaccess);
-                else
-                    $userinformation['lastaccess'] = get_string('neverlogged', 'tool_cleanupusers');
-
-                $isarchivid = array_key_exists($user->id, $cleanupusers);
-                if (empty($isarchivid)) {
-                    $userinformation['archived'] = get_string('No', 'tool_cleanupusers');
-                } else {
-                    $userinformation['archived'] = get_string('Yes', 'tool_cleanupusers');
-                }
+                $userinformation = $this->set_user_information_for_table($user, $userinformation, $cleanupusers);
 
                 $userinformation['Willbe'] = get_string('willbe_archived', 'tool_cleanupusers');
-
                 $url = new moodle_url('/admin/tool/cleanupusers/handleuser.php',
                     ['userid' => $user->id, 'action' => 'suspend', 'checker' => $checker]);
 
@@ -475,19 +456,13 @@ class tool_cleanupusers_renderer extends plugin_renderer_base {
      * @param array $cleanupusers all users that are currently archived by the plugin.
      * @return array userid as key for user information
      */
+    /*
     private function information_user_notloggedin($users, $cleanupusers) {
         $result = [];
         foreach ($users as $key => $user) {
             $userinformation = [];
             if (!empty($user)) {
-                $userinformation['username'] = $user->username;
-                $userinformation['lastaccess'] = get_string('neverlogged', 'tool_cleanupusers');
-                $isarchivid = array_key_exists($user->id, $cleanupusers);
-                if (empty($isarchivid)) {
-                    $userinformation['archived'] = get_string('No', 'tool_cleanupusers');
-                } else {
-                    $userinformation['archived'] = get_string('Yes', 'tool_cleanupusers');
-                }
+                $userinformation = $this->set_user_information_for_table($user, $userinformation, $cleanupusers);
                 $userinformation['Willbe'] = get_string('nothinghappens', 'tool_cleanupusers');
                 $url = new moodle_url('/admin/tool/cleanupusers/handleuser.php', ['userid' => $user->id, 'action' => 'delete']);
                 $userinformation['link'] = \html_writer::link(
@@ -503,7 +478,7 @@ class tool_cleanupusers_renderer extends plugin_renderer_base {
             $result[$key] = $userinformation;
         }
         return $result;
-    }
+    }*/
 
     /**
      * Renders a html-table for an array of users.
@@ -521,6 +496,32 @@ class tool_cleanupusers_renderer extends plugin_renderer_base {
         }
         $htmltable = html_writer::table($table);
         return $htmltable;
+    }
+
+    /**
+     * @param mixed $user
+     * @param array $userinformation
+     * @param array $cleanupusers
+     * @return array
+     * @throws coding_exception
+     */
+    protected function set_user_information_for_table(mixed $user, array $userinformation, array $cleanupusers): array
+    {
+        $userinformation['username'] = $user->username;
+        if ($user->lastaccess > 0)
+            $userinformation['lastaccess'] = date('d.m.Y h:i:s', $user->lastaccess);
+        else
+            $userinformation['lastaccess'] = get_string('neverlogged', 'tool_cleanupusers');
+
+        $isarchivid = array_key_exists($user->id, $cleanupusers);
+        if (empty($isarchivid)) {
+            $userinformation['archived'] = get_string('No', 'tool_cleanupusers');
+        } else {
+            $userinformation['archived'] = get_string('Yes', 'tool_cleanupusers');
+        }
+        $userinformation['auth'] = $user->auth;
+
+        return $userinformation;
     }
 }
 

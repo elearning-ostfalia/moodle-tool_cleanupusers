@@ -45,6 +45,10 @@ abstract  class userstatuschecker
         return get_string('condition', 'userstatus_' . $this->name);
     }
 
+    public function get_suspend_hint() : string {
+        return get_string('suspendtime', 'userstatus_' . $this->name);
+    }
+
     public function get_name() : string {
         return $this->name;
     }

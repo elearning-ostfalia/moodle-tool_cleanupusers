@@ -19,6 +19,11 @@
     width: 60px;
 }
 
+.cleanupusers .c5 {
+    max-width: 200px;
+    width: 60px;
+}
+
 /* decrease size of numeric inplace input fields */
 /* TODO: does not work */
 /* .cleanupusers .c4 input .ignoredirty {*/

@@ -153,7 +153,7 @@ abstract  class userstatuschecker
 
         $tosuspend = [];
         foreach ($users as $key => $user) {
-            if (!is_siteadmin($user) && $this->shall_suspend($user)) {
+            if (!is_siteadmin($user) && !isguestuser($user) && $this->shall_suspend($user)) {
                 $suspenduser = new archiveduser(
                     $user->id,
                     $user->suspended,
@@ -240,7 +240,7 @@ abstract  class userstatuschecker
 
         $todelete = [];
         foreach ($users as $key => $user) {
-            if (!is_siteadmin($user)) {
+            if (!is_siteadmin($user) && !isguestuser($user)) {
                 $deleteuser = new archiveduser(
                     $user->id,
                     $user->suspended,
@@ -267,10 +267,11 @@ abstract  class userstatuschecker
     public function get_to_reactivate() {
         global $DB;
 
+        $params = ["checker" => $this->name];
         list($sql_condition, $param_condition) = $this->condition_reactivate_sql('tca', 'tc');
         $sql = "SELECT tca.id, tca.suspended, tca.lastaccess, tca.username, tca.deleted, tca.auth
                 FROM {user} u
-                JOIN {tool_cleanupusers} tc ON u.id = tc.id
+                JOIN {tool_cleanupusers} tc ON u.id = tc.id and tc.checker = :checker
                 JOIN {tool_cleanupusers_archive} tca ON u.id = tca.id
                 WHERE " . $this->get_auth_sql('u.') . "
                     u.suspended = 1
@@ -281,7 +282,10 @@ abstract  class userstatuschecker
             $sql .= " AND " . $sql_condition;
         }
 
-        $users = $DB->get_records_sql($sql, $param_condition);
+        if (is_array($param_condition)) {
+            $params = array_merge($params, $param_condition);
+        }
+        $users = $DB->get_records_sql($sql, $params);
 
         $toactivate = [];
         foreach ($users as $key => $user) {

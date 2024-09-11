@@ -39,7 +39,6 @@ class timechecker extends userstatuschecker { // implements userstatusinterface 
      * This constructor sets timesuspend and timedelete from days to seconds.
      */
     public function __construct() {
-        // debugging("timechecker::__construct");
         parent::__construct(self::class);
     }
 
@@ -56,12 +55,7 @@ class timechecker extends userstatuschecker { // implements userstatusinterface 
         return ["{$tca}.lastaccess >= :timelimit" ,
             [ 'timelimit'  => time() - $this->get_suspendtime_in_sec() ]];
     }
-/*
-    private function get_auth_sql($alias) : string {
-        if (empty($this->config->auth_method))
-            return '';
-        return $alias . "auth = '" . $this->config->auth_method . "' AND ";
-    }*/
+
     /**
      * All users who are not suspended and not deleted are selected. If a user did not sign in for the hitherto
      * determined suspendtime he/she will be returned.
@@ -232,7 +226,8 @@ class timechecker extends userstatuschecker { // implements userstatusinterface 
      * returns the authentication method for all users being handled by this plugin
      * @return string
      */
+    /*
     public function get_authentication_method() :string {
         return $this->config->auth_method;
-    }
+    }*/
 }

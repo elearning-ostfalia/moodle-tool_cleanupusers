@@ -147,7 +147,7 @@ if (!$pluginsenabled) {
             }
 		} catch (Exception $e) {
             core\notification::warning($subplugin . ': '. $e->getMessage());
-            throw $e;
+            // throw $e;
         }
     }
 }

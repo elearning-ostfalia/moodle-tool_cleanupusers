@@ -53,6 +53,10 @@ abstract  class userstatuschecker
         return $this->name;
     }
 
+    public function get_displayname() : string {
+        return get_string('pluginname', 'userstatus_' . $this->name);
+    }
+
     /**
      * check if the given user fulfills the suspension condition
      *

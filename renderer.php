@@ -103,18 +103,18 @@ class tool_cleanupusers_renderer extends plugin_renderer_base {
             $mysubpluginname = "\\userstatus_" . $pluginname . "\\" . $pluginname;
             $userstatuschecker = new $mysubpluginname();
 
+            // displayname
+            $displayname = $userstatuschecker->get_displayname();
             // hide/show link
             if (in_array($pluginname, $authsenabled)) {
                 $hideshow = "<a href=\"$url&amp;action=disable&amp;userstatus=$pluginname\">";
                 $hideshow .= $OUTPUT->pix_icon('t/hide', get_string('disable')) . '</a>';
                 $enabled = true;
-                $displayname = $name;
             }
             else {
                 $hideshow = "<a href=\"$url&amp;action=enable&amp;userstatus=$pluginname\">";
                 $hideshow .= $OUTPUT->pix_icon('t/show', get_string('enable')) . '</a>';
                 $enabled = false;
-                $displayname = $name;
                 $class = 'dimmed_text';
             }
 

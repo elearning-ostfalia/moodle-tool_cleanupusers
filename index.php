@@ -141,7 +141,7 @@ if (!$pluginsenabled) {
             $arrayreactivate = $userstatuschecker->get_to_reactivate();
 
             if (count($archivearray) > 0 || count($arraytodelete) > 0 || count($arrayreactivate)) {
-                $content .= $OUTPUT->heading($subplugin, 3, 'main');
+                $content .= $OUTPUT->heading($userstatuschecker->get_displayname(), 3, 'main');
                 $content .= $renderer->render_index_page($arrayreactivate, $archivearray,
                     $arraytodelete, $arrayneverloggedin, $subplugin);
             }

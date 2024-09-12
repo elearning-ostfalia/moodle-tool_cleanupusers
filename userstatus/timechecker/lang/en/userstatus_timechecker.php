@@ -21,7 +21,7 @@
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-$string['pluginname'] = 'Timechecker';
+$string['pluginname'] = 'Last Login Checker';
 $string['settingsinformation'] = 'Subplugin information';
 $string['condition'] = 'User has not logged in for a long time';
 $string['suspendtime'] = 'Time since last user login [days]';

@@ -167,7 +167,9 @@ class archive_user_task extends scheduled_task {
                     $user->suspended,
                     $user->lastaccess,
                     $user->username,
-                    $user->deleted
+                    $user->deleted,
+                    $user->auth,
+                    $checker
                 );
                 try {
                     switch ($intention) {

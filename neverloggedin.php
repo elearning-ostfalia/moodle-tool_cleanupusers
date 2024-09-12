@@ -27,6 +27,7 @@ require_once($CFG->libdir . '/tablelib.php');
 require_once($CFG->dirroot . '/user/filters/lib.php');
 
 // Get URL parameters.
+echo 'not supported anymmore (separate checker)';
 
 $PAGE->set_context(context_system::instance());
 $context = context_system::instance();
@@ -34,6 +35,7 @@ $context = context_system::instance();
 require_login();
 require_capability('moodle/site:config', $context);
 
+/*
 admin_externalpage_setup('cleanupusers');
 
 $pagetitle = get_string('neverloggedin', 'tool_cleanupusers');
@@ -46,18 +48,6 @@ $renderer = $PAGE->get_renderer('tool_cleanupusers');
 $content = '';
 echo $OUTPUT->header();
 echo $renderer->get_heading();
-
-/*
-$config = get_config('tool_cleanupusers', 'cleanupusers_subplugin');
-if ($config) {
-    $subplugin = $config;
-    $mysubpluginname = "\\userstatus_" . $subplugin . "\\" . $subplugin;
-    $userstatuschecker = new $mysubpluginname();
-} else {
-    $subplugin = 'timechecker';
-    $userstatuschecker = new \userstatus_timechecker\timechecker();
-}
-*/
 
 $pluginsenabled =  \core_plugin_manager::instance()->get_enabled_plugins("userstatus");
 foreach ($pluginsenabled as $subplugin => $dir) {
@@ -84,3 +74,4 @@ foreach ($pluginsenabled as $subplugin => $dir) {
 
 echo $content;
 echo $OUTPUT->footer();
+*/

@@ -50,18 +50,6 @@ $content = '';
 echo $OUTPUT->header();
 echo $renderer->get_heading();
 
-/*
-$config = get_config('tool_cleanupusers', 'cleanupusers_subplugin');
-if ($config) {
-    $subplugin = $config;
-    $mysubpluginname = "\\userstatus_" . $subplugin . "\\" . $subplugin;
-    $userstatuschecker = new $mysubpluginname();
-} else {
-    $subplugin = 'timechecker';
-    $userstatuschecker = new timechecker();
-}
-*/
-
 $pluginsenabled =  \core_plugin_manager::instance()->get_enabled_plugins("userstatus");
 foreach ($pluginsenabled as $subplugin => $dir) {
     $mysubpluginname = "\\userstatus_" . $subplugin . "\\" . $subplugin;
@@ -71,7 +59,8 @@ foreach ($pluginsenabled as $subplugin => $dir) {
     $deletearray = $userstatuschecker->get_to_delete();
 
     if (empty($deletearray)) {
-        echo "Currently no users will be deleted by the next cronjob for checker " . $subplugin . ".<br>";
+        echo "Currently no users will be deleted by the next cronjob for checker " .
+            $userstatuschecker->get_displayname() . ".<br>";
     } else {
         $userfilter = new user_filtering();
         $userfilter->display_add();

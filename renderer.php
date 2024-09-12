@@ -22,6 +22,8 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+use tool_cleanupusers\archiveduser;
+
 defined('MOODLE_INTERNAL') || die;
 require_once($CFG->libdir . '/tablelib.php');
 /**
@@ -491,11 +493,30 @@ class tool_cleanupusers_renderer extends plugin_renderer_base {
         $table->head = $tableheadings;
         $table->attributes['class'] = 'generaltable admintable cleanupusers';
         $table->data = [];
-        foreach ($users as $key => $user) {
+
+        $limit = 20;
+        foreach (array_slice($users, 0, $limit, true) as $key => $user) {
             $table->data[$key] = $user;
         }
-        $htmltable = html_writer::table($table);
-        return $htmltable;
+
+        if (count($users) > $limit) {
+            $table->data['last'] = new archiveduser(
+                '<i>... truncated!</i>',
+                '',
+                '',
+                '',
+                '',
+                '',
+                ''
+            );
+        }
+
+        $output = html_writer::table($table);
+
+/*        if (count($users) > $limit) {
+            $output .= '<b>Table is truncated!</b><br><br>';
+        } */
+        return $output;
     }
 
     /**

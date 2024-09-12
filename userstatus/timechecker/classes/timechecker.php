@@ -23,8 +23,6 @@
  */
 namespace userstatus_timechecker;
 
-use tool_cleanupusers\archiveduser;
-use tool_cleanupusers\userstatusinterface;
 use tool_cleanupusers\userstatuschecker;
 
 /**
@@ -36,16 +34,12 @@ use tool_cleanupusers\userstatuschecker;
  */
 class timechecker extends userstatuschecker { // implements userstatusinterface {
     /**
-     * This constructor sets timesuspend and timedelete from days to seconds.
+     * constructor
      */
     public function __construct() {
         parent::__construct(self::class);
     }
 
-    /**
-     * The time since the last access is longer than the configured time period.
-     * @return array
-     */
     public function condition_suspend_sql() : array {
         return [" lastaccess != 0 AND lastaccess < :timelimit" ,
             [ 'timelimit'  => time() - $this->get_suspendtime_in_sec() ]];
@@ -222,12 +216,5 @@ class timechecker extends userstatuschecker { // implements userstatusinterface 
     }
     */
 
-    /**
-     * returns the authentication method for all users being handled by this plugin
-     * @return string
-     */
-    /*
-    public function get_authentication_method() :string {
-        return $this->config->auth_method;
-    }*/
+
 }

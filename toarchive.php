@@ -48,18 +48,6 @@ echo $OUTPUT->header();
 echo $renderer->get_heading();
 
 
-/*
-$config = get_config('tool_cleanupusers', 'cleanupusers_subplugin');
-if ($config) {
-    $subplugin = $config;
-    $mysubpluginname = "\\userstatus_" . $subplugin . "\\" . $subplugin;
-    $userstatuschecker = new $mysubpluginname();
-} else {
-    $subplugin = 'timechecker';
-    $userstatuschecker = new \userstatus_timechecker\timechecker();
-}
-*/
-
 $pluginsenabled =  \core_plugin_manager::instance()->get_enabled_plugins("userstatus");
 foreach ($pluginsenabled as $subplugin => $dir) {
     $mysubpluginname = "\\userstatus_" . $subplugin . "\\" . $subplugin;
@@ -70,7 +58,8 @@ foreach ($pluginsenabled as $subplugin => $dir) {
     $archivearray = $userstatuschecker->get_to_suspend();
 
     if (empty($archivearray)) {
-        echo "Currently no users will be suspended by the next cronjob for checker " . $subplugin . ".<br>";
+        echo "Currently no users will be suspended by the next cronjob for checker " .
+            $userstatuschecker->get_displayname() . ".<br>";
     } else {
         // var_dump($archivearray);
         $userfilter = new user_filtering();

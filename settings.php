@@ -62,7 +62,8 @@ if ($hassiteconfig) {
         get_string('todelete', 'tool_cleanupusers'),
         "$CFG->wwwroot/$CFG->admin/tool/cleanupusers/todelete.php"
     ));
-    // Adds an entry for every sub-plugin with an settings.php.
+
+    // Adds an entry for every sub-plugin with a settings.php.
     foreach (core_plugin_manager::instance()->get_plugins_of_type('userstatus') as $plugin) {
         global $CFG;
         $plugin->load_settings($ADMIN, 'tool_cleanupusers', $hassiteconfig);

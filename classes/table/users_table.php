@@ -81,7 +81,6 @@ class users_table extends \table_sql {
     }
 
     public function col_lastaccess($row) {
-        debugging('col_lastaccess');
         if ($row->lastaccess > 0)
             return date('d.m.Y h:i:s', $row->lastaccess);
         else

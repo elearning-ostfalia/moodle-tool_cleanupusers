@@ -51,6 +51,7 @@ if ($hassiteconfig) {
         "$CFG->wwwroot/$CFG->admin/tool/cleanupusers/neverloggedin.php"
     ));*/
     // Add entry for own settings.
+    /*
     foreach (core_plugin_manager::instance()->get_enabled_plugins('userstatus') as $plugin) {
         $mysubpluginname = "\\userstatus_" . $plugin . "\\" . $plugin;
         $userstatuschecker = new $mysubpluginname();
@@ -62,6 +63,7 @@ if ($hassiteconfig) {
             "$CFG->wwwroot/$CFG->admin/tool/cleanupusers/toarchive.php?checker=" . $userstatuschecker->get_name()
         ));
     }
+    */
     // Add entry for own settings.
     $ADMIN->add('tool_cleanupusers', new admin_externalpage(
         'Manage to delete',

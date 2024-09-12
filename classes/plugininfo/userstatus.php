@@ -104,11 +104,16 @@ class userstatus extends base {
      */
     public static function get_enabled_plugins() {
         global $CFG;
-
         $enabled = [];
         if (isset($CFG->userstatus_plugins_enabled)) {
             foreach (array_map('trim', explode(',', $CFG->userstatus_plugins_enabled)) as $checker) {
                 if (!empty($checker)) {
+                    // Check if plugin is still available.
+                    $mysubpluginname = "\\userstatus_" . $checker . "\\" . $checker;
+                    if (!class_exists($mysubpluginname)) {
+                        // debugging($checker . ' does not exist anymore');
+                        continue;
+                    }
                     $enabled[$checker] = $checker;
                 }
             }

@@ -103,6 +103,11 @@ class tool_cleanupusers_renderer extends plugin_renderer_base {
         foreach ($displayauths as $pluginname => $name) {
             $class = '';
             $mysubpluginname = "\\userstatus_" . $pluginname . "\\" . $pluginname;
+            if (!class_exists($mysubpluginname)) {
+                // core\notification::warning($pluginname . ' does not exist');
+                continue;
+            }
+
             $userstatuschecker = new $mysubpluginname();
 
             // displayname

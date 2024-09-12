@@ -90,6 +90,8 @@ abstract  class userstatuschecker
      * @return string
      */
     public function get_authentication_method() :string {
+        if (!isset($this->config) || !isset($this->config->auth_method))
+            return '';
         return $this->config->auth_method;
     }
 

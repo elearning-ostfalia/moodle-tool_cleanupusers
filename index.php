@@ -129,8 +129,12 @@ if (!$pluginsenabled) {
             continue;
         }
 
-
         $mysubpluginname = "\\userstatus_" . $subplugin . "\\" . $subplugin;
+        if (!class_exists($mysubpluginname)) {
+            // core\notification::warning($subplugin . ' does not exist');
+            continue;
+        }
+
         $userstatuschecker = new $mysubpluginname();
 
         try {

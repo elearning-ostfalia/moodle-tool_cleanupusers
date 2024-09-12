@@ -45,7 +45,7 @@ class users_table extends \table_sql {
         parent::__construct($uniqueid);
 
         // Define the list of columns to show.
-        $columns = ['id', 'username', 'fullname', 'lastaccess', 'auth'];
+        $columns = ['id', 'username', 'fullname', 'lastaccess', 'auth', $intention];
         $this->define_columns($columns);
 
         // debugging($intention);
@@ -63,9 +63,13 @@ class users_table extends \table_sql {
                 break;
         }
 
-        $headers = [get_string('id', 'tool_cleanupusers'), $header,
-            get_string('fullname'), get_string('lastaccess', 'tool_cleanupusers'),
-            get_string('authmethod', 'tool_cleanupusers')];
+        $headers = [
+            get_string('id', 'tool_cleanupusers'),
+            $header,
+            get_string('fullname'),
+            get_string('lastaccess', 'tool_cleanupusers'),
+            get_string('authmethod', 'tool_cleanupusers'),
+            ''];
         $this->define_headers($headers);
 
         $idsasstring = '';
@@ -77,13 +81,40 @@ class users_table extends \table_sql {
         if ($sqlwhere != null && $sqlwhere != '') {
             $where .= ' AND ' . $sqlwhere;
         }
-        $this->set_sql('id, username, lastaccess, auth, ' . implode(', ', fields::get_name_fields()), '{user}', $where, $param);
+        $this->set_sql('id, username, lastaccess, auth, ' .
+            implode(', ', fields::get_name_fields()), '{user}', $where, $param);
     }
 
-    public function col_lastaccess($row) {
-        if ($row->lastaccess > 0)
-            return date('d.m.Y h:i:s', $row->lastaccess);
+    public function col_lastaccess($user) {
+        if ($user->lastaccess > 0)
+            return date('d.m.Y h:i:s', $user->lastaccess);
         else
             return get_string('neverlogged', 'tool_cleanupusers');
+    }
+
+    public function col_suspend($user) {
+        $url = new \moodle_url('/admin/tool/cleanupusers/handleuser.php',
+            ['userid' => $user->id, 'action' => 'suspend', 'checker' => 'TODO checker' /*$checker*/]);
+
+        global $OUTPUT;
+        return \html_writer::link(
+            $url,
+            $OUTPUT->pix_icon(
+                't/hide',
+                get_string('hideuser', 'tool_cleanupusers'),
+                'moodle',
+                ['class' => "imggroup-" . $user->id]
+            )
+        );
+/*
+        $userinformation['link'] = \html_writer::link(
+            $url,
+            $this->output->pix_icon(
+                't/hide',
+                get_string('hideuser', 'tool_cleanupusers'),
+                'moodle',
+                ['class' => "imggroup-" . $user->id]
+            )
+        );*/
     }
 }

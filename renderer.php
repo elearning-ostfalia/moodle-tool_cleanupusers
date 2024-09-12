@@ -494,7 +494,7 @@ class tool_cleanupusers_renderer extends plugin_renderer_base {
         $table->attributes['class'] = 'generaltable admintable cleanupusers';
         $table->data = [];
 
-        $limit = 20;
+        $limit = 15;
         foreach (array_slice($users, 0, $limit, true) as $key => $user) {
             $table->data[$key] = $user;
         }

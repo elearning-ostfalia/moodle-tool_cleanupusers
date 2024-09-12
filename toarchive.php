@@ -35,11 +35,13 @@ require_capability('moodle/site:config', $context);
 
 admin_externalpage_setup('cleanupusers');
 
-$pagetitle = get_string('toarchive', 'tool_cleanupusers');
-$PAGE->set_title(get_string('toarchive', 'tool_cleanupusers'));
-$PAGE->set_heading(get_string('toarchive', 'tool_cleanupusers'));
+$checker = optional_param('checker', '', PARAM_ALPHANUMEXT);
+
+// $pagetitle = get_string('toarchive', 'tool_cleanupusers', $checker);
+$PAGE->set_title(get_string('toarchive', 'tool_cleanupusers', $checker));
+$PAGE->set_heading(get_string('toarchive', 'tool_cleanupusers', $checker));
 $PAGE->set_pagelayout('standard');
-$PAGE->set_url(new moodle_url('/admin/tool/cleanupusers/toarchive.php'));
+$PAGE->set_url(new moodle_url('/admin/tool/cleanupusers/toarchive.php'), ['checker' => $checker]);
 
 $renderer = $PAGE->get_renderer('tool_cleanupusers');
 
@@ -47,14 +49,14 @@ $content = '';
 echo $OUTPUT->header();
 echo $renderer->get_heading();
 
-
-$pluginsenabled =  \core_plugin_manager::instance()->get_enabled_plugins("userstatus");
-foreach ($pluginsenabled as $subplugin => $dir) {
-    $mysubpluginname = "\\userstatus_" . $subplugin . "\\" . $subplugin;
-    $userstatuschecker = new $mysubpluginname();
-
-
-    // Request arrays from the sub-plugin.
+/**
+ * @param mixed $userstatuschecker
+ * @param mixed $PAGE
+ * @return void
+ */
+function output_user_table(mixed $userstatuschecker, mixed $PAGE): void
+{
+// Request arrays from the sub-plugin.
     $archivearray = $userstatuschecker->get_to_suspend();
 
     if (empty($archivearray)) {
@@ -72,6 +74,19 @@ foreach ($pluginsenabled as $subplugin => $dir) {
         $archivetable->out(20, false);
     }
 }
+
+
+if (empty($checker)) {
+    $pluginsenabled =  \core_plugin_manager::instance()->get_enabled_plugins("userstatus");
+    foreach ($pluginsenabled as $subplugin => $dir) {
+        $mysubpluginname = "\\userstatus_" . $subplugin . "\\" . $subplugin;
+        output_user_table(new $mysubpluginname(), $PAGE);
+    }
+} else {
+    $mysubpluginname = "\\userstatus_" . $checker . "\\" . $checker;
+    output_user_table(new $mysubpluginname(), $PAGE);
+}
+
 
 echo $content;
 echo $OUTPUT->footer();

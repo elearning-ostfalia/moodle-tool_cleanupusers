@@ -127,7 +127,9 @@ A sub-plugin developed by TU Darmstadt; uses data from an external server connec
 Server can be chosen and configured in settings.
 Available at https://github.com/eLearning-TUDarmstadt/moodle-cleanupusers_ldapchecker
 
-# Probleme: 
+# TODO:
 
-Wenn eine Auth-Methode von mehreren Plugins kontrolliert wird, dann gibt es ggf. Überscheidungen 
-beim Reaktivieren. 
+* Löschen: eine Tabelle für alle, weil das mit einer SQL-Anfrage erledigt werden kann
+* Tabelle, mit der man Nutzer manuell reaktivieren kann
+* Tests
+

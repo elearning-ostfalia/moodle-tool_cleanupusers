@@ -63,8 +63,13 @@ class userstatus_ldapchecker_generator extends testing_data_generator {
 
         // Create user which was suspended with the plugin and should be deleted (was suspended one year ago or earlier)
         $delete = $generator->create_user(array('username' => 'anonym', 'firstname' => 'Anonym', 'auth'=>'shibboleth', 'suspended' => 1, 'lastaccess' => $timestamponeyearago));
-        $DB->insert_record_raw('tool_cleanupusers', array('id' => $delete->id, 'archived' => true, 'timestamp' => $timestamponeyearago), true, false, true);
-        $DB->insert_record_raw('tool_cleanupusers_archive', array('id' => $delete->id, 'auth'=>'shibboleth', 'username' => 'TO_DELETE_PLUGIN',
+        $DB->insert_record_raw('tool_cleanupusers', array(
+            'id' => $delete->id,
+            'archived' => true,
+            'timestamp' => $timestamponeyearago,
+            'checker' => 'ldapchecker'), true, false, true);
+        $DB->insert_record_raw('tool_cleanupusers_archive',
+                array('id' => $delete->id, 'auth'=>'shibboleth', 'username' => 'TO_DELETE_PLUGIN',
             'suspended' => 1, 'lastaccess' => $timestamponeyearago), true, false, true);
         $deleteduser = $delete;
 

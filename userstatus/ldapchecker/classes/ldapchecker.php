@@ -320,13 +320,4 @@ class ldapchecker extends userstatuschecker { // implements userstatusinterface 
         $this->lookup = $dummy_ldap;
     }
 
-    /**
-     * returns the authentication method for all users being handled by this plugin
-     * @return string
-     */
-    /*
-    public function get_authentication_method() :string {
-        return $this->config->auth_method;
-    }
-*/
 }

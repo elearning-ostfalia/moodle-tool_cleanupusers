@@ -60,7 +60,11 @@ class tool_cleanupusers_generator extends testing_data_generator {
         $tendaysago = $mytimestamp - 864000;
         $timestamponeyearago = $mytimestamp - 31622600;
 
-        $user = $generator->create_user(['username' => 'user', 'lastaccess' => $tendaysago, 'suspended' => '0']);
+        $user = $generator->create_user([
+            'username' => 'user',
+            'lastaccess' => $tendaysago,
+            'suspended' => '0'
+            ]);
         $user->realusername = $user->username;
 
         $userneverloggedin = $generator->create_user(['username' => 'userneverloggedin',
@@ -73,11 +77,12 @@ class tool_cleanupusers_generator extends testing_data_generator {
 
         $usersuspendedbypluginandmanually = $generator->create_user(['username' => 'anonym-x', 'suspended' => '1']);
         $usersuspendedbypluginandmanually->realusername = 'somerealusername';
-        $DB->insert_record_raw('tool_cleanupusers', ['id' => $usersuspendedbypluginandmanually->id, 'archived' => 1,
-            'timestamp' => $tendaysago], true, false, true);
+        $DB->insert_record_raw('tool_cleanupusers', [
+            'id' => $usersuspendedbypluginandmanually->id, 'archived' => 1,
+            'timestamp' => $tendaysago, 'checker' => 'timechecker'], true, false, true);
         $DB->insert_record_raw('tool_cleanupusers_archive', ['id' => $usersuspendedbypluginandmanually->id,
             'username' => 'somerealusername', 'suspended' => $usersuspendedbypluginandmanually->suspended,
-            'lastaccess' => $tendaysago], true, false, true);
+            'lastaccess' => $tendaysago, 'auth' => 'manual'], true, false, true);
 
         $usersuspendedmanually = $generator->create_user(['username' => 'usersuspendedmanually', 'suspended' => '1']);
         $usersuspendedmanually->realusername = $usersuspendedmanually->username;
@@ -89,12 +94,16 @@ class tool_cleanupusers_generator extends testing_data_generator {
         $usersuspendedbyplugin = $generator->create_user(['username' => 'anonym-y', 'suspended' => '1',
             'firstname' => 'Anonym']);
         $usersuspendedbyplugin->realusername = 'usersuspendedbyplugin';
-        $DB->insert_record_raw('tool_cleanupusers', ['id' => $usersuspendedbyplugin->id, 'archived' => true,
+        $DB->insert_record_raw('tool_cleanupusers', [
+            'id' => $usersuspendedbyplugin->id,
+            'archived' => true,
+            'checker' => 'timechecker',
             'timestamp' => $timestamponeyearago], true, false, true);
         $DB->insert_record_raw(
             'tool_cleanupusers_archive',
             ['id' => $usersuspendedbyplugin->id,
-            'username' => 'usersuspendedbyplugin', 'suspended' => 0, 'lastaccess' => $timestamponeyearago],
+            'username' => 'usersuspendedbyplugin', 'suspended' => 0, 'lastaccess' => $timestamponeyearago,
+                'auth' => 'manual'],
             true,
             false,
             true
@@ -106,7 +115,8 @@ class tool_cleanupusers_generator extends testing_data_generator {
         $DB->insert_record_raw(
             'tool_cleanupusers_archive',
             ['id' => $userinconsistentsuspended->id,
-            'username' => 'userinconsistentarchivedbyplugin', 'suspended' => 0, 'lastaccess' => $timestamponeyearago],
+            'username' => 'userinconsistentarchivedbyplugin', 'suspended' => 0, 'lastaccess' => $timestamponeyearago,
+                'auth' => 'manual'],
             true,
             false,
             true
@@ -122,13 +132,13 @@ class tool_cleanupusers_generator extends testing_data_generator {
         $DB->insert_record_raw(
             'tool_cleanupusers_archive',
             ['id' => $originaluser->id,
-            'username' => $userduplicatedname->username, 'suspended' => 0, 'lastaccess' => $tendaysago],
+            'username' => $userduplicatedname->username, 'suspended' => 0, 'lastaccess' => $tendaysago, 'auth' => 'manual'],
             true,
             false,
             true
         );
         $DB->insert_record_raw('tool_cleanupusers', ['id' => $originaluser->id, 'archived' => true,
-            'timestamp' => $tendaysago], true, false, true);
+            'timestamp' => $tendaysago, 'checker' => 'timechecker'], true, false, true);
 
         $data['user'] = $user;  // Logged in recently, no action.
         $data['userdeleted'] = $userdeleted;    // Already deleted, filtered by cronjob.

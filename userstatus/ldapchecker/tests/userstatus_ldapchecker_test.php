@@ -64,16 +64,19 @@ class userstatus_ldapchecker_test extends advanced_testcase {
 
         // User to suspend
         $returnsuspend = $myuserstatuschecker->get_to_suspend();
+        $this->assertEquals(1, count($returnsuspend));
         $this->assertEquals("to_suspend", reset($returnsuspend)->username);
 
         // Add user which should be reactivated
-        $myuserstatuschecker->fill_ldap_response_for_testing(array( "tu_id_1" => 1,
+        $myuserstatuschecker->fill_ldap_response_for_testing(array(
+            "tu_id_1" => 1,
             "tu_id_2" => 1,
             "tu_id_3" => 1,
             "tu_id_4" => 1,
             "to_reactivate" => 1,
         ));
         $returntoreactivate = $myuserstatuschecker->get_to_reactivate();
+        $this->assertEquals(1, count($returntoreactivate));
         $this->assertEquals("to_reactivate", reset($returntoreactivate)->username);
         $this->assertEquals("to_reactivate", end($returntoreactivate)->username);
 

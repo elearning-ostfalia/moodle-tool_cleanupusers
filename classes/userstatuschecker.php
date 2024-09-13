@@ -231,7 +231,7 @@ abstract  class userstatuschecker
         $users = $DB->get_records_sql(
             "SELECT tca.id, tca.suspended, tca.lastaccess, tca.username, tca.deleted, tca.auth
                 FROM {user} u
-                JOIN {tool_cleanupusers} tc ON u.id = tc.id AND tc.checker = :name
+                JOIN {tool_cleanupusers} tc ON u.id = tc.id AND tc.checker = :checker
                 JOIN {tool_cleanupusers_archive} tca ON u.id = tca.id
                 WHERE " . $this->get_auth_sql('u.') . "
                     u.suspended = 1
@@ -239,7 +239,7 @@ abstract  class userstatuschecker
                     AND tc.timestamp < :timelimit",
             [
                 'timelimit'  => time() - $this->get_deletetime_in_sec(),
-                'name' => $this->get_name()
+                'checker' => $this->get_name()
             ]
         );
 

@@ -135,4 +135,5 @@ Available at https://github.com/eLearning-TUDarmstadt/moodle-cleanupusers_ldapch
 * Tabelle, mit der man Nutzer manuell reaktivieren kann, falls Prüfungsleistungen
   zurückgeholt werden müssen
 * Tests
+* Auth_method mit mehreren Werten wird aktuell nicht unterstützt
 

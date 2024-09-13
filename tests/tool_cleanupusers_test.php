@@ -51,6 +51,18 @@ class tool_cleanupusers_test extends advanced_testcase {
         $generator = $this->getDataGenerator()->get_plugin_generator('tool_cleanupusers');
         $data = $generator->test_create_preparation();
         $this->resetAfterTest(true);
+        // set_config('cleanupusers_subplugin', 'timechecker', 'tool_cleanupusers');
+        // set enabled plugins
+        set_config('userstatus_plugins_enabled', "neverloginchecker,timechecker");
+        // set configuration values for neverloginchecker
+        set_config('auth_method', 'manual', 'userstatus_neverloginchecker');
+        set_config('suspendtime', 400, 'userstatus_neverloginchecker');
+        set_config('deletetime', 730, 'userstatus_neverloginchecker');
+        // set configuration values for timechecker
+        set_config('auth_method', 'manual', 'userstatus_timechecker');
+        set_config('suspendtime', 90, 'userstatus_timechecker');
+        set_config('deletetime', 365, 'userstatus_timechecker');
+
         return $data;
     }
 
@@ -75,15 +87,18 @@ class tool_cleanupusers_test extends advanced_testcase {
             $data['user']->suspended,
             $data['user']->lastaccess,
             $data['user']->realusername,
-            $data['user']->deleted
+            $data['user']->deleted,
+            $data['user']->auth,
         );
-        $user->archive_me();
+        $user->archive_me("checker1");
         $recordtooltable = $DB->get_record('tool_cleanupusers', ['id' => $data['user']->id]);
         $recordshadowtable = $DB->get_record('tool_cleanupusers_archive', ['id' => $data['user']->id]);
         $recordusertable = $DB->get_record('user', ['id' => $data['user']->id]);
         $this->assertEquals(1, $recordusertable->suspended);
         $this->assertEquals(0, $recordshadowtable->suspended);
+        $this->assertEquals('manual', $recordshadowtable->auth);
         $this->assertEquals(1, $recordtooltable->archived);
+        $this->assertEquals("checker1", $recordtooltable->checker);
         $this->assertEquals('Anonym', $recordusertable->firstname);
         $this->assertEquals('anonym' . $data['user']->id, $recordusertable->username);
 
@@ -111,7 +126,8 @@ class tool_cleanupusers_test extends advanced_testcase {
             $data['usersuspendedbypluginandmanually']->id,
             $data['usersuspendedbypluginandmanually']->lastaccess,
             $data['usersuspendedbypluginandmanually']->realusername,
-            $data['usersuspendedbypluginandmanually']->deleted
+            $data['usersuspendedbypluginandmanually']->deleted,
+            $data['usersuspendedbypluginandmanually']->auth
         );
         $usersuspendedbypluginandmanually->delete_me();
         $recordtooltable = $DB->get_record('tool_cleanupusers', ['id' => $data['usersuspendedbypluginandmanually']->id]);
@@ -126,7 +142,8 @@ class tool_cleanupusers_test extends advanced_testcase {
             $data['usersuspendedbyplugin']->id,
             $data['usersuspendedbyplugin']->lastaccess,
             $data['usersuspendedbyplugin']->realusername,
-            $data['usersuspendedbyplugin']->deleted
+            $data['usersuspendedbyplugin']->deleted,
+            $data['usersuspendedbyplugin']->auth
         );
         $usersuspendedbyplugin->delete_me();
         $recordtooltable = $DB->get_record('tool_cleanupusers', ['id' => $data['usersuspendedbyplugin']->id]);
@@ -160,7 +177,8 @@ class tool_cleanupusers_test extends advanced_testcase {
             $data['usersuspendedbypluginandmanually']->suspended,
             $data['usersuspendedbypluginandmanually']->lastaccess,
             $data['usersuspendedbypluginandmanually']->realusername,
-            $data['usersuspendedbypluginandmanually']->deleted
+            $data['usersuspendedbypluginandmanually']->deleted,
+            $data['usersuspendedbypluginandmanually']->auth
         );
         $usersuspendedbypluginandmanually->activate_me();
         $recordtooltable = $DB->get_record(
@@ -182,7 +200,8 @@ class tool_cleanupusers_test extends advanced_testcase {
             $data['usersuspendedbyplugin']->suspended,
             $data['usersuspendedbyplugin']->lastaccess,
             $data['usersuspendedbyplugin']->realusername,
-            $data['usersuspendedbyplugin']->deleted
+            $data['usersuspendedbyplugin']->deleted,
+            $data['usersuspendedbyplugin']->auth
         );
         $usersuspendedbyplugin->activate_me();
         $recordtooltable = $DB->get_record('tool_cleanupusers', ['id' => $data['usersuspendedbyplugin']->id]);
@@ -218,9 +237,10 @@ class tool_cleanupusers_test extends advanced_testcase {
             $data['usersuspendedmanually']->suspended,
             $data['usersuspendedmanually']->lastaccess,
             $data['usersuspendedmanually']->realusername,
-            $data['usersuspendedmanually']->deleted
+            $data['usersuspendedmanually']->deleted,
+            $data['usersuspendedmanually']->auth
         );
-        $usersuspendedmanually->archive_me();
+        $usersuspendedmanually->archive_me("checker2");
         $recordtooltable = $DB->get_record('tool_cleanupusers', ['id' => $data['usersuspendedmanually']->id]);
         $this->assertEmpty($recordtooltable);
 
@@ -250,7 +270,8 @@ class tool_cleanupusers_test extends advanced_testcase {
             $data['userdeleted']->suspended,
             $data['userdeleted']->lastaccess,
             $data['userdeleted']->realusername,
-            $data['userdeleted']->deleted
+            $data['userdeleted']->deleted,
+            $data['userdeleted']->auth
         );
         $userdeleted->delete_me();
         $recordtooltable = $DB->get_record('tool_cleanupusers', ['id' => $data['userdeleted']->id]);
@@ -269,7 +290,8 @@ class tool_cleanupusers_test extends advanced_testcase {
             $data['userinconsistentsuspended']->suspended,
             $data['userinconsistentsuspended']->lastaccess,
             $data['userinconsistentsuspended']->realusername,
-            $data['userinconsistentsuspended']->deleted
+            $data['userinconsistentsuspended']->deleted,
+            $data['userinconsistentsuspended']->auth
         );
         $userinconsistentsuspended->delete_me();
         $recordtooltable = $DB->get_record('tool_cleanupusers', ['id' => $data['userinconsistentsuspended']->id]);
@@ -285,7 +307,8 @@ class tool_cleanupusers_test extends advanced_testcase {
             $data['usersuspendedmanually']->suspended,
             $data['usersuspendedmanually']->lastaccess,
             $data['usersuspendedmanually']->realusername,
-            $data['usersuspendedmanually']->deleted
+            $data['usersuspendedmanually']->deleted,
+            $data['usersuspendedmanually']->auth
         );
         $usersuspendedmanually->delete_me();
         $recordtooltable = $DB->get_record('tool_cleanupusers', ['id' => $data['usersuspendedmanually']->id]);
@@ -320,7 +343,8 @@ class tool_cleanupusers_test extends advanced_testcase {
             $data['userinconsistentsuspended']->suspended,
             $data['userinconsistentsuspended']->lastaccess,
             $data['userinconsistentsuspended']->realusername,
-            $data['userinconsistentsuspended']->deleted
+            $data['userinconsistentsuspended']->deleted,
+            $data['userinconsistentsuspended']->auth
         );
         $userinconsistentsuspended->activate_me();
         $recordtooltable = $DB->get_record('tool_cleanupusers', ['id' => $data['userinconsistentsuspended']->id]);
@@ -338,7 +362,8 @@ class tool_cleanupusers_test extends advanced_testcase {
             0,
             $data['originaluser']->lastaccess,
             $data['userduplicatedname']->realusername,
-            $data['originaluser']->deleted
+            $data['originaluser']->deleted,
+            $data['originaluser']->auth
         );
         $originaluser->activate_me();
         $recordtooltableoriginaluser = $DB->get_record(
@@ -381,6 +406,8 @@ class tool_cleanupusers_test extends advanced_testcase {
      *
      * @see subplugin_select_form
      */
+    // Replaced by table with inplace input
+    /*
     public function test_subpluginform() {
         $data = $this->set_up();
         $this->assertNotEmpty($data);
@@ -397,7 +424,7 @@ class tool_cleanupusers_test extends advanced_testcase {
         $errorarray = ['subplugin' => get_string('errormessagesubplugin', 'tool_cleanupusers')];
         $this->assertEquals($errorarray, $return);
         $this->resetAfterTest(true);
-    }
+    }*/
 
     /**
      * Executes and tests the cron-job. The following table illustrates what will happen to the users:
@@ -429,19 +456,28 @@ class tool_cleanupusers_test extends advanced_testcase {
 
         $timestamponeyearago = time() - 31622600;
         // Creates entries in the tables which will result in an error in the cronjob.
-        $DB->insert_record_raw('tool_cleanupusers', ['id' => 236465, 'archived' => true,
-            'timestamp' => $timestamponeyearago], true, false, true);
+        $DB->insert_record_raw('tool_cleanupusers', [
+            'id' => 236465,
+            'archived' => true,
+            'timestamp' => $timestamponeyearago,
+            'checker' => 'timechecker'],
+            true, false, true);
         $DB->insert_record_raw(
-            'tool_cleanupusers_archive',
-            ['id' => 236465,
-            'username' => 'inconsistent', 'suspended' => 0, 'lastaccess' => $timestamponeyearago],
+            'tool_cleanupusers_archive', [
+                'id' => 236465,
+                'username' => 'inconsistent',
+                'suspended' => 0,
+                'auth' => 'manual',
+            'lastaccess' => $timestamponeyearago
+            ],
             true,
             false,
             true
         );
 
         // Run cron-job with timechecker plugin.
-        set_config('cleanupusers_subplugin', 'timechecker', 'tool_cleanupusers');
+        // set_config('cleanupusers_subplugin', 'timechecker', 'tool_cleanupusers');
+        set_config('userstatus_plugins_enabled', "timechecker");
         $cronjob = new task\archive_user_task();
         $cronjob->execute();
         // Administrator should have received an email.
@@ -462,6 +498,7 @@ class tool_cleanupusers_test extends advanced_testcase {
             'In the last cron-job 1 users were reactivated',
             $msg
         ); // Usersuspendedbypluginandmanually.
+        ///////
         $this->assertStringContainsString(
             'In the last cron-job 1 users caused exception and could not be deleted',
             $msg
@@ -474,6 +511,7 @@ class tool_cleanupusers_test extends advanced_testcase {
             'In the last cron-job 1 users caused exception and could not be reactivated',
             $msg
         );  // Originaluser.
+        ///////
 
         // Users not changed by the Cronjob.
         $recordusertable = $DB->get_record('user', ['id' => $data['user']->id]);
@@ -567,7 +605,7 @@ class tool_cleanupusers_test extends advanced_testcase {
 
         $eventsink = $this->redirectEvents();
 
-        set_config('cleanupusers_subplugin', 'timechecker', 'tool_cleanupusers');
+        // set_config('cleanupusers_subplugin', 'timechecker', 'tool_cleanupusers');
         $cronjob = new task\archive_user_task();
         $cronjob->execute();
         $sink = $this->redirectEmails();

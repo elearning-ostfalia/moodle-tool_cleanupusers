@@ -273,7 +273,7 @@ abstract  class userstatuschecker
                 }
             }
             // $todelete = array_diff($todelete, $toreactivate);
-            var_dump($todelete);
+            // var_dump($todelete);
         }
 
         return $todelete;

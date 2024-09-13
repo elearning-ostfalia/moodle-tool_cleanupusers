@@ -85,7 +85,7 @@ function tool_cleanupusers_inplace_editable($itemtype, $plugin, $newvalue1) {
         require_capability('moodle/site:config', context_system::instance());
 
         // Clean input and update configuration.
-        $newvalue1 = clean_param($newvalue1, PARAM_NOTAGS);
+        $newvalue1 = clean_param($newvalue1, PARAM_INT);
 
         set_config('deletetime', $newvalue1, 'userstatus_' . $plugin);
 
@@ -115,7 +115,7 @@ function tool_cleanupusers_inplace_editable($itemtype, $plugin, $newvalue1) {
         require_capability('moodle/site:config', context_system::instance());
 
         // Clean input and update configuration.
-        $newvalue1 = clean_param($newvalue1, PARAM_NOTAGS);
+        $newvalue1 = clean_param($newvalue1, PARAM_INT);
 
         set_config('suspendtime', $newvalue1, 'userstatus_' . $plugin);
 

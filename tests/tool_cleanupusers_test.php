@@ -498,8 +498,12 @@ class tool_cleanupusers_test extends advanced_testcase {
             'In the last cron-job 1 users were reactivated',
             $msg
         ); // Usersuspendedbypluginandmanually.
-        ///////
         $this->assertStringContainsString(
+            'No problems occurred in plugin tool_cleanupusers in the last run.',
+            $msg
+        );
+        ///////
+/*        $this->assertStringContainsString(
             'In the last cron-job 1 users caused exception and could not be deleted',
             $msg
         );  // User 236465 (from this function) and userdeleted, but deleted users are already filtered.
@@ -511,7 +515,7 @@ class tool_cleanupusers_test extends advanced_testcase {
             'In the last cron-job 1 users caused exception and could not be reactivated',
             $msg
         );  // Originaluser.
-        ///////
+*/        ///////
 
         // Users not changed by the Cronjob.
         $recordusertable = $DB->get_record('user', ['id' => $data['user']->id]);

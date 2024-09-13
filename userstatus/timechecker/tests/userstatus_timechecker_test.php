@@ -40,7 +40,7 @@ use advanced_testcase;
  * @covers \userstatus_timechecker\timechecker::get_to_reactivate()
  *
  */
-class userstatus_timechecker_test extends advanced_testcase {
+final class userstatus_timechecker_test extends advanced_testcase {
     /**
      * Create the data from the generator.
      * @return mixed
@@ -51,6 +51,11 @@ class userstatus_timechecker_test extends advanced_testcase {
         $generator = $this->getDataGenerator()->get_plugin_generator('userstatus_timechecker');
         $data = $generator->test_create_preparation();
         $this->resetAfterTest(true);
+        set_config('userstatus_plugins_enabled', "neverloginchecker,timechecker");
+        // set configuration values for timechecker
+        set_config('auth_method', 'shibboleth', 'userstatus_timechecker');
+        set_config('suspendtime', 90, 'userstatus_timechecker');
+        set_config('deletetime', 365, 'userstatus_timechecker');
         return $data;
     }
     /**
@@ -58,78 +63,56 @@ class userstatus_timechecker_test extends advanced_testcase {
      *
      * @see timechecker
      */
-    public function test_locallib() {
+    public function test_locallib(): void {
         $data = $this->set_up();
-        $myuserstatuschecker = new timechecker();
+        $checker = new timechecker();
 
-        // Calls for sub-plugin functions to return arrays.
-        $returnsuspend = $myuserstatuschecker->get_to_suspend();
-        $returndelete = $myuserstatuschecker->get_to_delete();
-        $returnneverloggedin = $myuserstatuschecker->get_never_logged_in();
-        $returntoreactivate = $myuserstatuschecker->get_to_reactivate();
+        // Never logged in.
+        // Suspended users without archive table entry are included.
+        // $never = ["anonym9", "anonym10", "never_logged_in_1", "never_logged_in_2"];
+        // $returnnever = $checker->get_never_logged_in();
+        // $this->assertEqualsCanonicalizing(array_map(fn($user) => $user->username, $returnnever), $never);
 
-        $this->assertEquals($data['useroneyearnotlogedin']->id, $returnsuspend[$data['useroneyearnotlogedin']->id]->id);
-        // We know from the testcase construction that only one user is deleted for this reason the user is at index 0.
-        $this->assertEquals(
-            $data['userarchivedoneyearnintydaysautomatically']->id,
-            $returndelete[$data['userarchivedoneyearnintydaysautomatically']->id]->id
-        );
-        $this->assertEquals($data['neverloggedin']->id, $returnneverloggedin[$data['neverloggedin']->id]->id);
-        // Merely id is compared since plugin only saves necessary data not complete user.
-        $this->assertEquals($data['reactivate']->id, $returntoreactivate[$data['reactivate']->id]->id);
-        $this->assertNotContains($data['user']->username, $returnsuspend);
-        $this->assertNotContains($data['user']->username, $returndelete);
-        $this->assertNotContains($data['user']->username, $returnneverloggedin);
-        $this->assertNotContains($data['userfifteendays']->username, $returnsuspend);
-        $this->assertNotContains($data['userfifteendays']->username, $returndelete);
-        $this->assertNotContains($data['userfifteendays']->username, $returnneverloggedin);
+        // To suspend.
+        $suspend = ["to_suspend"];
+        $returnsuspend = $checker->get_to_suspend();
+        $this->assertEqualsCanonicalizing(array_map(fn($user) => $user->username, $returnsuspend), $suspend);
 
-        // Userarchived is not in array since time is not right.
-        set_config('suspendtime', 400, 'userstatus_timechecker');
-        set_config('deletetime', 730, 'userstatus_timechecker');
-        $newstatuschecker = new timechecker();
-        $returnsuspend = $newstatuschecker->get_to_suspend();
-        $returndelete = $newstatuschecker->get_to_delete();
-        $returnneverloggedin = $newstatuschecker->get_never_logged_in();
+        // To reactivate.
+        $reactivate = ["to_reactivate"];
+        $returnreactivate = $checker->get_to_reactivate();
+        $this->assertEqualsCanonicalizing(array_map(fn($user) => $user->username, $returnreactivate), $reactivate);
 
-        $this->assertNotContains($data['user']->username, $returnsuspend);
-        $this->assertNotContains($data['user']->username, $returndelete);
-        $this->assertNotContains($data['user']->username, $returnneverloggedin);
-        $this->assertNotContains($data['useroneyearnotlogedin']->username, $returnsuspend);
-        $this->assertNotContains($data['useroneyearnotlogedin']->username, $returndelete);
-        $this->assertNotContains($data['useroneyearnotlogedin']->username, $returnneverloggedin);
-        $this->assertNotContains($data['userarchivedoneyearnintydaysautomatically']->username, $returnsuspend);
-        $this->assertNotContains($data['userarchivedoneyearnintydaysautomatically']->username, $returndelete);
-        $this->assertNotContains($data['userarchivedoneyearnintydaysautomatically']->username, $returnneverloggedin);
-        $this->assertNotContains($data['userarchivedoneyearnintydaysmanually']->username, $returnsuspend);
-        $this->assertNotContains($data['userarchivedoneyearnintydaysmanually']->username, $returndelete);
-        $this->assertNotContains($data['userarchivedoneyearnintydaysmanually']->username, $returnneverloggedin);
-        $this->assertEquals($data['neverloggedin']->id, $returnneverloggedin[$data['neverloggedin']->id]->id);
+        // To delete.
+        $delete = ["to_delete"];
+        $returndelete = $checker->get_to_delete();
+        $this->assertEqualsCanonicalizing(array_map(fn($user) => $user->username, $returndelete), $delete);
 
-        set_config('suspendtime', 10, 'userstatus_timechecker');
-        set_config('deletetime', 20, 'userstatus_timechecker');
-        $newstatuschecker = new timechecker();
-        $returnsuspend = $newstatuschecker->get_to_suspend();
-        $returndelete = $newstatuschecker->get_to_delete();
-        $returnneverloggedin = $newstatuschecker->get_never_logged_in();
+        set_config('suspendtime', 0.5, 'userstatus_timechecker');
+        set_config('deletetime', 0.5, 'userstatus_timechecker');
+        $newchecker = new timechecker();
 
-        $this->assertEquals($data['useroneyearnotlogedin']->id, $returnsuspend[$data['useroneyearnotlogedin']->id]->id);
-        $this->assertEquals($data['userfifteendays']->id, $returnsuspend[$data['userfifteendays']->id]->id);
-        // We know from the testcase construction that only one user is deleted for this reason the user is at index 0.
-        $this->assertEquals(
-            $data['userarchivedoneyearnintydaysautomatically']->id,
-            $returndelete[$data['userarchivedoneyearnintydaysautomatically']->id]->id
-        );
-        $this->assertNotContains($data['user']->username, $returnsuspend);
-        $this->assertNotContains($data['user']->username, $returndelete);
-        $this->assertNotContains($data['user']->username, $returnneverloggedin);
-        $this->assertEquals($data['neverloggedin']->id, $returnneverloggedin[$data['neverloggedin']->id]->id);
+        // To suspend.
+        $suspend = ["to_suspend", "tu_id_1", "tu_id_2", "tu_id_3", "tu_id_4"];
+        $returnsuspend = $newchecker->get_to_suspend();
+        $this->assertEqualsCanonicalizing(array_map(fn($user) => $user->username, $returnsuspend), $suspend);
+
+        // To reactivate.
+        $reactivate = [];
+        $returnreactivate = $newchecker->get_to_reactivate();
+        $this->assertEqualsCanonicalizing(array_map(fn($user) => $user->username, $returnreactivate), $reactivate);
+
+        // To delete.
+        $delete = ["to_delete", "to_not_delete_one_day", "to_reactivate", "to_not_reactivate_username_taken"];
+        $returndelete = $newchecker->get_to_delete();
+        $this->assertEqualsCanonicalizing(array_map(fn($user) => $user->username, $returndelete), $delete);
+
         $this->resetAfterTest(true);
     }
     /**
      * Methodes recommended by moodle to assure database and dataroot is reset.
      */
-    public function test_deleting() {
+    public function test_deleting(): void {
         global $DB;
         $this->resetAfterTest(true);
         $DB->delete_records('user');
@@ -140,7 +123,7 @@ class userstatus_timechecker_test extends advanced_testcase {
     /**
      * Methodes recommended by moodle to assure database is reset.
      */
-    public function test_user_table_was_reset() {
+    public function test_user_table_was_reset(): void {
         global $DB;
         $this->assertEquals(2, $DB->count_records('user', []));
         $this->assertEquals(0, $DB->count_records('tool_cleanupusers', []));

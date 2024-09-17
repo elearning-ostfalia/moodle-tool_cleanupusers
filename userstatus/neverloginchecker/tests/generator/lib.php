@@ -87,10 +87,6 @@ class userstatus_neverloginchecker_generator extends testing_data_generator {
         $this->create_test_user('manually_suspended', ['suspended' => 1]);
         $this->create_test_user('manually_deleted', ['deleted' => 1]);
 
-        // Create users which never logged in.
-        //$this->create_test_user( 'never_logged_in_1', ['lastaccess' => 0]);
-        // $this->create_test_user( 'never_logged_in_2', []);
-
         // Create user which should be reactivated (current time - timecreated < time to suspend).
         $reactivate = $this->create_test_user('anonym1', ['firstname' => 'Anonym',
             'suspended' => 1, 'timecreated' => $dayago]);
@@ -107,21 +103,6 @@ class userstatus_neverloginchecker_generator extends testing_data_generator {
             ['firstname' => 'Anonym', 'suspended' => 1, 'timecreated' => $dayago]);
         $this->archive($notreactivate2, $dayago, 'to_not_reactivate_username_taken');
 
-        // Incomplete archive data (will not be selected by SQL Join)
-        $notreactivate3 = $this->create_test_user('anonym3',
-            ['firstname' => 'Anonym', 'suspended' => 1, 'timecreated' => $dayago]);
-        $DB->insert_record_raw('tool_cleanupusers', ['id' => $notreactivate3->id, 'archived' => true,
-            'timestamp' => $dayago, 'checker' => 'neverloginchecker'], true, false, true);
-
-        // Incomplete archive data (will not be selected by SQL Join)
-        $notreactivate4 = $this->create_test_user('anonym4',
-            ['firstname' => 'Anonym', 'suspended' => 1, 'timecreated' => $dayago]);
-        $DB->insert_record_raw('tool_cleanupusers_archive', ['id' => $notreactivate4->id, 'auth' => 'shibboleth',
-            'username' => 'to_not_reactivate_entry_missing',
-            'suspended' => 1, 'timecreated' => $dayago], true, false, true);
-
-        $notreactivate5 = $this->create_test_user('anonym5',
-            ['firstname' => 'Anonym', 'suspended' => 1, 'timecreated' => $dayago]);
 
         // Create user which was suspended with the plugin and should be deleted (time - suspended
         // >= time to delete).
@@ -134,7 +115,24 @@ class userstatus_neverloginchecker_generator extends testing_data_generator {
             ['firstname' => 'Anonym', 'suspended' => 1, 'timecreated' => $elevendaysago]);
         $this->archive($notdelete1, $dayago, 'to_not_delete_one_day');
 
-        // Incomplete archive data (will not be selected by SQL Join)
+        // Incomplete archive data (will not be suspended or reactivated as
+        // they're not selected by SQL Join)
+        // --------------
+        $notreactivate3 = $this->create_test_user('anonym3',
+            ['firstname' => 'Anonym', 'suspended' => 1, 'timecreated' => $dayago]);
+        $DB->insert_record_raw('tool_cleanupusers', ['id' => $notreactivate3->id, 'archived' => true,
+            'timestamp' => $dayago, 'checker' => 'neverloginchecker'], true, false, true);
+
+        $notreactivate4 = $this->create_test_user('anonym4',
+            ['firstname' => 'Anonym', 'suspended' => 1, 'timecreated' => $dayago]);
+        $DB->insert_record_raw('tool_cleanupusers_archive', ['id' => $notreactivate4->id, 'auth' => 'shibboleth',
+            'username' => 'to_not_reactivate_entry_missing',
+            'suspended' => 1, 'timecreated' => $dayago], true, false, true);
+
+        $notreactivate5 = $this->create_test_user('anonym5',
+            ['firstname' => 'Anonym', 'suspended' => 1, 'timecreated' => $dayago]);
+
+        // Incomplete delete data
         $notdelete2 = $this->create_test_user('anonym8',
             ['firstname' => 'Anonym', 'suspended' => 1, 'timecreated' => $elevendaysago]);
         $DB->insert_record_raw(
@@ -145,7 +143,6 @@ class userstatus_neverloginchecker_generator extends testing_data_generator {
             true
         );
 
-        // Incomplete archive data (will not be selected by SQL Join)
         $notdelete3 = $this->create_test_user('anonym9',
             ['firstname' => 'Anonym', 'suspended' => 1, 'timecreated' => 0]);
         $DB->insert_record_raw('tool_cleanupusers_archive', ['id' => $notdelete3->id, 'auth' => 'shibboleth',

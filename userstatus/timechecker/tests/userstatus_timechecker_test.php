@@ -35,7 +35,6 @@ use advanced_testcase;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  *
  * @covers \userstatus_timechecker\timechecker::get_to_suspend()
- * @covers \userstatus_timechecker\timechecker::get_never_logged_in()
  * @covers \userstatus_timechecker\timechecker::get_to_delete()
  * @covers \userstatus_timechecker\timechecker::get_to_reactivate()
  *

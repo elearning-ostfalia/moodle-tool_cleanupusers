@@ -22,7 +22,7 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace userstatus_timechecker;
+namespace userstatus_neveloginchecker;
 use advanced_testcase;
 
 /**
@@ -34,13 +34,12 @@ use advanced_testcase;
  * @copyright  2016/17 N Herrmann
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  *
- * @covers \userstatus_timechecker\timechecker::get_to_suspend()
- * @covers \userstatus_timechecker\timechecker::get_never_logged_in()
- * @covers \userstatus_timechecker\timechecker::get_to_delete()
- * @covers \userstatus_timechecker\timechecker::get_to_reactivate()
+ * @covers \userstatus_neveloginchecker\neverloginchecker::get_to_suspend()
+ * @covers \userstatus_neveloginchecker\neverloginchecker::get_to_delete()
+ * @covers \userstatus_neveloginchecker\neverloginchecker::get_to_reactivate()
  *
  */
-class userstatus_timechecker_test extends advanced_testcase {
+class userstatus_neverloginchecker_test extends advanced_testcase {
     /**
      * Create the data from the generator.
      * @return mixed
@@ -48,7 +47,7 @@ class userstatus_timechecker_test extends advanced_testcase {
     protected function set_up() {
         // Recommended in Moodle docs to always include CFG.
         global $CFG;
-        $generator = $this->getDataGenerator()->get_plugin_generator('userstatus_timechecker');
+        $generator = $this->getDataGenerator()->get_plugin_generator('userstatus_neverloginchecker');
         $data = $generator->test_create_preparation();
         $this->resetAfterTest(true);
         return $data;

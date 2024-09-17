@@ -22,7 +22,7 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace userstatus_timechecker;
+namespace userstatus_nocoursechecker;
 use advanced_testcase;
 
 /**
@@ -40,7 +40,7 @@ use advanced_testcase;
  * @covers \userstatus_timechecker\timechecker::get_to_reactivate()
  *
  */
-class userstatus_timechecker_test extends advanced_testcase {
+class userstatus_nocourse_test extends advanced_testcase {
     /**
      * Create the data from the generator.
      * @return mixed

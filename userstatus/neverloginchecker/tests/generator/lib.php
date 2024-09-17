@@ -60,15 +60,11 @@ class userstatus_neverloginchecker_generator extends testing_data_generator {
             true, false, true);
     }
 
-
-
-
     /**
      * Creates users to test the sub-plugin.
      */
     public function test_create_preparation() {
         global $DB;
-        $generator = advanced_testcase::getDataGenerator();
 
         $yearago = time() - 366 * 86400;
         $dayago = time() - 86400;
@@ -80,10 +76,10 @@ class userstatus_neverloginchecker_generator extends testing_data_generator {
         $this->create_test_user('tu_id_3', ['timecreated' => $dayago]);
         $this->create_test_user('tu_id_4', ['timecreated' => $dayago]);
 
-        // Create user which should be suspended (created one year ago).
+        // Create user which should be suspended (created 11 days ago).
         $this->create_test_user('to_suspend', ['timecreated' => $elevendaysago]);
 
-        // Create users which should NOT be suspended.
+        // Create users which should NOT be suspended as they are suspended by admin user.
         $this->create_test_user('manually_suspended', ['suspended' => 1]);
         $this->create_test_user('manually_deleted', ['deleted' => 1]);
 

@@ -44,16 +44,34 @@ class nocoursechecker extends userstatuschecker {
         $courses = enrol_get_all_users_courses($user->id, true, "startdate, enddate, visible");
 
         foreach ($courses as $course) {
-            if ($course->visible && $course->enddate > time()) {
-                debugging("valid course");
-                return false;
+            if ($course->visible) {
+                if (isset($course->enddate) && $course->enddate > time()) {
+                    // Enddate in the future
+                    return false;
+                }
+                if (isset($course->startdate)) {
+                    if ($course->startdate >= time()) {
+                        // Startdate in the future => future course
+                        return false;
+                    } else {
+                        // Startdate in the past
+                        if (!(isset($course->enddate) && $course->enddate < time())) {
+                            // and enddate is not in the past
+                            return false;
+                        }
+                        // Special case enddate = '0'
+                        if (isset($course->enddate) && $course->enddate == '0') {
+                            // missing enddate
+                            return false;
+                        }
+
+                    }
+                } else {
+                    debugging('missing course startdate');
+                }
             }
         }
         return true;
-        // todo: check is course is active or not
-
-        // var_dump($courses);
-        // return count($courses) == 0;
     }
 
     public function shall_reactivate($user) : bool {

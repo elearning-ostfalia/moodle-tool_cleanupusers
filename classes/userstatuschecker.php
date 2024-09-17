@@ -106,7 +106,7 @@ abstract  class userstatuschecker
      * returns the period after suspension before deletion
      * @return string
      */
-    public function get_deletetime() : int {
+    public function get_deletetime() : float {
         if (!isset($this->config->deletetime) || $this->config->deletetime == null) {
             // initial state
             return 365;
@@ -114,7 +114,7 @@ abstract  class userstatuschecker
         return $this->config->deletetime;
     }
 
-    public function get_suspendtime() : int {
+    public function get_suspendtime() : float {
         if (!isset($this->config->suspendtime) || $this->config->suspendtime == null) {
             // initial state
             return 365;
@@ -292,8 +292,8 @@ abstract  class userstatuschecker
         list($sql_condition, $param_condition) = $this->condition_reactivate_sql('tca', 'tc');
         $sql = "SELECT tca.id, tca.suspended, tca.lastaccess, tca.username, tca.deleted, tca.auth
                 FROM {user} u
-                JOIN {tool_cleanupusers} tc ON u.id = tc.id and tc.checker = :checker
                 JOIN {tool_cleanupusers_archive} tca ON u.id = tca.id
+                JOIN {tool_cleanupusers} tc ON u.id = tc.id and tc.checker = :checker
                 WHERE " . $this->get_auth_sql('u.') . "
                     u.suspended = 1
                     AND u.deleted = 0

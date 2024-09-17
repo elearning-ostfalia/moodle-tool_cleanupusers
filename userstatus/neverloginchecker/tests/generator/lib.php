@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Data Generator for the userstatus_timechecker sub-plugin
+ * Data Generator for the userstatus_neverloginchecker sub-plugin
  *
  * @package    userstatus_timechecker
  * @category   test
@@ -31,54 +31,127 @@
  * @copyright  2016/17 Nina Herrmann
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class userstatus_timechecker_generator extends testing_data_generator {
+class userstatus_neverloginchecker_generator extends testing_data_generator {
+
+    private function create_test_user($username, $extra_attributes = []) {
+        $generator = advanced_testcase::getDataGenerator();
+        return $generator->create_user(array_merge(['username' => $username, 'auth' => 'shibboleth'],
+            $extra_attributes));
+    }
+
+    private function archive($user, $when, $username) {
+        $this->insert_into_metadata_table($user, $when);
+        $this->insert_into_archive($user, $username);
+
+    }
+
+    private function insert_into_metadata_table($user, $when) {
+        global $DB;
+        $DB->insert_record_raw('tool_cleanupusers',
+            ['id' => $user->id, 'archived' => true,
+                'timestamp' => $when, 'checker' => 'neverloginchecker'], true, false, true);
+    }
+
+    private function insert_into_archive($user, $username) {
+        global $DB;
+        $DB->insert_record_raw('tool_cleanupusers_archive', ['id' => $user->id, 'auth' => 'shibboleth',
+            'username' => $username,
+            'suspended' => $user->suspended, 'timecreated' => $user->timecreated],
+            true, false, true);
+    }
+
+
+
+
     /**
      * Creates users to test the sub-plugin.
      */
     public function test_create_preparation() {
         global $DB;
         $generator = advanced_testcase::getDataGenerator();
-        $data = [];
-        $mytimestamp = time();
 
-        $user = $generator->create_user(['username' => 'neutraluser', 'lastaccess' => $mytimestamp]);
-        $data['user'] = $user;
+        $yearago = time() - 366 * 86400;
+        $dayago = time() - 86400;
+        $elevendaysago = time() - (86400 * 11);
 
-        $timestamponeyearago = $mytimestamp - 31536000;
-        $userlongnotloggedin = $generator->create_user(['username' => 'userlongnotloggedin',
-            'lastaccess' => $timestamponeyearago]);
-        $data['useroneyearnotlogedin'] = $userlongnotloggedin;
+        // Create users which are not yet handled by this plugin.
+        $this->create_test_user('tu_id_1', ['timecreated' => $dayago]);
+        $this->create_test_user('tu_id_2', ['timecreated' => $dayago]);
+        $this->create_test_user('tu_id_3', ['timecreated' => $dayago]);
+        $this->create_test_user('tu_id_4', ['timecreated' => $dayago]);
 
-        $timestampfifteendays = $mytimestamp - 1296000;
-        $userfifteendays = $generator->create_user(['username' => 'userfifteendays', 'lastaccess' => $timestampfifteendays]);
-        $data['userfifteendays'] = $userfifteendays;
+        // Create user which should be suspended (created one year ago).
+        $this->create_test_user('to_suspend', ['timecreated' => $elevendaysago]);
 
-        // User manually suspended.
-        $oneyearnintydays = $mytimestamp - 39313000;
-        $userarchived = $generator->create_user(['username' => 'userarchivedmanually', 'lastaccess' => $oneyearnintydays,
-            'suspended' => 1]);
-        $data['userarchivedoneyearnintydaysmanually'] = $userarchived;
-        $userarchived2 = $generator->create_user(['username' => 'userarchivedautomatically', 'lastaccess' => $oneyearnintydays,
-            'suspended' => 1]);
-        $DB->insert_record_raw('tool_cleanupusers', ['id' => $userarchived2->id, 'archived' => true,
-            'timestamp' => $oneyearnintydays], true, false, true);
-        $DB->insert_record_raw('tool_cleanupusers_archive', ['id' => $userarchived2->id,
-            'username' => 'userarchivedautomatically',
-            'suspended' => 0, 'lastaccess' => $oneyearnintydays], true, false, true);
-        $data['userarchivedoneyearnintydaysautomatically'] = $userarchived2;
+        // Create users which should NOT be suspended.
+        $this->create_test_user('manually_suspended', ['suspended' => 1]);
+        $this->create_test_user('manually_deleted', ['deleted' => 1]);
 
-        $neverloggedin = $generator->create_user(['username' => 'neverloggedin']);
-        $data['neverloggedin'] = $neverloggedin;
+        // Create users which never logged in.
+        //$this->create_test_user( 'never_logged_in_1', ['lastaccess' => 0]);
+        // $this->create_test_user( 'never_logged_in_2', []);
 
-        // User suspended by the plugin.
-        $tendaysago = $mytimestamp - 864000;
-        $reactivate = $generator->create_user(['username' => 'anonym', 'suspended' => 1]);
-        $DB->insert_record_raw('tool_cleanupusers', ['id' => $reactivate->id, 'archived' => true,
-            'timestamp' => $tendaysago], true, false, true);
-        $DB->insert_record_raw('tool_cleanupusers_archive', ['id' => $reactivate->id, 'username' => 'reactivate',
-            'suspended' => 1, 'lastaccess' => $tendaysago], true, false, true);
-        $data['reactivate'] = $reactivate;
+        // Create user which should be reactivated (current time - timecreated < time to suspend).
+        $reactivate = $this->create_test_user('anonym1', ['firstname' => 'Anonym',
+            'suspended' => 1, 'timecreated' => $dayago]);
+        $this->archive($reactivate, $dayago, 'to_reactivate');
 
-        return $data; // Return the user, course and group objects.
+        // Create users which should NOT be reactivated.
+        $notreactivate1 = $this->create_test_user('to_not_reactivate',
+            ['suspended' => 1, 'timecreated' => $yearago]);
+
+        $this->create_test_user('to_not_reactivate_username_taken',
+            ['suspended' => 1, 'timecreated' => $dayago]);
+
+        $notreactivate2 = $this->create_test_user('anonym2',
+            ['firstname' => 'Anonym', 'suspended' => 1, 'timecreated' => $dayago]);
+        $this->archive($notreactivate2, $dayago, 'to_not_reactivate_username_taken');
+
+        // Incomplete archive data (will not be selected by SQL Join)
+        $notreactivate3 = $this->create_test_user('anonym3',
+            ['firstname' => 'Anonym', 'suspended' => 1, 'timecreated' => $dayago]);
+        $DB->insert_record_raw('tool_cleanupusers', ['id' => $notreactivate3->id, 'archived' => true,
+            'timestamp' => $dayago, 'checker' => 'neverloginchecker'], true, false, true);
+
+        // Incomplete archive data (will not be selected by SQL Join)
+        $notreactivate4 = $this->create_test_user('anonym4',
+            ['firstname' => 'Anonym', 'suspended' => 1, 'timecreated' => $dayago]);
+        $DB->insert_record_raw('tool_cleanupusers_archive', ['id' => $notreactivate4->id, 'auth' => 'shibboleth',
+            'username' => 'to_not_reactivate_entry_missing',
+            'suspended' => 1, 'timecreated' => $dayago], true, false, true);
+
+        $notreactivate5 = $this->create_test_user('anonym5',
+            ['firstname' => 'Anonym', 'suspended' => 1, 'timecreated' => $dayago]);
+
+        // Create user which was suspended with the plugin and should be deleted (time - suspended
+        // >= time to delete).
+        $delete = $this->create_test_user('anonym6',
+            ['firstname' => 'Anonym', 'suspended' => 1, 'timecreated' => $yearago]);
+        $this->archive($delete, $yearago, 'to_delete');
+
+        // Create users which were suspended with the plugin and should NOT be deleted.
+        $notdelete1 = $this->create_test_user('anonym7',
+            ['firstname' => 'Anonym', 'suspended' => 1, 'timecreated' => $elevendaysago]);
+        $this->archive($notdelete1, $dayago, 'to_not_delete_one_day');
+
+        // Incomplete archive data (will not be selected by SQL Join)
+        $notdelete2 = $this->create_test_user('anonym8',
+            ['firstname' => 'Anonym', 'suspended' => 1, 'timecreated' => $elevendaysago]);
+        $DB->insert_record_raw(
+            'tool_cleanupusers',
+            ['id' => $notdelete2->id, 'archived' => true, 'timestamp' => $dayago, 'checker' => 'neverloginchecker'],
+            true,
+            false,
+            true
+        );
+
+        // Incomplete archive data (will not be selected by SQL Join)
+        $notdelete3 = $this->create_test_user('anonym9',
+            ['firstname' => 'Anonym', 'suspended' => 1, 'timecreated' => 0]);
+        $DB->insert_record_raw('tool_cleanupusers_archive', ['id' => $notdelete3->id, 'auth' => 'shibboleth',
+            'username' => 'to_not_delete_entry_missing', 'suspended' => 1, 'lastaccess' => $yearago], true, false, true);
+
+        $notdelete4 = $this->create_test_user('anonym10',
+            ['firstname' => 'Anonym', 'suspended' => 1, 'timecreated' => 0]);
     }
 }

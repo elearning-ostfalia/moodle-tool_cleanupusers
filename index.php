@@ -106,14 +106,16 @@ if (!empty($action) && confirm_sesskey()) {
     }
 }
 
-$enabled =  core_plugin_manager::instance()->get_enabled_plugins("userstatus");
+unset($enabled);
+// $enabled =  core_plugin_manager::instance()->get_enabled_plugins("userstatus");
 // var_dump($enabled);
 
 ////////////////////////////////////////////////////////////////////////////////
 // process actions rnd
 
-
 $content .= $renderer->render_subplugin_table();
+
+$content .= $OUTPUT->heading(get_string('pendingactions', 'tool_cleanupusers'), 2, 'main');
 
 $pluginsenabled =  core_plugin_manager::instance()->get_enabled_plugins("userstatus");
 if (!$pluginsenabled) {

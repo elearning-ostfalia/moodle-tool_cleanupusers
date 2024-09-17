@@ -73,5 +73,5 @@ $string['authmethod_info'] = 'Only users with this authentication method are han
 $string['condition'] = 'Condition';
 $string['suspendtime'] = 'Time until suspension [days]';
 $string['deletetime'] = 'Time until deletion after suspension [days]';
-
+$string['pendingactions'] = 'Pending actions';
 

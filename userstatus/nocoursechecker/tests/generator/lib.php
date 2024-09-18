@@ -70,7 +70,7 @@ class userstatus_nocoursechecker_generator extends testing_data_generator {
 
         $generator = advanced_testcase::getDataGenerator();
         // valid course
-        $active_course = $generator->create_course(['startdate' => $yesterday, 'enddate' => $tomorrow, 'visible' => true]);
+/*        $active_course = $generator->create_course(['startdate' => $yesterday, 'enddate' => $tomorrow, 'visible' => true]);
         $active_endless_course = $generator->create_course(['startdate' => $yesterday, 'visible' => true]);
         $future_course = $generator->create_course(['startdate' => $tomorrow, 'visible' => true]);
         // inactive
@@ -95,7 +95,7 @@ class userstatus_nocoursechecker_generator extends testing_data_generator {
         $generator->enrol_user($to_suspend_2->id, $invisible_course->id);
         // course is in the past
         $to_suspend_3 = $this->create_test_user('to_suspend_3');
-        $generator->enrol_user($to_suspend_3->id, $past_course->id);
+        $generator->enrol_user($to_suspend_3->id, $past_course->id);*/
 
         // Create users which should NOT be suspended as they are suspended by admin user.
         $this->create_test_user('manually_suspended', ['suspended' => 1]);

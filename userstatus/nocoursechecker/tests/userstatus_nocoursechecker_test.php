@@ -24,6 +24,7 @@
 
 namespace userstatus_nocoursechecker;
 use advanced_testcase;
+// use userstatus_nocoursechecker\task\archive_user_task;
 
 /**
  * The class contains a test script for the moodle userstatus_timechecker
@@ -146,8 +147,17 @@ class userstatus_nocoursechecker_test extends advanced_testcase {
 
     public function test_no_course_suspend() {
         $user = $this->init('username');
-        $returnsuspend = $this->checker->get_to_suspend();
-        $this->assertEqualsUsersArrays($returnsuspend, $user);
+        $this->assertEqualsUsersArrays($this->checker->get_to_suspend(), $user);
+    }
+
+    /**
+     * user is already (manually) suspended. Do not handle with this plugin.
+     * @return void
+     */
+    public function test_user_manually_suspended_no_suspend() {
+        $this->init();
+        $user = $this->create_test_user('manually_suspended', ['suspended' => 1]);
+        $this->assertEquals(0, count($this->checker->get_to_suspend()));
     }
 
     public function test_invisible_course_suspend() {
@@ -161,15 +171,39 @@ class userstatus_nocoursechecker_test extends advanced_testcase {
         $this->assertEqualsUsersArrays($returnsuspend, $user);
     }
 
+    public function test_past_course_suspend() {
+        $this->generator = advanced_testcase::getDataGenerator();
+        $past_course = $this->generator->create_course(['startdate' => LAST_MONTH, 'enddate' => YESTERDAY, 'visible' => true]);
+        $user = $this->init('username', $past_course);
+
+        $this->assertEqualsUsersArrays($this->checker->get_to_suspend(), $user);
+    }
+
+    public function test_invisible_course_make_visisble_reactivate() {
+        $this->generator = advanced_testcase::getDataGenerator();
+        $invisible_course = $this->generator->create_course(['startdate' => YESTERDAY, 'visible' => false]);
+        $user = $this->init('username', $invisible_course);
+
+        $this->assertEqualsUsersArrays($this->checker->get_to_suspend(), $user);
+
+        // RUN CRON!!!
+        // $cronjob = new task\archive_user_task();
+        // $cronjob->execute();
+
+        global $DB;
+        $invisible_course->visible = true;
+        $DB->update_record('course', $invisible_course);
+
+        $reactivate = $this->checker->get_to_reactivate();
+        $this->assertEqualsUsersArrays($reactivate, $user);
+    }
+
 
     public function test_locallib() {
         $data = $this->set_up();
         $checker = new nocoursechecker();
 
-        // To suspend.
-        $suspend = ["to_suspend_1", "to_suspend_2", "to_suspend_3"];
-        $returnsuspend = $checker->get_to_suspend();
-        $this->assertEqualsCanonicalizing(array_map(fn($user) => $user->username, $returnsuspend), $suspend);
+        // Handled with single tests
 
         // To reactivate.
         $reactivate = ["to_reactivate"];

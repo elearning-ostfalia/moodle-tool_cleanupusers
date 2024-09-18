@@ -132,8 +132,7 @@ Available at https://github.com/eLearning-TUDarmstadt/moodle-cleanupusers_ldapch
 * Löschen: eine Tabelle für alle, weil das mit einer SQL-Anfrage erledigt werden kann??
   Problem: Vor dem Löschen muss noch getestet werden, ob die Nutzer nicht doch 
   reaktiviert werden müssen und dazu muss der jeweilige Checker befragt werden.
-* Tabelle, mit der man Nutzer manuell reaktivieren kann, falls Prüfungsleistungen
-  zurückgeholt werden müssen
 * Tests
 * Auth_method mit mehreren Werten wird aktuell nicht unterstützt
+* Task zum Löschen abtrennen (damit er standardmäßig aus ist)
 

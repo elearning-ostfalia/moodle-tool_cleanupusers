@@ -39,7 +39,59 @@ use advanced_testcase;
  * @covers \userstatus_timechecker\timechecker::get_to_reactivate()
  *
  */
+
+define('YESTERDAY', (time() - 86400));
+define('TOMORROW', (time() + 86400));
+define('LAST_MONTH', (time() - (86400 * 30)));
+
 class userstatus_nocoursechecker_test extends advanced_testcase {
+    protected $generator = null;
+    protected $checker = null;
+
+    private function create_test_user($username, $extra_attributes = []) {
+        $generator = advanced_testcase::getDataGenerator();
+        return $generator->create_user(array_merge(['username' => $username, 'auth' => 'shibboleth'],
+            $extra_attributes));
+    }
+
+    /**
+     * @param array $returnsuspend
+     * @param \stdClass|null $user
+     * @return array
+     */
+    protected function assertEqualsUsersArrays(array $returnsuspend, ?\stdClass $user)
+    {
+        $this->assertEquals(1, count($returnsuspend));
+
+        $this->assertEqualsCanonicalizing(array_map(fn($user) => $user->username, $returnsuspend), [$user->username]);
+
+        // Compare content
+        $archuser = reset($returnsuspend); // get one and only element from array
+        $array2 = (array)($archuser);
+        $user->checker = "nocoursechecker"; // checker is not contained in user
+        $this->assertEquals($array2, array_intersect_assoc((array)$user, $array2));
+    }
+
+    private function archive($user, $when, $username) {
+        $this->insert_into_metadata_table($user, $when);
+        $this->insert_into_archive($user, $username);
+    }
+
+    private function insert_into_archive($user, $username) {
+        global $DB;
+        $DB->insert_record_raw('tool_cleanupusers_archive', ['id' => $user->id, 'auth' => 'shibboleth',
+            'username' => $username,
+            'suspended' => $user->suspended, 'timecreated' => $user->timecreated],
+            true, false, true);
+    }
+
+    private function insert_into_metadata_table($user, $when) {
+        global $DB;
+        $DB->insert_record_raw('tool_cleanupusers',
+            ['id' => $user->id, 'archived' => true,
+                'timestamp' => $when, 'checker' => 'nocoursechecker'], true, false, true);
+    }
+
     /**
      * Create the data from the generator.
      * @return mixed
@@ -55,11 +107,61 @@ class userstatus_nocoursechecker_test extends advanced_testcase {
         $this->resetAfterTest(true);
         return $data;
     }
-    /**
-     * Function to test the class timechecker.
-     *
-     * @see timechecker
-     */
+
+    protected function init($username = '', $course = null) {
+        if (!$this->generator)
+            $this->generator = advanced_testcase::getDataGenerator();
+        $this->checker = new nocoursechecker();
+        $this->resetAfterTest(true);
+        if (!empty($username)) {
+            $user = $this->create_test_user($username);
+            if ($course != null) {
+                $this->generator->enrol_user($user->id, $course->id);
+            }
+            return $user;
+        }
+        return null;
+    }
+
+    public function test_active_course_no_suspend() {
+        $this->generator = advanced_testcase::getDataGenerator();
+        $active_course = $this->generator->create_course(['startdate' => YESTERDAY, 'enddate' => TOMORROW, 'visible' => true]);
+        $this->init('username', $active_course);
+        $this->assertEquals(0, count($this->checker->get_to_suspend()));
+    }
+
+    public function test_future_course_no_suspend() {
+        $this->generator = advanced_testcase::getDataGenerator();
+        $future_course = $this->generator->create_course(['startdate' => TOMORROW, 'visible' => true]);
+        $this->init('username', $future_course);
+        $this->assertEquals(0, count($this->checker->get_to_suspend()));
+    }
+
+    public function test_open_course_no_suspend() {
+        $this->generator = advanced_testcase::getDataGenerator();
+        $active_endless_course = $this->generator->create_course(['startdate' => YESTERDAY, 'visible' => true]);
+        $this->init('username', $active_endless_course);
+        $this->assertEquals(0, count($this->checker->get_to_suspend()));
+    }
+
+    public function test_no_course_suspend() {
+        $user = $this->init('username');
+        $returnsuspend = $this->checker->get_to_suspend();
+        $this->assertEqualsUsersArrays($returnsuspend, $user);
+    }
+
+    public function test_invisible_course_suspend() {
+        $this->generator = advanced_testcase::getDataGenerator();
+        $invisible_course = $this->generator->create_course(['startdate' => YESTERDAY, 'visible' => false]);
+        $user = $this->init('username', $invisible_course);
+
+        $checker = new nocoursechecker();
+        $returnsuspend = $checker->get_to_suspend();
+
+        $this->assertEqualsUsersArrays($returnsuspend, $user);
+    }
+
+
     public function test_locallib() {
         $data = $this->set_up();
         $checker = new nocoursechecker();

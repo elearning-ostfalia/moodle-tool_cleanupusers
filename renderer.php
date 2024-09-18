@@ -359,10 +359,12 @@ class tool_cleanupusers_renderer extends plugin_renderer_base {
      *
      * @return string
      */
-    public function get_heading() {
-        $output = '';
-        $output .= $this->heading(get_string('pluginname', 'tool_cleanupusers'));
-        return $output;
+    public function get_heading($text = '') {
+        if (!empty($text)) {
+            return $this->heading($text);
+        } else {
+            return $this->heading(get_string('pluginname', 'tool_cleanupusers'));
+        }
     }
 
     /**

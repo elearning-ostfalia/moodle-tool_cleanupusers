@@ -89,21 +89,4 @@ class reactivate_table extends \table_sql {
         else
             return get_string('neverlogged', 'tool_cleanupusers');
     }
-/*
-    public function col_suspend($user) {
-        $url = new \moodle_url('/admin/tool/cleanupusers/handleuser.php',
-            ['userid' => $user->id, 'action' => 'suspend', 'checker' => 'TODO checker']);
-
-        global $OUTPUT;
-        return \html_writer::link(
-            $url,
-            $OUTPUT->pix_icon(
-                't/hide',
-                get_string('hideuser', 'tool_cleanupusers'),
-                'moodle',
-                ['class' => "imggroup-" . $user->id]
-            )
-        );
-
-    } */
 }

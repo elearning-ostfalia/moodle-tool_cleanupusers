@@ -28,28 +28,38 @@ if ($hassiteconfig) {
     // Add own category for plugin's  and subplugins' settings.
     $ADMIN->add('users', new admin_category('tool_cleanupusers', get_string('pluginname', 'tool_cleanupusers')));
 
-/*
-    $settings = new admin_settingpage(manager::PLUGINNAME, get_string('settings', manager::PLUGINNAME));
-    // Log folder.
-    $settings->add(new admin_setting_configtext('tool_cleanupusers/log_folder',
-        "Folder for log files ", // get_string('auth_ldap_bind_dn_key', 'auth_ldap'),
-        "Folder for log files (must exist and be accessible)", // get_string('auth_ldap_bind_dn', 'auth_ldap'),
-        '/var/log/httpd', PARAM_RAW_TRIMMED));
-*/
-
     // Add entry for own settings.
     $ADMIN->add('tool_cleanupusers', new admin_externalpage(
         'cleanupusers',
         get_string('pluginsettingstitle', 'tool_cleanupusers'),
         "$CFG->wwwroot/$CFG->admin/tool/cleanupusers/index.php"
     ));
-    /*
-    // Add entry for own settings.
-    $ADMIN->add('tool_cleanupusers', new admin_externalpage(
-        'Manage never logged in',
-        get_string('neverloggedin', 'tool_cleanupusers'),
-        "$CFG->wwwroot/$CFG->admin/tool/cleanupusers/neverloggedin.php"
-    ));*/
+
+    $settings = new admin_settingpage('tool_cleanupusers_settings', get_string('sett_title', 'tool_cleanupusers'));
+    $settings->add(new admin_setting_configtext(
+        'tool_cleanupusers/suspendusername',
+        get_string('sett_suspendusername', 'tool_cleanupusers'),
+        get_string('sett_suspendusername_description', 'tool_cleanupusers'),
+        get_string('suspendusername', 'tool_cleanupusers'),
+        PARAM_TEXT
+    ));
+    $settings->add(new admin_setting_configtext(
+        'tool_cleanupusers/suspendfirstname',
+        get_string('sett_suspendfirstname', 'tool_cleanupusers'),
+        get_string('sett_suspendfirstname_description', 'tool_cleanupusers'),
+        get_string('suspendfirstname', 'tool_cleanupusers'),
+        PARAM_TEXT
+    ));
+    $settings->add(new admin_setting_configtext(
+        'tool_cleanupusers/suspendlastname',
+        get_string('sett_suspendlastname', 'tool_cleanupusers'),
+        get_string('sett_suspendlastname_description', 'tool_cleanupusers'),
+        '',
+        PARAM_TEXT
+    ));
+
+    $ADMIN->add('tool_cleanupusers', $settings);
+
     // Add entry for users to be archived.
     foreach (core_plugin_manager::instance()->get_enabled_plugins('userstatus') as $plugin) {
         $mysubpluginname = "\\userstatus_" . $plugin . "\\" . $plugin;
@@ -67,6 +77,13 @@ if ($hassiteconfig) {
         'Manage to delete',
         get_string('todelete', 'tool_cleanupusers'),
         "$CFG->wwwroot/$CFG->admin/tool/cleanupusers/todelete.php"
+    ));
+
+    // Add entry for achived users.
+    $ADMIN->add('tool_cleanupusers', new admin_externalpage(
+        'Browse acrhived users',
+        get_string('reactivate', 'tool_cleanupusers'),
+        "$CFG->wwwroot/$CFG->admin/tool/cleanupusers/reactivate.php"
     ));
 
     // Adds an entry for every sub-plugin with a settings.php.

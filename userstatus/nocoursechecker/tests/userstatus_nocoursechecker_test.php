@@ -39,7 +39,7 @@ use advanced_testcase;
  * @covers \userstatus_timechecker\timechecker::get_to_reactivate()
  *
  */
-class userstatus_nocourse_test extends advanced_testcase {
+class userstatus_nocoursechecker_test extends advanced_testcase {
     /**
      * Create the data from the generator.
      * @return mixed

@@ -228,9 +228,11 @@ class archiveduser {
         $cloneuser = new \stdClass();
         $cloneuser->id = $id;
         // Usernames have to be unique therefore the id is used.
-        $cloneuser->username = 'anonym' . $id;
-        $cloneuser->firstname = 'Anonym';
-        $cloneuser->lastname = '';
+        $config = get_config('tool_cleanupusers');
+
+        $cloneuser->username = $config->suspendusername; // 'anonym' . $id;
+        $cloneuser->firstname = $config->suspendfirstname; // 'Anonym';
+        $cloneuser->lastname = $config->suspendlastname; // '';
         $cloneuser->suspended = 1;
         $cloneuser->email = '';
         $cloneuser->phone1 = '';

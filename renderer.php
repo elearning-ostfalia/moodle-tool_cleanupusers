@@ -409,6 +409,7 @@ class tool_cleanupusers_renderer extends plugin_renderer_base {
             if (!empty($user)) {
                 $userinformation = $this->set_user_information_for_table($user, $userinformation, $cleanupusers);
                 $userinformation['Willbe'] = 'Reactivated';
+
                 $url = new moodle_url('/admin/tool/cleanupusers/handleuser.php', ['userid' => $user->id, 'action' => 'reactivate']);
                 $userinformation['link'] = \html_writer::link(
                     $url,

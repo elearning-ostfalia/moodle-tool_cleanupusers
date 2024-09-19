@@ -101,6 +101,16 @@ abstract class userstatus_base_test extends \advanced_testcase
 
     abstract public function typical_scenario_for_suspension() : \stdClass;
 
+    abstract protected function create_checker();
+
+    public function test_more_auth_suspend() {
+        set_config('auth_method', 'email,' . AUTH_METHOD, 'userstatus_nocoursechecker');
+        // Create new checker instance so that configuration will be "reread".
+        $this->checker = $this->create_checker();
+        $user = $this->typical_scenario_for_suspension('username');
+        $this->assertEqualsUsersArrays($this->checker->get_to_suspend(), $user);
+    }
+
     // Common tests for all subplugins
     /**
      * like test_invisible_course_make_visisble_reactivate, but record in tool_cleanupusers is missing
@@ -141,6 +151,15 @@ abstract class userstatus_base_test extends \advanced_testcase
         $user->deleted = 1;
         $DB->update_record('user', $user);
         $this->assertEquals(0, count($this->checker->get_to_suspend()));
+    }
+
+    public function test_no_delete() {
+        $user = $this->typical_scenario_for_suspension();
+        $this->assertEqualsUsersArrays($this->checker->get_to_suspend(), $user);
+        // run cron
+        $cronjob = new \tool_cleanupusers\task\archive_user_task();
+        $cronjob->execute();
+        $this->assertEquals(0, count($this->checker->get_to_delete()));
     }
 
     public function test_delete() {

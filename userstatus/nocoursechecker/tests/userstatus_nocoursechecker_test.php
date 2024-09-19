@@ -85,6 +85,10 @@ final class userstatus_nocoursechecker_test extends \tool_cleanupusers\userstatu
         return $this->create_user_and_enrol('username');
     }
 
+    protected function create_checker() {
+        return new \userstatus_nocoursechecker\nocoursechecker();
+    }
+
     // TESTS
 
     // ---------------------------------------------
@@ -129,14 +133,6 @@ final class userstatus_nocoursechecker_test extends \tool_cleanupusers\userstatu
     // Suspend: scenarios handled by this plugin
     // ---------------------------------------------
     public function test_no_course_suspend() {
-        $user = $this->create_user_and_enrol('username');
-        $this->assertEqualsUsersArrays($this->checker->get_to_suspend(), $user);
-    }
-
-    public function test_no_course_more_auth_suspend() {
-        set_config('auth_method', 'email,' . AUTH_METHOD, 'userstatus_nocoursechecker');
-        // Create new checker instance so that configuration will be "reread".
-        $this->checker = new \userstatus_nocoursechecker\nocoursechecker();
         $user = $this->create_user_and_enrol('username');
         $this->assertEqualsUsersArrays($this->checker->get_to_suspend(), $user);
     }

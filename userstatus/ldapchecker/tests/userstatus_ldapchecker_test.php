@@ -44,8 +44,12 @@ class userstatus_ldapchecker_test extends \tool_cleanupusers\userstatus_base_tes
         set_config('auth_method', AUTH_METHOD, 'userstatus_ldapchecker');
         set_config('deletetime', 365, 'userstatus_ldapchecker');
         $this->generator = advanced_testcase::getDataGenerator();
-        $this->checker = new \userstatus_ldapchecker\ldapchecker(true);
+        $this->checker = $this->create_checker();
         $this->resetAfterTest(true);
+    }
+
+    protected function create_checker() {
+        return new \userstatus_ldapchecker\ldapchecker();
     }
 
     public function typical_scenario_for_reactivation() : \stdClass {

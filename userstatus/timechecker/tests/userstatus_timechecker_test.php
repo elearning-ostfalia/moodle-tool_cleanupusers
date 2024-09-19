@@ -75,6 +75,10 @@ final class userstatus_timechecker_test extends \tool_cleanupusers\userstatus_ba
         return $data;
     }*/
 
+    protected function create_checker() {
+        return new \userstatus_timechecker\timechecker();
+    }
+
     public function typical_scenario_for_reactivation() : \stdClass {
         $user = $this->create_test_user('username', ['lastaccess' => ELEVENDAYSAGO]);
         $this->assertEqualsUsersArrays($this->checker->get_to_suspend(), $user);

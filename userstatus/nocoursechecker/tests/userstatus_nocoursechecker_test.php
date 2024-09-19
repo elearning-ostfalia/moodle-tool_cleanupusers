@@ -43,16 +43,46 @@ use advanced_testcase;
  * get to delete is not handled here as the suplugin is not envolved
  */
 
-class userstatus_nocoursechecker_test extends \tool_cleanupusers\userstatus_base_test {
+final class userstatus_nocoursechecker_test extends \tool_cleanupusers\userstatus_base_test {
 
     protected function setup() : void {
+        $this->generator = advanced_testcase::getDataGenerator();
+        $this->resetAfterTest(true);
         // set enabled plugin for running task
         set_config('userstatus_plugins_enabled', "nocoursechecker");
         set_config('auth_method', AUTH_METHOD, 'userstatus_nocoursechecker');
-        $this->generator = advanced_testcase::getDataGenerator();
         $this->checker = new \userstatus_nocoursechecker\nocoursechecker();
-        $this->resetAfterTest(true);
         // TODO??: set_config('deletetime', 365, 'userstatus_nocoursechcker');
+    }
+
+    /**
+     * precondition: user is enrolled in a course that is invisible
+     *
+     * action: course is set to visible
+     * expect: reactivate user
+     *
+     * @return void
+     * @throws dml_exception
+     * @throws moodle_exception
+     */
+    public function typical_scenario_for_reactivation() : \stdClass {
+        $invisible_course = $this->generator->create_course(['startdate' => YESTERDAY, 'visible' => false]);
+        $user = $this->create_user_and_enrol('username', $invisible_course);
+
+        $this->assertEqualsUsersArrays($this->checker->get_to_suspend(), $user);
+
+        // run cron
+        $cronjob = new \tool_cleanupusers\task\archive_user_task();
+        $cronjob->execute();
+
+        global $DB;
+        $invisible_course->visible = true;
+        $DB->update_record('course', $invisible_course);
+        return $user;
+    }
+
+    public function typical_scenario_for_suspension() : \stdClass {
+        return $this->create_user_and_enrol('username');
     }
 
     // TESTS
@@ -91,7 +121,6 @@ class userstatus_nocoursechecker_test extends \tool_cleanupusers\userstatus_base
      * @return void
      */
     public function test_user_manually_suspended_no_suspend() {
-        $this->create_user_and_enrol();
         $user = $this->create_test_user('manually_suspended', ['suspended' => 1]);
         $this->assertEquals(0, count($this->checker->get_to_suspend()));
     }
@@ -132,30 +161,8 @@ class userstatus_nocoursechecker_test extends \tool_cleanupusers\userstatus_base
     // ---------------------------------------------
     // Reactivate
     // ---------------------------------------------
-    /**
-     * precondition: user is enrolled in a course that is invisible
-     *
-     * action: course is set to visible
-     * expect: reactivate user
-     *
-     * @return void
-     * @throws dml_exception
-     * @throws moodle_exception
-     */
     public function test_invisible_course_make_visisble_reactivate() {
-        $invisible_course = $this->generator->create_course(['startdate' => YESTERDAY, 'visible' => false]);
-        $user = $this->create_user_and_enrol('username', $invisible_course);
-
-        $this->assertEqualsUsersArrays($this->checker->get_to_suspend(), $user);
-
-        // run cron
-        $cronjob = new \tool_cleanupusers\task\archive_user_task();
-        $cronjob->execute();
-
-        global $DB;
-        $invisible_course->visible = true;
-        $DB->update_record('course', $invisible_course);
-
+        $user = $this->typical_scenario_for_reactivation();
         $this->assertEqualsUsersArrays($this->checker->get_to_reactivate(), $user);
     }
 
@@ -187,7 +194,7 @@ class userstatus_nocoursechecker_test extends \tool_cleanupusers\userstatus_base
     }
 
     /**
-     * pre: enrol user in activa course
+     * pre: enrol user in active course
      * action: manually suspend user
      * expect: not reactivated
      *
@@ -205,65 +212,4 @@ class userstatus_nocoursechecker_test extends \tool_cleanupusers\userstatus_base
         $this->assertEquals(0, count($this->checker->get_to_reactivate()));
     }
 
-    /**
-     * like test_invisible_course_make_visisble_reactivate, but record in tool_cleanupusers is missing
-     * @return void
-     * @throws dml_exception
-     * @throws moodle_exception
-     */
-    public function test_incomplete_archive_no_reactivate_1() {
-        $invisible_course = $this->generator->create_course(['startdate' => YESTERDAY, 'visible' => false]);
-        $user = $this->create_user_and_enrol('username', $invisible_course);
-
-        $this->assertEqualsUsersArrays($this->checker->get_to_suspend(), $user);
-
-        // run cron
-        $cronjob = new \tool_cleanupusers\task\archive_user_task();
-        $cronjob->execute();
-
-        global $DB;
-        $invisible_course->visible = true;
-        $DB->update_record('course', $invisible_course);
-        $DB->delete_records('tool_cleanupusers', ['id' => $user->id]); // NEW for test_invisible_course_make_visisble_reactivate
-
-        $this->assertEquals(0, count($this->checker->get_to_reactivate()));
-    }
-
-    public function test_incomplete_archive_no_reactivate_2() {
-        $invisible_course = $this->generator->create_course(['startdate' => YESTERDAY, 'visible' => false]);
-        $user = $this->create_user_and_enrol('username', $invisible_course);
-
-        $this->assertEqualsUsersArrays($this->checker->get_to_suspend(), $user);
-
-        // run cron
-        $cronjob = new \tool_cleanupusers\task\archive_user_task();
-        $cronjob->execute();
-
-        global $DB;
-        $invisible_course->visible = true;
-        $DB->update_record('course', $invisible_course);
-        $DB->delete_records('tool_cleanupusers_archive', ['id' => $user->id]); // NEW for test_invisible_course_make_visisble_reactivate
-
-        $this->assertEquals(0, count($this->checker->get_to_reactivate()));
-    }
-
-    /**
-     * Methodes recommended by moodle to assure database and dataroot is reset.
-     */
-    public function test_deleting() {
-        global $DB;
-        $this->resetAfterTest(true);
-        $DB->delete_records('user');
-        $DB->delete_records('tool_cleanupusers');
-        $this->assertEmpty($DB->get_records('user'));
-        $this->assertEmpty($DB->get_records('tool_cleanupusers'));
-    }
-    /**
-     * Methodes recommended by moodle to assure database is reset.
-     */
-    public function test_user_table_was_reset() {
-        global $DB;
-        $this->assertEquals(2, $DB->count_records('user', []));
-        $this->assertEquals(0, $DB->count_records('tool_cleanupusers', []));
-    }
 }

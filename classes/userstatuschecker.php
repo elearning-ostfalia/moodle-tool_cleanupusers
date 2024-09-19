@@ -163,6 +163,8 @@ abstract  class userstatuschecker
         }
         $users = $DB->get_records_sql($sql, $param_condition);
 
+        $users1 = $DB->get_records('user');
+
         $tosuspend = [];
         foreach ($users as $key => $user) {
             if (!is_siteadmin($user) && !isguestuser($user) && $this->shall_suspend($user)) {

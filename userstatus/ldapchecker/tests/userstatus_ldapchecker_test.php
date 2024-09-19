@@ -48,6 +48,22 @@ class userstatus_ldapchecker_test extends \tool_cleanupusers\userstatus_base_tes
         // TODO??: set_config('deletetime', 365, 'userstatus_nocoursechcker');
     }
 
+    public function typical_scenario_for_reactivation() : \stdClass {
+        $user = $this->create_test_user('username');
+        $this->assertEqualsUsersArrays($this->checker->get_to_suspend(), $user);
+
+        // run cron
+        $cronjob = new \tool_cleanupusers\task\archive_user_task();
+        $cronjob->execute();
+
+        $this->checker->fill_ldap_response_for_testing(["username" => $user->username]);
+        return $user;
+    }
+
+    public function typical_scenario_for_suspension() : \stdClass {
+        return $this->create_test_user('username');
+    }
+
 /*
     protected function set_up() {
         $config = get_config('userstatus_ldapchecker');
@@ -84,14 +100,7 @@ class userstatus_ldapchecker_test extends \tool_cleanupusers\userstatus_base_tes
     // Reactivate
     // ---------------------------------------------
     public function test_not_in_ldap_then_in_ldap_reactivate() {
-        $user = $this->create_test_user('username');
-        $this->assertEqualsUsersArrays($this->checker->get_to_suspend(), $user);
-
-        // run cron
-        $cronjob = new \tool_cleanupusers\task\archive_user_task();
-        $cronjob->execute();
-
-        $this->checker->fill_ldap_response_for_testing(["username" => $user->username]);
+        $user = $this->typical_scenario_for_reactivation();
         $this->assertEqualsUsersArrays($this->checker->get_to_reactivate(), $user);
     }
 
@@ -141,23 +150,4 @@ class userstatus_ldapchecker_test extends \tool_cleanupusers\userstatus_base_tes
     }
     */
 
-    /**
-     * Methods recommended by moodle to assure database and dataroot is reset.
-     */
-    public function test_deleting() {
-        global $DB;
-        $this->resetAfterTest(true);
-        $DB->delete_records('user');
-        $DB->delete_records('tool_cleanupusers');
-        $this->assertEmpty($DB->get_records('user'));
-        $this->assertEmpty($DB->get_records('tool_cleanupusers'));
-    }
-    /**
-     * Methods recommended by moodle to assure database is reset.
-     */
-    public function test_user_table_was_reset() {
-        global $DB;
-        $this->assertEquals(2, $DB->count_records('user', array()));
-        $this->assertEquals(0, $DB->count_records('tool_cleanupusers', array()));
-    }
 }

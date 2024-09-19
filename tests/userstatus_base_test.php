@@ -25,12 +25,15 @@
 
 namespace tool_cleanupusers;
 
-define('YESTERDAY', (time() - 86400));
-define('TOMORROW', (time() + 86400));
-define('LAST_MONTH', (time() - (86400 * 30)));
+define('LAST_MONTH',    (time() - (86400 * 30)));
+define('ELEVENDAYSAGO', (time() - (86400 * 11)));
+define('NINEDAYSAGO',   (time() - (86400 * 9)));
+define('YESTERDAY',     (time() - 86400));
+define('TOMORROW',      (time() + 86400));
+
 define('AUTH_METHOD', 'shibboleth');
 
-class userstatus_base_test extends \advanced_testcase
+abstract class userstatus_base_test extends \advanced_testcase
 {
     protected $generator = null;
     protected $checker = null;
@@ -65,15 +68,12 @@ class userstatus_base_test extends \advanced_testcase
             $extra_attributes));
     }
 
-    protected function create_user_and_enrol($username = '', $course = null) {
-        if (!empty($username)) {
-            $user = $this->create_test_user($username);
-            if ($course != null) {
-                $this->generator->enrol_user($user->id, $course->id);
-            }
-            return $user;
+    protected function create_user_and_enrol($username, $course = null) {
+        $user = $this->create_test_user($username);
+        if ($course != null) {
+            $this->generator->enrol_user($user->id, $course->id);
         }
-        return null;
+        return $user;
     }
 
     protected function archive($user, $when, $username) {
@@ -94,5 +94,71 @@ class userstatus_base_test extends \advanced_testcase
         $DB->insert_record_raw('tool_cleanupusers',
             ['id' => $user->id, 'archived' => true,
                 'timestamp' => $when, 'checker' => 'nocoursechecker'], true, false, true);
+    }
+
+    abstract public function typical_scenario_for_reactivation() : \stdClass;
+
+    abstract public function typical_scenario_for_suspension() : \stdClass;
+
+    // Common tests for all subplugins
+    /**
+     * like test_invisible_course_make_visisble_reactivate, but record in tool_cleanupusers is missing
+     * @return void
+     * @throws dml_exception
+     * @throws moodle_exception
+     */
+    public function test_incomplete_archive_no_reactivate_1() {
+        $user = $this->typical_scenario_for_reactivation();
+        global $DB;
+        $DB->delete_records('tool_cleanupusers', ['id' => $user->id]); // NEW for test_invisible_course_make_visisble_reactivate
+        $this->assertEquals(0, count($this->checker->get_to_reactivate()));
+    }
+
+    public function test_incomplete_archive_no_reactivate_2() {
+        $user = $this->typical_scenario_for_reactivation();
+        global $DB;
+        $DB->delete_records('tool_cleanupusers_archive', ['id' => $user->id]); // NEW for test_invisible_course_make_visisble_reactivate
+        $this->assertEquals(0, count($this->checker->get_to_reactivate()));
+    }
+
+    /**
+     * already manually suspended
+     * @return void
+     * @throws \dml_exception
+     */
+    public function test_already_suspended_not_suspend() {
+        $user = $this->typical_scenario_for_suspension();
+        global $DB;
+        $user->suspended = 1;
+        $DB->update_record('user', $user);
+        $this->assertEquals(0, count($this->checker->get_to_suspend()));
+    }
+
+    public function test_already_deleted_not_suspend() {
+        $user = $this->typical_scenario_for_suspension();
+        global $DB;
+        $user->deleted = 1;
+        $DB->update_record('user', $user);
+        $this->assertEquals(0, count($this->checker->get_to_suspend()));
+    }
+
+    /**
+     * Methodes recommended by moodle to assure database and dataroot is reset.
+     */
+    public function test_deleting(): void {
+        global $DB;
+        $this->resetAfterTest(true);
+        $DB->delete_records('user');
+        $DB->delete_records('tool_cleanupusers');
+        $this->assertEmpty($DB->get_records('user'));
+        $this->assertEmpty($DB->get_records('tool_cleanupusers'));
+    }
+    /**
+     * Methodes recommended by moodle to assure database is reset.
+     */
+    public function test_user_table_was_reset(): void {
+        global $DB;
+        $this->assertEquals(2, $DB->count_records('user', []));
+        $this->assertEquals(0, $DB->count_records('tool_cleanupusers', []));
     }
 }

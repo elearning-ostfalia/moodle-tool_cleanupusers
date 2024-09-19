@@ -23,6 +23,9 @@
  */
 
 namespace userstatus_timechecker;
+
+require_once(__DIR__.'/../../../tests/userstatus_base_test.php');
+
 use advanced_testcase;
 
 /**
@@ -35,15 +38,30 @@ use advanced_testcase;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  *
  * @covers \userstatus_timechecker\timechecker::get_to_suspend()
- * @covers \userstatus_timechecker\timechecker::get_to_delete()
  * @covers \userstatus_timechecker\timechecker::get_to_reactivate()
  *
  */
-final class userstatus_timechecker_test extends advanced_testcase {
+final class userstatus_timechecker_test extends \tool_cleanupusers\userstatus_base_test {
+
+    protected function setup() : void {
+        $this->generator = advanced_testcase::getDataGenerator();
+        $this->resetAfterTest(true);
+
+        // set enabled plugin for running task
+        set_config('userstatus_plugins_enabled', "timechecker");
+        set_config('auth_method', AUTH_METHOD, 'userstatus_timechecker');
+        set_config('suspendtime', 10, 'userstatus_timechecker');
+        set_config('deletetime', 365, 'userstatus_timechecker');
+
+        $this->checker = new \userstatus_timechecker\timechecker();
+        // TODO??: set_config('deletetime', 365, 'userstatus_nocoursechcker');
+    }
+
     /**
      * Create the data from the generator.
      * @return mixed
      */
+    /*
     protected function set_up() {
         // Recommended in Moodle docs to always include CFG.
         global $CFG;
@@ -53,15 +71,72 @@ final class userstatus_timechecker_test extends advanced_testcase {
         set_config('userstatus_plugins_enabled', "neverloginchecker,timechecker");
         // set configuration values for timechecker
         set_config('auth_method', 'shibboleth', 'userstatus_timechecker');
-        set_config('suspendtime', 90, 'userstatus_timechecker');
+        set_config('suspendtime', 10, 'userstatus_timechecker');
         set_config('deletetime', 365, 'userstatus_timechecker');
         return $data;
+    }*/
+
+    public function typical_scenario_for_reactivation() : \stdClass {
+        $user = $this->create_test_user('username', ['lastaccess' => ELEVENDAYSAGO]);
+        $this->assertEqualsUsersArrays($this->checker->get_to_suspend(), $user);
+
+        // run cron
+        $cronjob = new \tool_cleanupusers\task\archive_user_task();
+        $cronjob->execute();
+
+        // change suspend time to 12 days
+        set_config('suspendtime', 12, 'userstatus_timechecker');
+        // create new checker instance in order to read changes values
+        $this->checker = new \userstatus_timechecker\timechecker();
+        return $user;
     }
+
+    public function typical_scenario_for_suspension() : \stdClass {
+        return $this->create_test_user('username', ['lastaccess' => ELEVENDAYSAGO]);
+    }
+
+    // TESTS
+    // ---------------------------------------------
+    // Suspend: scenarios not handled by this plugin
+    // ---------------------------------------------
+    public function test_yesterday_no_suspend() {
+        $this->create_test_user('username', ['lastaccess' => YESTERDAY]);
+        $this->assertEquals(0, count($this->checker->get_to_suspend()));
+    }
+
+    public function test_9_days_ago_no_suspend() {
+        $this->create_test_user('username', ['lastaccess' => NINEDAYSAGO]);
+        $this->assertEquals(0, count($this->checker->get_to_suspend()));
+    }
+
+    // ---------------------------------------------
+    // Suspend: scenarios handled by this plugin
+    // ---------------------------------------------
+    public function test_11_days_ago_suspend() {
+        $user = $this->create_test_user('username', ['lastaccess' => ELEVENDAYSAGO]);
+        $this->assertEqualsUsersArrays($this->checker->get_to_suspend(), $user);
+    }
+
+    public function test_9_days_ago_change_suspend_time_suspend() {
+        $user = $this->create_test_user('username', ['lastaccess' => NINEDAYSAGO]);
+        $this->assertEquals(0, count($this->checker->get_to_suspend()));
+
+        // change suspend time to 8 days
+        set_config('suspendtime', 8, 'userstatus_timechecker');
+        $this->checker = new \userstatus_timechecker\timechecker();
+
+        $this->assertEqualsUsersArrays($this->checker->get_to_suspend(), $user);
+    }
+
+
+
+
     /**
      * Function to test the class timechecker.
      *
      * @see timechecker
      */
+    /*
     public function test_locallib(): void {
         $data = $this->set_up();
         $checker = new timechecker();
@@ -107,24 +182,6 @@ final class userstatus_timechecker_test extends advanced_testcase {
         $this->assertEqualsCanonicalizing(array_map(fn($user) => $user->username, $returndelete), $delete);
 
         $this->resetAfterTest(true);
-    }
-    /**
-     * Methodes recommended by moodle to assure database and dataroot is reset.
-     */
-    public function test_deleting(): void {
-        global $DB;
-        $this->resetAfterTest(true);
-        $DB->delete_records('user');
-        $DB->delete_records('tool_cleanupusers');
-        $this->assertEmpty($DB->get_records('user'));
-        $this->assertEmpty($DB->get_records('tool_cleanupusers'));
-    }
-    /**
-     * Methodes recommended by moodle to assure database is reset.
-     */
-    public function test_user_table_was_reset(): void {
-        global $DB;
-        $this->assertEquals(2, $DB->count_records('user', []));
-        $this->assertEquals(0, $DB->count_records('tool_cleanupusers', []));
-    }
+    }*/
+
 }

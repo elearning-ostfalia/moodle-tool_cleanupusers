@@ -51,8 +51,8 @@ final class userstatus_nocoursechecker_test extends \tool_cleanupusers\userstatu
         // set enabled plugin for running task
         set_config('userstatus_plugins_enabled', "nocoursechecker");
         set_config('auth_method', AUTH_METHOD, 'userstatus_nocoursechecker');
+        set_config('deletetime', 365, 'userstatus_nocoursechecker');
         $this->checker = new \userstatus_nocoursechecker\nocoursechecker();
-        // TODO??: set_config('deletetime', 365, 'userstatus_nocoursechcker');
     }
 
     /**

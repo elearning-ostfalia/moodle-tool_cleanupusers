@@ -25,6 +25,7 @@
 
 namespace tool_cleanupusers;
 
+define('YEARAGO',       (time() - (86400 * 366)));
 define('LAST_MONTH',    (time() - (86400 * 30)));
 define('ELEVENDAYSAGO', (time() - (86400 * 11)));
 define('NINEDAYSAGO',   (time() - (86400 * 9)));
@@ -140,6 +141,25 @@ abstract class userstatus_base_test extends \advanced_testcase
         $user->deleted = 1;
         $DB->update_record('user', $user);
         $this->assertEquals(0, count($this->checker->get_to_suspend()));
+    }
+
+    public function test_delete() {
+        $user = $this->typical_scenario_for_suspension();
+        $this->assertEqualsUsersArrays($this->checker->get_to_suspend(), $user);
+        // run cron
+        $cronjob = new \tool_cleanupusers\task\archive_user_task();
+        $cronjob->execute();
+
+        // Fake: Update timestamp so that it seems as if
+        // the record has been inserted a year ago
+        // => data can be deleted
+        global $DB;
+        $record = new \stdClass();
+        $record->id = $user->id;
+        $record->timestamp = YEARAGO;
+        $DB->update_record_raw('tool_cleanupusers', $record);
+
+        $this->assertEqualsUsersArrays($this->checker->get_to_delete(), $user);
     }
 
     /**

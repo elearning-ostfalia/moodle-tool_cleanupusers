@@ -54,7 +54,6 @@ final class userstatus_timechecker_test extends \tool_cleanupusers\userstatus_ba
         set_config('deletetime', 365, 'userstatus_timechecker');
 
         $this->checker = new \userstatus_timechecker\timechecker();
-        // TODO??: set_config('deletetime', 365, 'userstatus_nocoursechcker');
     }
 
     /**

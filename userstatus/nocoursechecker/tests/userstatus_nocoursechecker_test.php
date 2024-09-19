@@ -22,9 +22,7 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-// namespace userstatus_nocoursechecker;
-// use advanced_testcase;
-// use userstatus_nocoursechecker\task\archive_user_task;
+require_once(__DIR__.'/../../../tests/userstatus_base_test.php');
 
 /**
  * The class contains a test script for the moodle userstatus_nocoursechecker
@@ -46,10 +44,7 @@ define('TOMORROW', (time() + 86400));
 define('LAST_MONTH', (time() - (86400 * 30)));
 define('AUTH_METHOD', 'shibboleth');
 
-class userstatus_nocoursechecker_test extends advanced_testcase {
-
-    protected $generator = null;
-    protected $checker = null;
+class userstatus_nocoursechecker_test extends \tool_cleanupusers\userstatus_base_test {
 
     protected function setup() : void {
         // set enabled plugin for running task
@@ -58,80 +53,8 @@ class userstatus_nocoursechecker_test extends advanced_testcase {
         $this->generator = advanced_testcase::getDataGenerator();
         $this->checker = new \userstatus_nocoursechecker\nocoursechecker();
         $this->resetAfterTest(true);
-        // TODO: set_config('deletetime', 365, 'userstatus_nocoursechcker');
+        // TODO??: set_config('deletetime', 365, 'userstatus_nocoursechcker');
     }
-    private function create_test_user($username, $extra_attributes = []) {
-        $generator = advanced_testcase::getDataGenerator();
-        return $generator->create_user(array_merge(
-            ['username' => $username, 'auth' => AUTH_METHOD],
-            $extra_attributes));
-    }
-
-    /**
-     * @param array $returnsuspend
-     * @param \stdClass|null $user
-     * @return array
-     */
-    protected function assertEqualsUsersArrays(array $returnsuspend, ?\stdClass $user)
-    {
-        $this->assertEquals(1, count($returnsuspend));
-
-        $this->assertEqualsCanonicalizing(array_map(fn($user) => $user->username, $returnsuspend), [$user->username]);
-
-        // Compare content
-        $archuser = reset($returnsuspend); // get one and only element from array
-        $array2 = (array)($archuser);
-        $user->checker = "nocoursechecker"; // checker is not contained in user
-        $this->assertEquals($array2, array_intersect_assoc((array)$user, $array2));
-    }
-
-    private function archive($user, $when, $username) {
-        $this->insert_into_metadata_table($user, $when);
-        $this->insert_into_archive($user, $username);
-    }
-
-    private function insert_into_archive($user, $username) {
-        global $DB;
-        $DB->insert_record_raw('tool_cleanupusers_archive', ['id' => $user->id, 'auth' => 'shibboleth',
-            'username' => $username,
-            'suspended' => $user->suspended, 'timecreated' => $user->timecreated],
-            true, false, true);
-    }
-
-    private function insert_into_metadata_table($user, $when) {
-        global $DB;
-        $DB->insert_record_raw('tool_cleanupusers',
-            ['id' => $user->id, 'archived' => true,
-                'timestamp' => $when, 'checker' => 'nocoursechecker'], true, false, true);
-    }
-
-    /**
-     * Create the data from the generator.
-     * @return mixed
-     */
-    protected function set_up() {
-        // Recommended in Moodle docs to always include CFG.
-        global $CFG;
-        $generator = $this->getDataGenerator()->get_plugin_generator('userstatus_nocoursechecker');
-        $data = $generator->test_create_preparation();
-        set_config('auth_method', 'shibboleth', 'userstatus_nocoursechecker');
-        set_config('deletetime', 10, 'userstatus_nocoursechecker');
-
-        $this->resetAfterTest(true);
-        return $data;
-    }
-
-    protected function create_user_and_enrol($username = '', $course = null) {
-        if (!empty($username)) {
-            $user = $this->create_test_user($username);
-            if ($course != null) {
-                $this->generator->enrol_user($user->id, $course->id);
-            }
-            return $user;
-        }
-        return null;
-    }
-
 
     // TESTS
 

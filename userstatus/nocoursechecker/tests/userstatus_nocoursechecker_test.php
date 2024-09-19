@@ -52,12 +52,12 @@ class userstatus_nocoursechecker_test extends advanced_testcase {
     protected $checker = null;
 
     protected function setup() : void {
-        $this->generator = advanced_testcase::getDataGenerator();
-        $this->checker = new \userstatus_nocoursechecker\nocoursechecker();
-        $this->resetAfterTest(true);
         // set enabled plugin for running task
         set_config('userstatus_plugins_enabled', "nocoursechecker");
         set_config('auth_method', AUTH_METHOD, 'userstatus_nocoursechecker');
+        $this->generator = advanced_testcase::getDataGenerator();
+        $this->checker = new \userstatus_nocoursechecker\nocoursechecker();
+        $this->resetAfterTest(true);
         // TODO: set_config('deletetime', 365, 'userstatus_nocoursechcker');
     }
     private function create_test_user($username, $extra_attributes = []) {
@@ -131,9 +131,23 @@ class userstatus_nocoursechecker_test extends advanced_testcase {
         return null;
     }
 
+
+    // TESTS
+
+    // ---------------------------------------------
+    // Suspend: scenarios not handled by this plugin
+    // ---------------------------------------------
     public function test_active_course_no_suspend() {
         $active_course = $this->generator->create_course(['startdate' => YESTERDAY, 'enddate' => TOMORROW, 'visible' => true]);
         $this->create_user_and_enrol('username', $active_course);
+        $this->assertEquals(0, count($this->checker->get_to_suspend()));
+    }
+
+    public function test_other_auth_method_no_suspend() {
+        $user = $this->create_user_and_enrol('username');
+        global $DB;
+        $user->auth = 'email';
+        $DB->update_record('user', $user);
         $this->assertEquals(0, count($this->checker->get_to_suspend()));
     }
 
@@ -149,11 +163,6 @@ class userstatus_nocoursechecker_test extends advanced_testcase {
         $this->assertEquals(0, count($this->checker->get_to_suspend()));
     }
 
-    public function test_no_course_suspend() {
-        $user = $this->create_user_and_enrol('username');
-        $this->assertEqualsUsersArrays($this->checker->get_to_suspend(), $user);
-    }
-
     /**
      * user is already (manually) suspended. Do not handle with this plugin.
      * @return void
@@ -162,6 +171,22 @@ class userstatus_nocoursechecker_test extends advanced_testcase {
         $this->create_user_and_enrol();
         $user = $this->create_test_user('manually_suspended', ['suspended' => 1]);
         $this->assertEquals(0, count($this->checker->get_to_suspend()));
+    }
+
+    // ---------------------------------------------
+    // Suspend: scenarios handled by this plugin
+    // ---------------------------------------------
+    public function test_no_course_suspend() {
+        $user = $this->create_user_and_enrol('username');
+        $this->assertEqualsUsersArrays($this->checker->get_to_suspend(), $user);
+    }
+
+    public function test_no_course_more_auth_suspend() {
+        set_config('auth_method', 'email,' . AUTH_METHOD, 'userstatus_nocoursechecker');
+        // Create new checker instance so that configuration will be "reread".
+        $this->checker = new \userstatus_nocoursechecker\nocoursechecker();
+        $user = $this->create_user_and_enrol('username');
+        $this->assertEqualsUsersArrays($this->checker->get_to_suspend(), $user);
     }
 
     public function test_invisible_course_suspend() {
@@ -181,6 +206,19 @@ class userstatus_nocoursechecker_test extends advanced_testcase {
         $this->assertEqualsUsersArrays($this->checker->get_to_suspend(), $user);
     }
 
+    // ---------------------------------------------
+    // Reactivate
+    // ---------------------------------------------
+    /**
+     * precondition: user is enrolled in a course that is invisible
+     *
+     * action: course is set to visible
+     * expect: reactivate user
+     *
+     * @return void
+     * @throws dml_exception
+     * @throws moodle_exception
+     */
     public function test_invisible_course_make_visisble_reactivate() {
         $invisible_course = $this->generator->create_course(['startdate' => YESTERDAY, 'visible' => false]);
         $user = $this->create_user_and_enrol('username', $invisible_course);
@@ -195,46 +233,53 @@ class userstatus_nocoursechecker_test extends advanced_testcase {
         $invisible_course->visible = true;
         $DB->update_record('course', $invisible_course);
 
-        $reactivate = $this->checker->get_to_reactivate();
-        $this->assertEqualsUsersArrays($reactivate, $user);
+        $this->assertEqualsUsersArrays($this->checker->get_to_reactivate(), $user);
     }
 
-    public function test_locallib() {
-        $data = $this->set_up();
-        $checker = new \userstatus_nocoursechecker\nocoursechecker();
+    /**
+     * precondition: user is enrolled in a course that is already finished
+     *
+     * action: course enddate is set to future date
+     * expect: reactivate user
+     *
+     * @return void
+     * @throws dml_exception
+     * @throws moodle_exception
+     */
+    public function test_past_course_prolong_reactivate() {
+        $course = $this->generator->create_course(['startdate' => LAST_MONTH, 'enddate' => YESTERDAY, 'visible' => true]);
+        $user = $this->create_user_and_enrol('username', $course);
 
-        // Handled with single tests
+        $this->assertEqualsUsersArrays($this->checker->get_to_suspend(), $user);
 
-        // To reactivate.
-        $reactivate = ["to_reactivate"];
-        $returnreactivate = $checker->get_to_reactivate();
-        $this->assertEqualsCanonicalizing(array_map(fn($user) => $user->username, $returnreactivate), $reactivate);
+        // run cron
+        $cronjob = new \tool_cleanupusers\task\archive_user_task();
+        $cronjob->execute();
 
-        // To delete.
-        $delete = ["to_delete"];
-        $returndelete = $checker->get_to_delete();
-        $this->assertEqualsCanonicalizing(array_map(fn($user) => $user->username, $returndelete), $delete);
+        global $DB;
+        $course->enddate = TOMORROW;
+        $DB->update_record('course', $course);
 
-        // Change configuration
-        set_config('deletetime', 0.5, 'userstatus_neverloginchecker');
-        $newchecker = new nocoursechecker();
+        $this->assertEqualsUsersArrays($this->checker->get_to_reactivate(), $user);
+    }
 
-        // To suspend.
-        $suspend = ["to_suspend", "tu_id_1", "tu_id_2", "tu_id_3", "tu_id_4"];
-        $returnsuspend = $newchecker->get_to_suspend();
-        $this->assertEqualsCanonicalizing(array_map(fn($user) => $user->username, $returnsuspend), $suspend);
+    /**
+     * pre: enrol user in activa course
+     * action: manually suspend user
+     * expect: not reactivated
+     *
+     * @return void
+     * @throws dml_exception
+     */
+    public function test_no_reactivate() {
+        $active_course = $this->generator->create_course(['startdate' => YESTERDAY, 'enddate' => TOMORROW, 'visible' => true]);
+        $user = $this->create_user_and_enrol('username', $active_course);
 
-        // To reactivate.
-        $reactivate = [];
-        $returnreactivate = $newchecker->get_to_reactivate();
-        $this->assertEqualsCanonicalizing(array_map(fn($user) => $user->username, $returnreactivate), $reactivate);
+        global $DB;
+        $user->suspended = 1;
+        $DB->update_record('user', $user);
 
-        // To delete.
-        $delete = ["to_delete", "to_not_delete_one_day", "to_reactivate", "to_not_reactivate_username_taken"];
-        $returndelete = $newchecker->get_to_delete();
-        $this->assertEqualsCanonicalizing(array_map(fn($user) => $user->username, $returndelete), $delete);
-
-        $this->resetAfterTest(true);
+        $this->assertEquals(0, count($this->checker->get_to_reactivate()));
     }
 
     /**

@@ -320,7 +320,7 @@ class ldapchecker extends userstatuschecker { // implements userstatusinterface 
     */
 
     public function fill_ldap_response_for_testing($dummy_ldap) {
-        if ($this->testing) {
+        if ($this->testing || defined('PHPUNIT_COMPOSER_INSTALL')) {
             // only for testing
             $this->lookup = $dummy_ldap;
         }

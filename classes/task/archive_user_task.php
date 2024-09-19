@@ -152,7 +152,7 @@ class archive_user_task extends scheduled_task {
         // However, this would have produced duplicated code.
         // Therefore, checking the intention parameter repeatedly was preferred.
         foreach ($userarray as $key => $user) {
-            if ($user->deleted == 0 && !is_siteadmin($user)) {
+            if ($user->deleted == 0 && !is_siteadmin($user) && !isguestuser($user)) {
                 $changinguser = new archiveduser(
                     $user->id,
                     $user->suspended,

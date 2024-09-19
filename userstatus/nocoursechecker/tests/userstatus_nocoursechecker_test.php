@@ -22,8 +22,8 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace userstatus_nocoursechecker;
-use advanced_testcase;
+// namespace userstatus_nocoursechecker;
+// use advanced_testcase;
 // use userstatus_nocoursechecker\task\archive_user_task;
 
 /**
@@ -44,14 +44,25 @@ use advanced_testcase;
 define('YESTERDAY', (time() - 86400));
 define('TOMORROW', (time() + 86400));
 define('LAST_MONTH', (time() - (86400 * 30)));
+define('AUTH_METHOD', 'shibboleth');
 
 class userstatus_nocoursechecker_test extends advanced_testcase {
+
     protected $generator = null;
     protected $checker = null;
 
+    protected function setup() : void {
+        $this->generator = advanced_testcase::getDataGenerator();
+        $this->checker = new \userstatus_nocoursechecker\nocoursechecker();
+        $this->resetAfterTest(true);
+        // set enabled plugin for running task
+        set_config('userstatus_plugins_enabled', "nocoursechecker");
+        set_config('auth_method', AUTH_METHOD, 'userstatus_nocoursechecker');
+        // TODO: set_config('deletetime', 365, 'userstatus_nocoursechcker');
+    }
     private function create_test_user($username, $extra_attributes = []) {
         $generator = advanced_testcase::getDataGenerator();
-        return $generator->create_user(array_merge(['username' => $username, 'auth' => 'shibboleth'],
+        return $generator->create_user(array_merge(['username' => $username, 'auth' => AUTH_METHOD],
             $extra_attributes));
     }
 
@@ -109,11 +120,7 @@ class userstatus_nocoursechecker_test extends advanced_testcase {
         return $data;
     }
 
-    protected function init($username = '', $course = null) {
-        if (!$this->generator)
-            $this->generator = advanced_testcase::getDataGenerator();
-        $this->checker = new nocoursechecker();
-        $this->resetAfterTest(true);
+    protected function create_user_and_enrol($username = '', $course = null) {
         if (!empty($username)) {
             $user = $this->create_test_user($username);
             if ($course != null) {
@@ -125,28 +132,25 @@ class userstatus_nocoursechecker_test extends advanced_testcase {
     }
 
     public function test_active_course_no_suspend() {
-        $this->generator = advanced_testcase::getDataGenerator();
         $active_course = $this->generator->create_course(['startdate' => YESTERDAY, 'enddate' => TOMORROW, 'visible' => true]);
-        $this->init('username', $active_course);
+        $this->create_user_and_enrol('username', $active_course);
         $this->assertEquals(0, count($this->checker->get_to_suspend()));
     }
 
     public function test_future_course_no_suspend() {
-        $this->generator = advanced_testcase::getDataGenerator();
         $future_course = $this->generator->create_course(['startdate' => TOMORROW, 'visible' => true]);
-        $this->init('username', $future_course);
+        $this->create_user_and_enrol('username', $future_course);
         $this->assertEquals(0, count($this->checker->get_to_suspend()));
     }
 
     public function test_open_course_no_suspend() {
-        $this->generator = advanced_testcase::getDataGenerator();
         $active_endless_course = $this->generator->create_course(['startdate' => YESTERDAY, 'visible' => true]);
-        $this->init('username', $active_endless_course);
+        $this->create_user_and_enrol('username', $active_endless_course);
         $this->assertEquals(0, count($this->checker->get_to_suspend()));
     }
 
     public function test_no_course_suspend() {
-        $user = $this->init('username');
+        $user = $this->create_user_and_enrol('username');
         $this->assertEqualsUsersArrays($this->checker->get_to_suspend(), $user);
     }
 
@@ -155,40 +159,37 @@ class userstatus_nocoursechecker_test extends advanced_testcase {
      * @return void
      */
     public function test_user_manually_suspended_no_suspend() {
-        $this->init();
+        $this->create_user_and_enrol();
         $user = $this->create_test_user('manually_suspended', ['suspended' => 1]);
         $this->assertEquals(0, count($this->checker->get_to_suspend()));
     }
 
     public function test_invisible_course_suspend() {
-        $this->generator = advanced_testcase::getDataGenerator();
         $invisible_course = $this->generator->create_course(['startdate' => YESTERDAY, 'visible' => false]);
-        $user = $this->init('username', $invisible_course);
+        $user = $this->create_user_and_enrol('username', $invisible_course);
 
-        $checker = new nocoursechecker();
+        $checker = new \userstatus_nocoursechecker\nocoursechecker();
         $returnsuspend = $checker->get_to_suspend();
 
         $this->assertEqualsUsersArrays($returnsuspend, $user);
     }
 
     public function test_past_course_suspend() {
-        $this->generator = advanced_testcase::getDataGenerator();
         $past_course = $this->generator->create_course(['startdate' => LAST_MONTH, 'enddate' => YESTERDAY, 'visible' => true]);
-        $user = $this->init('username', $past_course);
+        $user = $this->create_user_and_enrol('username', $past_course);
 
         $this->assertEqualsUsersArrays($this->checker->get_to_suspend(), $user);
     }
 
     public function test_invisible_course_make_visisble_reactivate() {
-        $this->generator = advanced_testcase::getDataGenerator();
         $invisible_course = $this->generator->create_course(['startdate' => YESTERDAY, 'visible' => false]);
-        $user = $this->init('username', $invisible_course);
+        $user = $this->create_user_and_enrol('username', $invisible_course);
 
         $this->assertEqualsUsersArrays($this->checker->get_to_suspend(), $user);
 
-        // RUN CRON!!!
-        // $cronjob = new task\archive_user_task();
-        // $cronjob->execute();
+        // run cron
+        $cronjob = new \tool_cleanupusers\task\archive_user_task();
+        $cronjob->execute();
 
         global $DB;
         $invisible_course->visible = true;
@@ -198,10 +199,9 @@ class userstatus_nocoursechecker_test extends advanced_testcase {
         $this->assertEqualsUsersArrays($reactivate, $user);
     }
 
-
     public function test_locallib() {
         $data = $this->set_up();
-        $checker = new nocoursechecker();
+        $checker = new \userstatus_nocoursechecker\nocoursechecker();
 
         // Handled with single tests
 

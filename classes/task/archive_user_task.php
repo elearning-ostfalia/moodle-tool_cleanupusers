@@ -65,15 +65,6 @@ class archive_user_task extends scheduled_task {
             return true;
         }
 
-/*
-        if (!empty($subplugin = get_config('tool_cleanupusers', 'cleanupusers_subplugin'))) {
-            $mysubpluginname = "\\userstatus_" . $subplugin . "\\" . $subplugin;
-            $userstatuschecker = new $mysubpluginname();
-        } else {
-            $userstatuschecker = new timechecker();
-        }
-*/
-
         foreach ($pluginsenabled as $subplugin => $dir) {
 
             $mysubpluginname = "\\userstatus_" . $subplugin . "\\" . $subplugin;

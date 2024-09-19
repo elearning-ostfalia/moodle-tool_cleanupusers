@@ -139,8 +139,8 @@ abstract  class userstatuschecker
 
     private function get_auth_sql($alias) : string {
         if (empty($this->get_authentication_method()))
-            return '';
-        return $alias . "auth = '" . $this->get_authentication_method() . "' AND ";
+            return ' 1 ';
+        return $alias . "auth = '" . $this->get_authentication_method() . "'  ";
     }
 
     public function get_to_suspend() {
@@ -150,7 +150,7 @@ abstract  class userstatuschecker
         $sql = "SELECT id, suspended, lastaccess, username, deleted, auth
                 FROM {user}
                 WHERE " . $this->get_auth_sql('') . "
-                        suspended = 0
+                    AND suspended = 0
                     AND deleted = 0";
         if (!empty($sql_condition)) {
             $sql .= " AND " . $sql_condition;
@@ -174,8 +174,14 @@ abstract  class userstatuschecker
             }
         }
 
-        if (empty($sql_condition) && (count($users) == count($tosuspend))) {
-            throw new \moodle_exception("warning: all current users shall be suspended => suspension aborted");
+        if (empty($sql_condition) && (count($users) == count($tosuspend)) && (count($users) > 10)) {
+            // Check if number of users to suspend equals number of users matching
+            // the authentication method filter
+            global $DB;
+            $count = $DB->count_records_select('user', $this->get_auth_sql(''));
+            if ($count == count($tosuspend)) {
+                throw new \moodle_exception("warning: all current users shall be suspended => suspension aborted");
+            }
         }
         $this->log("[get_to_suspend] marked " . count($tosuspend) . " users");
         return $tosuspend;
@@ -234,7 +240,7 @@ abstract  class userstatuschecker
                 JOIN {tool_cleanupusers} tc ON u.id = tc.id AND tc.checker = :checker
                 JOIN {tool_cleanupusers_archive} tca ON u.id = tca.id
                 WHERE " . $this->get_auth_sql('u.') . "
-                    u.suspended = 1
+                    AND u.suspended = 1
                     AND u.deleted = 0
                     AND tc.timestamp < :timelimit",
             [
@@ -295,7 +301,7 @@ abstract  class userstatuschecker
                 JOIN {tool_cleanupusers_archive} tca ON u.id = tca.id
                 JOIN {tool_cleanupusers} tc ON u.id = tc.id and tc.checker = :checker
                 WHERE " . $this->get_auth_sql('u.') . "
-                    u.suspended = 1
+                    AND u.suspended = 1
                     AND u.deleted = 0
                     AND tca.username NOT IN
                         (SELECT username FROM {user} WHERE username IS NOT NULL)";

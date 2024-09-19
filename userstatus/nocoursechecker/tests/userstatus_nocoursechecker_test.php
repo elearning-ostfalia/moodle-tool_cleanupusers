@@ -15,10 +15,10 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * The class contains a test script for the moodle userstatus_timechecker
+ * The class contains a test script for the moodle userstatus_nocoursechecker
  *
- * @package    userstatus_timechecker
- * @copyright  2016/17 N Herrmann
+ * @package    userstatus_nocoursechecker
+ * @copyright  2016/17 N Herrmann / 2024 Ostfalia
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -27,18 +27,18 @@
 // use userstatus_nocoursechecker\task\archive_user_task;
 
 /**
- * The class contains a test script for the moodle userstatus_timechecker
+ * The class contains a test script for the moodle userstatus_nocoursechecker
  *
- * @package    userstatus_timechecker
+ * @package    userstatus_nocoursechecker
  * @group      tool_cleanupusers
  * @group      tool_cleanupusers_timechecker
- * @copyright  2016/17 N Herrmann
+ * @copyright  2016/17 N Herrmann / 2024 Ostfalia
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  *
  * @covers \userstatus_timechecker\timechecker::get_to_suspend()
- * @covers \userstatus_timechecker\timechecker::get_to_delete()
  * @covers \userstatus_timechecker\timechecker::get_to_reactivate()
  *
+ * get to delete is not handled here as the suplugin is not envolved
  */
 
 define('YESTERDAY', (time() - 86400));
@@ -62,7 +62,8 @@ class userstatus_nocoursechecker_test extends advanced_testcase {
     }
     private function create_test_user($username, $extra_attributes = []) {
         $generator = advanced_testcase::getDataGenerator();
-        return $generator->create_user(array_merge(['username' => $username, 'auth' => AUTH_METHOD],
+        return $generator->create_user(array_merge(
+            ['username' => $username, 'auth' => AUTH_METHOD],
             $extra_attributes));
     }
 
@@ -278,6 +279,48 @@ class userstatus_nocoursechecker_test extends advanced_testcase {
         global $DB;
         $user->suspended = 1;
         $DB->update_record('user', $user);
+
+        $this->assertEquals(0, count($this->checker->get_to_reactivate()));
+    }
+
+    /**
+     * like test_invisible_course_make_visisble_reactivate, but record in tool_cleanupusers is missing
+     * @return void
+     * @throws dml_exception
+     * @throws moodle_exception
+     */
+    public function test_incomplete_archive_no_reactivate_1() {
+        $invisible_course = $this->generator->create_course(['startdate' => YESTERDAY, 'visible' => false]);
+        $user = $this->create_user_and_enrol('username', $invisible_course);
+
+        $this->assertEqualsUsersArrays($this->checker->get_to_suspend(), $user);
+
+        // run cron
+        $cronjob = new \tool_cleanupusers\task\archive_user_task();
+        $cronjob->execute();
+
+        global $DB;
+        $invisible_course->visible = true;
+        $DB->update_record('course', $invisible_course);
+        $DB->delete_records('tool_cleanupusers', ['id' => $user->id]); // NEW for test_invisible_course_make_visisble_reactivate
+
+        $this->assertEquals(0, count($this->checker->get_to_reactivate()));
+    }
+
+    public function test_incomplete_archive_no_reactivate_2() {
+        $invisible_course = $this->generator->create_course(['startdate' => YESTERDAY, 'visible' => false]);
+        $user = $this->create_user_and_enrol('username', $invisible_course);
+
+        $this->assertEqualsUsersArrays($this->checker->get_to_suspend(), $user);
+
+        // run cron
+        $cronjob = new \tool_cleanupusers\task\archive_user_task();
+        $cronjob->execute();
+
+        global $DB;
+        $invisible_course->visible = true;
+        $DB->update_record('course', $invisible_course);
+        $DB->delete_records('tool_cleanupusers_archive', ['id' => $user->id]); // NEW for test_invisible_course_make_visisble_reactivate
 
         $this->assertEquals(0, count($this->checker->get_to_reactivate()));
     }

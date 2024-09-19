@@ -41,9 +41,9 @@ use advanced_testcase;
  * @covers \tool_cleanupusers\task\archive_user_task::execute()
  *
  */
-class tool_cleanupusers_test extends advanced_testcase {
-    /** Get data from generator.
-     * @return mixed
+final class tool_cleanupusers_test extends advanced_testcase {
+    /**
+     * Get data from generator.
      */
     protected function set_up() {
         // Recommended in Moodle docs to always include CFG.
@@ -73,14 +73,15 @@ class tool_cleanupusers_test extends advanced_testcase {
      * user               | tendaysago           | no                 | no                  | no
      * @see archiveduser
      */
-    public function test_archiveduser_archiveme() {
+    public function test_archiveduser_archiveme(): void {
         global $DB;
         $data = $this->set_up();
         $this->assertNotEmpty($data);
 
         // Users that are archived will be marked as suspended in the user table and transfer their previous suspended
         // status in the tool_cleanupusers table.
-        // Additionally, they will be anonymized in the user table. Firstname will be 'Anonym', Username will be 'anonym + id'.
+        // Additionally, they will be anonymized in the user table. Firstname will be :suspendfirstname,
+        // Username will be ':suspendusername + id'.
 
         $user = new archiveduser(
             $data['user']->id,
@@ -88,8 +89,9 @@ class tool_cleanupusers_test extends advanced_testcase {
             $data['user']->lastaccess,
             $data['user']->realusername,
             $data['user']->deleted,
-            $data['user']->auth,
+            $data['user']->auth
         );
+
         $user->archive_me("checker1");
         $recordtooltable = $DB->get_record('tool_cleanupusers', ['id' => $data['user']->id]);
         $recordshadowtable = $DB->get_record('tool_cleanupusers_archive', ['id' => $data['user']->id]);
@@ -99,8 +101,11 @@ class tool_cleanupusers_test extends advanced_testcase {
         $this->assertEquals('manual', $recordshadowtable->auth);
         $this->assertEquals(1, $recordtooltable->archived);
         $this->assertEquals("checker1", $recordtooltable->checker);
-        $this->assertEquals('Anonym', $recordusertable->firstname);
-        $this->assertEquals('anonym' . $data['user']->id, $recordusertable->username);
+        $this->assertEquals(get_config('tool_cleanupusers', 'suspendfirstname'), $recordusertable->firstname);
+        $this->assertEquals(get_config(
+                'tool_cleanupusers',
+                'suspendusername'
+            ) . $data['user']->id, $recordusertable->username);
 
         $this->resetAfterTest(true);
     }
@@ -113,7 +118,7 @@ class tool_cleanupusers_test extends advanced_testcase {
      *  usersuspendedbyplugin            | oneyearago    | no                 | yes                 | no
      * @see archiveduser
      */
-    public function test_archiveduser_deleteme() {
+    public function test_archiveduser_deleteme(): void {
         global $DB;
         $data = $this->set_up();
         $this->assertNotEmpty($data);
@@ -164,7 +169,7 @@ class tool_cleanupusers_test extends advanced_testcase {
      * usersuspendedbyplugin            | oneyearago    | no                 | yes                 | no
      * @see archiveduser
      */
-    public function test_archiveduser_activateme() {
+    public function test_archiveduser_activateme(): void {
         global $DB;
         $data = $this->set_up();
         $this->assertNotEmpty($data);
@@ -224,7 +229,7 @@ class tool_cleanupusers_test extends advanced_testcase {
      * @throws cleanupusers_exception
      * @throws dml_exception
      */
-    public function test_exception_archiveme() {
+    public function test_exception_archiveme(): void {
         global $DB;
         $data = $this->set_up();
         $this->assertNotEmpty($data);
@@ -257,7 +262,7 @@ class tool_cleanupusers_test extends advanced_testcase {
      * @throws cleanupusers_exception
      * @throws dml_exception
      */
-    public function test_exception_deleteme() {
+    public function test_exception_deleteme(): void {
         global $DB;
         $data = $this->set_up();
         $this->assertNotEmpty($data);
@@ -332,7 +337,7 @@ class tool_cleanupusers_test extends advanced_testcase {
      * @throws cleanupusers_exception
      * @throws dml_exception
      */
-    public function test_exception_activateme() {
+    public function test_exception_activateme(): void {
         global $DB;
         $data = $this->set_up();
         $this->assertNotEmpty($data);
@@ -443,7 +448,7 @@ class tool_cleanupusers_test extends advanced_testcase {
      * @throws dml_exception
      * @throws coding_exception
      */
-    public function test_cronjob() {
+    public function test_cronjob(): void {
         global $DB;
         $data = $this->set_up();
         $this->assertNotEmpty($data);
@@ -455,25 +460,6 @@ class tool_cleanupusers_test extends advanced_testcase {
         $this->assertEquals(get_string('archive_user_task', 'tool_cleanupusers'), $name);
 
         $timestamponeyearago = time() - 31622600;
-        // Creates entries in the tables which will result in an error in the cronjob.
-        $DB->insert_record_raw('tool_cleanupusers', [
-            'id' => 236465,
-            'archived' => true,
-            'timestamp' => $timestamponeyearago,
-            'checker' => 'timechecker'],
-            true, false, true);
-        $DB->insert_record_raw(
-            'tool_cleanupusers_archive', [
-                'id' => 236465,
-                'username' => 'inconsistent',
-                'suspended' => 0,
-                'auth' => 'manual',
-            'lastaccess' => $timestamponeyearago
-            ],
-            true,
-            false,
-            true
-        );
 
         // Run cron-job with timechecker plugin.
         // set_config('cleanupusers_subplugin', 'timechecker', 'tool_cleanupusers');
@@ -502,20 +488,9 @@ class tool_cleanupusers_test extends advanced_testcase {
             'No problems occurred in plugin tool_cleanupusers in the last run.',
             $msg
         );
-        ///////
-/*        $this->assertStringContainsString(
-            'In the last cron-job 1 users caused exception and could not be deleted',
-            $msg
-        );  // User 236465 (from this function) and userdeleted, but deleted users are already filtered.
-        $this->assertStringContainsString(
-            'In the last cron-job 1 users caused exception and could not be suspended',
-            $msg
-        );  // Userinconsistentsuspended.
-        $this->assertStringContainsString(
-            'In the last cron-job 1 users caused exception and could not be reactivated',
-            $msg
-        );  // Originaluser.
-*/        ///////
+        // Userdeleted already filtered.
+        // Userinconsistentsuspended not selected by timechecker.
+        // Originaluser not selected by timechecker.
 
         // Users not changed by the Cronjob.
         $recordusertable = $DB->get_record('user', ['id' => $data['user']->id]);
@@ -538,7 +513,10 @@ class tool_cleanupusers_test extends advanced_testcase {
         $this->assert_user_equals($data['useroneyearnotloggedin'], $recordtooltable2);
         $this->assertEquals(1, $recordusertable->suspended);
         $this->assertEquals(0, $recordtooltable2->suspended);
-        $this->assertEquals('anonym' . $data['useroneyearnotloggedin']->id, $recordusertable->username);
+        $this->assertEquals(get_config(
+                'tool_cleanupusers',
+                'suspendusername'
+            ) . $data['useroneyearnotloggedin']->id, $recordusertable->username);
         $this->assertEquals(0, $recordusertable->deleted);
 
         // User is deleted.
@@ -602,13 +580,12 @@ class tool_cleanupusers_test extends advanced_testcase {
      *
      * @see event\deprovisionusercronjob_completed
      */
-    public function test_logging() {
+    public function test_logging(): void {
         $data = $this->set_up();
         $this->assertNotEmpty($data);
         $timestamp = time();
 
         $eventsink = $this->redirectEvents();
-
         // set_config('cleanupusers_subplugin', 'timechecker', 'tool_cleanupusers');
         $cronjob = new task\archive_user_task();
         $cronjob->execute();
@@ -633,7 +610,7 @@ class tool_cleanupusers_test extends advanced_testcase {
     /**
      * Methods recommended by moodle to assure database and dataroot is reset.
      */
-    public function test_deleting() {
+    public function test_deleting(): void {
         global $DB;
         $this->resetAfterTest(true);
         $DB->delete_records('user');
@@ -645,7 +622,7 @@ class tool_cleanupusers_test extends advanced_testcase {
     /**
      * Methods recommended by moodle to assure database is reset.
      */
-    public function test_user_table_was_reset() {
+    public function test_user_table_was_reset(): void {
         global $DB;
         $this->assertEquals(2, $DB->count_records('user', []));
         $this->assertEquals(0, $DB->count_records('tool_cleanupusers', []));

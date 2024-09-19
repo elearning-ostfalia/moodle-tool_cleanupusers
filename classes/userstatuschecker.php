@@ -139,7 +139,7 @@ abstract  class userstatuschecker
 
     private function get_auth_sql($alias) : string {
         if (empty($this->get_authentication_method()))
-            return ' 1 ';
+            return ' true ';
         // In case there are more authentication methods selected
         // the sql string will be e.g.
         // "(u.auth = 'email' or u.auth = 'ldap')"

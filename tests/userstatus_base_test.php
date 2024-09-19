@@ -1,6 +1,34 @@
 <?php
+// This file is part of Moodle - http://moodle.org/
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
+/**
+ * The class contains a base class for the moodle userstatus_xxx classes
+ *
+ * @package    userstatus_base_test
+ * @copyright  2024 Ostfalia
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+
 
 namespace tool_cleanupusers;
+
+define('YESTERDAY', (time() - 86400));
+define('TOMORROW', (time() + 86400));
+define('LAST_MONTH', (time() - (86400 * 30)));
+define('AUTH_METHOD', 'shibboleth');
 
 class userstatus_base_test extends \advanced_testcase
 {
@@ -22,7 +50,11 @@ class userstatus_base_test extends \advanced_testcase
         $array2 = (array)($archuser);
         $checker = get_class($this->checker);
         // strip namespace from checker class
-        $checker = substr($checker, strlen("userstatus_nocoursechecker\\"));
+        $index = strpos($checker, "\\");
+        if ($index === false)
+            throw new \coding_exception("cannot determin namespace of " . $checker);
+
+        $checker = substr($checker, $index + 1);
         $user->checker = $checker; // checker is not contained in user => add for check
         $this->assertEquals($array2, array_intersect_assoc((array)$user, $array2));
     }

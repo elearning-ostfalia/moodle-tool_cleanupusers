@@ -23,7 +23,11 @@
  */
 
 namespace userstatus_neveloginchecker;
-use userstatus_neverloginchecker\neverloginchecker;
+
+require_once(__DIR__.'/../../../tests/userstatus_base_test.php');
+
+
+// use userstatus_neverloginchecker\neverloginchecker;
 
 use advanced_testcase;
 
@@ -37,37 +41,158 @@ use advanced_testcase;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  *
  * @covers \userstatus_neveloginchecker\neverloginchecker::get_to_suspend()
- * @covers \userstatus_neveloginchecker\neverloginchecker::get_to_delete()
  * @covers \userstatus_neveloginchecker\neverloginchecker::get_to_reactivate()
  *
  */
-class userstatus_neverloginchecker_test extends advanced_testcase {
-    /**
-     * Create the data from the generator.
-     * @return mixed
-     */
-    protected function set_up() {
-        // Recommended in Moodle docs to always include CFG.
-        global $CFG;
-        $generator = $this->getDataGenerator()->get_plugin_generator('userstatus_neverloginchecker');
-        $data = $generator->test_create_preparation();
+class userstatus_neverloginchecker_test extends \tool_cleanupusers\userstatus_base_test {
 
+    protected function setup() : void {
+        // set enabled plugin for running task
         set_config('userstatus_plugins_enabled', "neverloginchecker");
-        // set configuration values for neverloginchecker
-        set_config('auth_method', 'shibboleth', 'userstatus_neverloginchecker');
+        set_config('auth_method', AUTH_METHOD, 'userstatus_neverloginchecker');
         set_config('suspendtime', 10, 'userstatus_neverloginchecker');
         set_config('deletetime', 365, 'userstatus_neverloginchecker');
-
+        $this->generator = advanced_testcase::getDataGenerator();
+        $this->checker = new \userstatus_neverloginchecker\neverloginchecker();
         $this->resetAfterTest(true);
-        return $data;
+        // TODO??: set_config('deletetime', 365, 'userstatus_nocoursechcker');
     }
+
+    // TESTS
+
+    // ---------------------------------------------
+    // Suspend: scenarios not handled by this plugin
+    // ---------------------------------------------
+    public function test_yesterday_no_suspend() {
+        $this->create_test_user('username', ['timecreated' => YESTERDAY]);
+        $this->assertEquals(0, count($this->checker->get_to_suspend()));
+    }
+
+    public function test_9_days_ago_no_suspend() {
+        $ninedaysago = time() - (86400 * 9);
+        $this->create_test_user('username', ['timecreated' => $ninedaysago]);
+        $this->assertEquals(0, count($this->checker->get_to_suspend()));
+    }
+
+    /**
+     * already manually suspended
+     * @return void
+     * @throws \dml_exception
+     */
+    public function test_11_days_ago_already_suspended_not_suspend() {
+        $elevendaysago = time() - (86400 * 11);
+        $user = $this->create_test_user('username', ['timecreated' => $elevendaysago]);
+        global $DB;
+        $user->suspended = 1;
+        $DB->update_record('user', $user);
+        $this->assertEquals(0, count($this->checker->get_to_suspend()));
+    }
+
+    public function test_11_days_ago_already_deleted_not_suspend() {
+        $elevendaysago = time() - (86400 * 11);
+        $user = $this->create_test_user('username', ['timecreated' => $elevendaysago]);
+        global $DB;
+        $user->deleted = 1;
+        $DB->update_record('user', $user);
+        $this->assertEquals(0, count($this->checker->get_to_suspend()));
+    }
+
+    // ---------------------------------------------
+    // Suspend: scenarios handled by this plugin
+    // ---------------------------------------------
+    public function test_11_days_ago_suspend() {
+        $elevendaysago = time() - (86400 * 11);
+        $user = $this->create_test_user('username', ['timecreated' => $elevendaysago]);
+        $this->assertEqualsUsersArrays($this->checker->get_to_suspend(), $user);
+    }
+
+    public function test_9_days_ago_change_suspend_time_suspend() {
+        $ninedaysago = time() - (86400 * 9);
+        $user = $this->create_test_user('username', ['timecreated' => $ninedaysago]);
+        $this->assertEquals(0, count($this->checker->get_to_suspend()));
+
+        // change suspend time to 8 days
+        set_config('suspendtime', 8, 'userstatus_neverloginchecker');
+        $this->checker = new \userstatus_neverloginchecker\neverloginchecker();
+
+        $this->assertEqualsUsersArrays($this->checker->get_to_suspend(), $user);
+    }
+
+    // ---------------------------------------------
+    // Reactivate
+    // ---------------------------------------------
+    public function test_change_suspend_time_reactivate() {
+        $elevendaysago = time() - (86400 * 11);
+        $user = $this->create_test_user('username', ['timecreated' => $elevendaysago]);
+        $this->assertEqualsUsersArrays($this->checker->get_to_suspend(), $user);
+
+        // run cron
+        $cronjob = new \tool_cleanupusers\task\archive_user_task();
+        $cronjob->execute();
+
+        // change suspend time to 12 days
+        set_config('suspendtime', 12, 'userstatus_neverloginchecker');
+        // create new checker instance in order to read changes values
+        $this->checker = new \userstatus_neverloginchecker\neverloginchecker();
+
+        $this->assertEqualsUsersArrays($this->checker->get_to_reactivate(), $user);
+    }
+
+    /**
+     * fake an inconsistent database with missing record in archive table
+     * @return void
+     * @throws \coding_exception
+     * @throws \dml_exception
+     * @throws \moodle_exception
+     */
+    public function test_change_suspend_time_incomplete_no_reactivate_1() {
+        $elevendaysago = time() - (86400 * 11);
+        $user = $this->create_test_user('username', ['timecreated' => $elevendaysago]);
+        $this->assertEqualsUsersArrays($this->checker->get_to_suspend(), $user);
+
+        // run cron
+        $cronjob = new \tool_cleanupusers\task\archive_user_task();
+        $cronjob->execute();
+
+        global $DB;
+        $DB->delete_records('tool_cleanupusers', ['id' => $user->id]); // NEW for test_invisible_course_make_visisble_reactivate
+
+        // change suspend time to 12 days
+        set_config('suspendtime', 12, 'userstatus_neverloginchecker');
+        // create new checker instance in order to read changes values
+        $this->checker = new \userstatus_neverloginchecker\neverloginchecker();
+
+        $this->assertEquals(0, count($this->checker->get_to_reactivate()));
+    }
+
+    public function test_change_suspend_time_incomplete_no_reactivate_2() {
+        $elevendaysago = time() - (86400 * 11);
+        $user = $this->create_test_user('username', ['timecreated' => $elevendaysago]);
+        $this->assertEqualsUsersArrays($this->checker->get_to_suspend(), $user);
+
+        // run cron
+        $cronjob = new \tool_cleanupusers\task\archive_user_task();
+        $cronjob->execute();
+
+        global $DB;
+        $DB->delete_records('tool_cleanupusers_archive', ['id' => $user->id]); // NEW for test_invisible_course_make_visisble_reactivate
+
+        // change suspend time to 12 days
+        set_config('suspendtime', 12, 'userstatus_neverloginchecker');
+        // create new checker instance in order to read changes values
+        $this->checker = new \userstatus_neverloginchecker\neverloginchecker();
+
+        $this->assertEquals(0, count($this->checker->get_to_reactivate()));
+    }
+
     /**
      * Function to test the class timechecker.
      *
      * @see timechecker
      */
+    /*
     public function test_locallib() {
-        $data = $this->set_up();
+//        $data = $this->set_up();
         $checker = new neverloginchecker();
 
         // To suspend.
@@ -107,6 +232,7 @@ class userstatus_neverloginchecker_test extends advanced_testcase {
 
         $this->resetAfterTest(true);
     }
+    */
     /**
      * Methodes recommended by moodle to assure database and dataroot is reset.
      */

@@ -22,7 +22,11 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+namespace userstatus_nocoursechecker;
+
 require_once(__DIR__.'/../../../tests/userstatus_base_test.php');
+
+use advanced_testcase;
 
 /**
  * The class contains a test script for the moodle userstatus_nocoursechecker
@@ -38,11 +42,6 @@ require_once(__DIR__.'/../../../tests/userstatus_base_test.php');
  *
  * get to delete is not handled here as the suplugin is not envolved
  */
-
-define('YESTERDAY', (time() - 86400));
-define('TOMORROW', (time() + 86400));
-define('LAST_MONTH', (time() - (86400 * 30)));
-define('AUTH_METHOD', 'shibboleth');
 
 class userstatus_nocoursechecker_test extends \tool_cleanupusers\userstatus_base_test {
 

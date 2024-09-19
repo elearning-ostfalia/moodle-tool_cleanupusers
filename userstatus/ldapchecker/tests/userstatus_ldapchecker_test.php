@@ -95,7 +95,7 @@ class userstatus_ldapchecker_test extends \tool_cleanupusers\userstatus_base_tes
     }
 
     public function test_in_ldap_no_suspend() {
-        $this->create_test_user('username');
+        $user = $this->create_test_user('username');
         $this->checker->fill_ldap_response_for_testing(["username" => 1]);
         $this->assertEquals(0, count($this->checker->get_to_suspend()));
     }

@@ -24,7 +24,9 @@
  */
 use userstatus_ldapchecker\ldapchecker;
 
-defined('MOODLE_INTERNAL') || die();
+require_once(__DIR__.'/../../../tests/userstatus_base_test.php');
+
+// use advanced_testcase;
 
 /**
  * The class contains a test script for the moodle userstatus_ldapchecker
@@ -34,8 +36,19 @@ defined('MOODLE_INTERNAL') || die();
  * @copyright  2016/17 N Herrmann
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class userstatus_ldapchecker_test extends advanced_testcase {
+class userstatus_ldapchecker_test extends \tool_cleanupusers\userstatus_base_test {
 
+    protected function setup() : void {
+        // set enabled plugin for running task
+        set_config('userstatus_plugins_enabled', "ldapchecker");
+        set_config('auth_method', AUTH_METHOD, 'userstatus_ldapchecker');
+        $this->generator = advanced_testcase::getDataGenerator();
+        $this->checker = new \userstatus_ldapchecker\ldapchecker(true);
+        $this->resetAfterTest(true);
+        // TODO??: set_config('deletetime', 365, 'userstatus_nocoursechcker');
+    }
+
+/*
     protected function set_up() {
         $config = get_config('userstatus_ldapchecker');
         $config->deletetime = 356; // Set time for deleting users in days
@@ -45,11 +58,50 @@ class userstatus_ldapchecker_test extends advanced_testcase {
         $this->resetAfterTest(true);
         return $data;
     }
+*/
+    // TESTS
+
+    // ---------------------------------------------
+    // Suspend
+    // ---------------------------------------------
+    public function test_not_in_ldap_suspend() {
+        $user = $this->create_test_user('username');
+        $this->assertEqualsUsersArrays($this->checker->get_to_suspend(), $user);
+    }
+
+    public function test_other_auth_no_suspend() {
+        $this->create_test_user('username', ['auth' => 'email']);
+        $this->assertEquals(0, count($this->checker->get_to_suspend()));
+    }
+
+    public function test_in_ldap_no_suspend() {
+        $this->create_test_user('username');
+        $this->checker->fill_ldap_response_for_testing(["username" => 1]);
+        $this->assertEquals(0, count($this->checker->get_to_suspend()));
+    }
+
+    // ---------------------------------------------
+    // Reactivate
+    // ---------------------------------------------
+    public function test_not_in_ldap_then_in_ldap_reactivate() {
+        $user = $this->create_test_user('username');
+        $this->assertEqualsUsersArrays($this->checker->get_to_suspend(), $user);
+
+        // run cron
+        $cronjob = new \tool_cleanupusers\task\archive_user_task();
+        $cronjob->execute();
+
+        $this->checker->fill_ldap_response_for_testing(["username" => $user->username]);
+        $this->assertEqualsUsersArrays($this->checker->get_to_reactivate(), $user);
+    }
+
+
     /**
      * Function to test the class ldapchecker.
      *
      * @see ldapchecker
      */
+    /*
     public function test_locallib() {
         $deleteduser_by_plugin = $this->set_up();
 
@@ -87,6 +139,8 @@ class userstatus_ldapchecker_test extends advanced_testcase {
         $this->resetAfterTest(true);
 
     }
+    */
+
     /**
      * Methods recommended by moodle to assure database and dataroot is reset.
      */

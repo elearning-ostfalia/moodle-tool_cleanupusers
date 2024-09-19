@@ -61,7 +61,7 @@ class ldapchecker extends userstatuschecker { // implements userstatusinterface 
 
     private function init() {
         // Only connect to LDAP if we are not in testing case
-        if ($this->testing === false) {
+        if ($this->testing === false && !defined('PHPUNIT_COMPOSER_INSTALL')) {
 
             $ldap = ldap_connect($this->config->host_url) or die("Could not connect to $this->config->host_url");
 
@@ -99,6 +99,9 @@ class ldapchecker extends userstatuschecker { // implements userstatusinterface 
 
 
     private function is_initialised() : bool {
+        if (defined('PHPUNIT_COMPOSER_INSTALL')) {
+            return true;
+        }
         if (count($this->lookup) == 0) {
             $this->init();
             if (count($this->lookup) == 0) {
@@ -317,7 +320,10 @@ class ldapchecker extends userstatuschecker { // implements userstatusinterface 
     */
 
     public function fill_ldap_response_for_testing($dummy_ldap) {
-        $this->lookup = $dummy_ldap;
+        if ($this->testing) {
+            // only for testing
+            $this->lookup = $dummy_ldap;
+        }
     }
 
 }

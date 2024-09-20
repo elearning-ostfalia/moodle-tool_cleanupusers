@@ -502,6 +502,7 @@ abstract class userstatus_base_test extends \advanced_testcase
 
         $this->assertEqualsUsersArrays($this->checker->get_to_delete(), $user);
 
+        // Fake: manually suspended user who fulfills delete condition
         $DB->delete_records('tool_cleanupusers_archive', ['id' => $user->id]);
         $DB->delete_records('tool_cleanupusers', ['id' => $user->id]);
         $this->assertEquals(0, count($this->checker->get_to_delete()));

@@ -54,7 +54,6 @@ class userstatus_neverloginchecker_test extends \tool_cleanupusers\userstatus_ba
         $this->generator = advanced_testcase::getDataGenerator();
         $this->checker = new \userstatus_neverloginchecker\neverloginchecker();
         $this->resetAfterTest(true);
-        // TODO??: set_config('deletetime', 365, 'userstatus_nocoursechcker');
     }
 
     protected function create_checker() {
@@ -104,7 +103,7 @@ class userstatus_neverloginchecker_test extends \tool_cleanupusers\userstatus_ba
     // ---------------------------------------------
     // Suspend: scenarios handled by this plugin
     // ---------------------------------------------
-    public function test_9_days_ago_change_suspend_time_suspend() {
+    public function test_change_suspend_time() {
         $user = $this->create_test_user('username', ['timecreated' => NINEDAYSAGO]);
         $this->assertEquals(0, count($this->checker->get_to_suspend()));
 
@@ -113,56 +112,16 @@ class userstatus_neverloginchecker_test extends \tool_cleanupusers\userstatus_ba
         $this->checker = new \userstatus_neverloginchecker\neverloginchecker();
 
         $this->assertEqualsUsersArrays($this->checker->get_to_suspend(), $user);
+
+        $cronjob = new \tool_cleanupusers\task\archive_user_task();
+        $cronjob->execute();
+
+        // change suspend time to 12 days
+        set_config('suspendtime', 12, 'userstatus_neverloginchecker');
+        $this->checker = new \userstatus_neverloginchecker\neverloginchecker();
+
+        $this->assertEquals(0, count($this->checker->get_to_suspend()));
+        $this->assertEqualsUsersArrays($this->checker->get_to_reactivate(), $user);
     }
-
-
-    /**
-     * Function to test the class timechecker.
-     *
-     * @see timechecker
-     */
-    /*
-    public function test_locallib() {
-//        $data = $this->set_up();
-        $checker = new neverloginchecker();
-
-        // To suspend.
-        $suspend = ["to_suspend"];
-        $returnsuspend = $checker->get_to_suspend();
-        $this->assertEqualsCanonicalizing(array_map(fn($user) => $user->username, $returnsuspend), $suspend);
-
-        // To reactivate.
-        $reactivate = ["to_reactivate"];
-        $returnreactivate = $checker->get_to_reactivate();
-        $this->assertEqualsCanonicalizing(array_map(fn($user) => $user->username, $returnreactivate), $reactivate);
-
-        // To delete.
-        $delete = ["to_delete"];
-        $returndelete = $checker->get_to_delete();
-        $this->assertEqualsCanonicalizing(array_map(fn($user) => $user->username, $returndelete), $delete);
-
-        // Change configuration
-        set_config('suspendtime', 0.5, 'userstatus_neverloginchecker');
-        set_config('deletetime', 0.5, 'userstatus_neverloginchecker');
-        $newchecker = new neverloginchecker();
-
-        // To suspend.
-        $suspend = ["to_suspend", "tu_id_1", "tu_id_2", "tu_id_3", "tu_id_4"];
-        $returnsuspend = $newchecker->get_to_suspend();
-        $this->assertEqualsCanonicalizing(array_map(fn($user) => $user->username, $returnsuspend), $suspend);
-
-        // To reactivate.
-        $reactivate = [];
-        $returnreactivate = $newchecker->get_to_reactivate();
-        $this->assertEqualsCanonicalizing(array_map(fn($user) => $user->username, $returnreactivate), $reactivate);
-
-        // To delete.
-        $delete = ["to_delete", "to_not_delete_one_day", "to_reactivate", "to_not_reactivate_username_taken"];
-        $returndelete = $newchecker->get_to_delete();
-        $this->assertEqualsCanonicalizing(array_map(fn($user) => $user->username, $returndelete), $delete);
-
-        $this->resetAfterTest(true);
-    }
-    */
 
 }

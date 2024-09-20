@@ -244,6 +244,18 @@ abstract class userstatus_base_test extends \advanced_testcase
         $this->assertFalse($record);
     }
 
+
+    public function test_reactivate_username_already_exists_no_reactivate() {
+        $user = $this->typical_scenario_for_reactivation();
+        $this->assertEqualsUsersArrays($this->checker->get_to_reactivate(), $user);
+
+        $user1 = $this->create_test_user($user->username, ['firstname' => $user->firstname,
+            'lastname' => $user->lastname, 'email' => $user->email]);
+
+        // user will not be reactivated!
+        $this->assertEquals(0, count($this->checker->get_to_reactivate()));
+    }
+
     /**
      * like test_invisible_course_make_visisble_reactivate, but record in tool_cleanupusers is missing
      * @return void
@@ -261,6 +273,14 @@ abstract class userstatus_base_test extends \advanced_testcase
         $user = $this->typical_scenario_for_reactivation();
         global $DB;
         $DB->delete_records('tool_cleanupusers_archive', ['id' => $user->id]); // NEW for test_invisible_course_make_visisble_reactivate
+        $this->assertEquals(0, count($this->checker->get_to_reactivate()));
+    }
+
+    public function test_incomplete_archive_no_reactivate_3() {
+        $user = $this->typical_scenario_for_reactivation();
+        global $DB;
+        $DB->delete_records('tool_cleanupusers_archive', ['id' => $user->id]); // NEW for test_invisible_course_make_visisble_reactivate
+        $DB->delete_records('tool_cleanupusers', ['id' => $user->id]); // NEW for test_invisible_course_make_visisble_reactivate
         $this->assertEquals(0, count($this->checker->get_to_reactivate()));
     }
 
@@ -323,7 +343,67 @@ abstract class userstatus_base_test extends \advanced_testcase
         $record = $DB->get_record('user', ['id' => $user->id]);
         $this->assertEquals(1, $record->deleted);
 
-        // Check that no user data is left over.
+        // Check that no user data remains.
+        $this->assertStringNotContainsStringIgnoringCase($user->username, $record->username);
+        $this->assertStringNotContainsStringIgnoringCase($user->username, $record->firstname);
+        $this->assertStringNotContainsStringIgnoringCase($user->username, $record->lastname);
+        $this->assertStringNotContainsStringIgnoringCase($user->username, $record->email);
+
+        $this->assertStringNotContainsStringIgnoringCase($user->firstname, $record->username);
+        $this->assertStringNotContainsStringIgnoringCase($user->firstname, $record->firstname);
+        $this->assertStringNotContainsStringIgnoringCase($user->firstname, $record->lastname);
+        $this->assertStringNotContainsStringIgnoringCase($user->firstname, $record->email);
+
+        $this->assertStringNotContainsStringIgnoringCase($user->lastname, $record->username);
+        $this->assertStringNotContainsStringIgnoringCase($user->lastname, $record->firstname);
+        $this->assertStringNotContainsStringIgnoringCase($user->lastname, $record->lastname);
+        $this->assertStringNotContainsStringIgnoringCase($user->lastname, $record->email);
+
+        $this->assertStringNotContainsStringIgnoringCase($user->email, $record->username);
+        $this->assertStringNotContainsStringIgnoringCase($user->email, $record->firstname);
+        $this->assertStringNotContainsStringIgnoringCase($user->email, $record->lastname);
+        $this->assertStringNotContainsStringIgnoringCase($user->email, $record->email);
+    }
+
+    public function test_duplicate_username_delete() {
+        $user = $this->typical_scenario_for_suspension();
+        $this->assertEqualsUsersArrays($this->checker->get_to_suspend(), $user);
+        // run cron
+        $cronjob = new \tool_cleanupusers\task\archive_user_task();
+        $cronjob->execute();
+
+        // Fake: Update timestamp so that it seems as if
+        // the record has been inserted a year ago
+        // => data can be deleted
+        global $DB;
+        $record = new \stdClass();
+        $record->id = $user->id;
+        $record->timestamp = YEARAGO;
+        $DB->update_record_raw('tool_cleanupusers', $record);
+
+        $this->assertEqualsUsersArrays($this->checker->get_to_delete(), $user);
+
+        // Create new user with same attributes as the one that
+        // is already suspended.
+        $user1 = $this->create_test_user($user->username, ['firstname' => $user->firstname,
+            'lastname' => $user->lastname, 'email' => $user->email]);
+
+        $this->assertEqualsUsersArrays($this->checker->get_to_delete(), $user);
+
+        $cronjob = new \tool_cleanupusers\task\archive_user_task();
+        $cronjob->execute();
+
+        // no records in tool_cleanupusers and tool_cleanupusers_archive
+        $record = $DB->get_record('tool_cleanupusers', ['id' => $user->id]);
+        $this->assertFalse($record);
+
+        $record = $DB->get_record('tool_cleanupusers_archive', ['id' => $user->id]);
+        $this->assertFalse($record);
+
+        // Check that no user data left over.
+        $record = $DB->get_record('user', ['id' => $user->id]);
+        $this->assertEquals(1, $record->deleted);
+
         $this->assertStringNotContainsStringIgnoringCase($user->username, $record->username);
         $this->assertStringNotContainsStringIgnoringCase($user->username, $record->firstname);
         $this->assertStringNotContainsStringIgnoringCase($user->username, $record->lastname);
@@ -344,6 +424,87 @@ abstract class userstatus_base_test extends \advanced_testcase
         $this->assertStringNotContainsStringIgnoringCase($user->email, $record->lastname);
         $this->assertStringNotContainsStringIgnoringCase($user->email, $record->email);
 
+        // duplicate user is unchanged
+        $record = $DB->get_record('user', ['id' => $user1->id]);
+        $this->assertEquals(0, $record->deleted);
+        // Do not check for suspension flag because
+        // the duplicate user could also have been suspended in task
+        // because he or she matches the suspension filter
+        // (maybe problem with ldapchecker and lookup table missing
+        // in task)
+        // $this->assertEquals(0, $record->suspended);
+        $this->assertEquals($user1->username, $record->username);
+        $this->assertEquals($user1->firstname, $record->firstname);
+        $this->assertEquals($user1->lastname, $record->lastname);
+        $this->assertEquals($user1->auth, $record->auth); // not modified
+        $this->assertEquals($user1->lastaccess, $record->lastaccess);
+        $this->assertEquals($user1->timecreated, $record->timecreated);
+    }
+
+
+    public function test_delete_incomplete_no_delete_1() {
+        $user = $this->typical_scenario_for_suspension();
+        // run cron
+        $cronjob = new \tool_cleanupusers\task\archive_user_task();
+        $cronjob->execute();
+
+        // Fake: Update timestamp so that it seems as if
+        // the record has been inserted a year ago
+        // => data can be deleted
+        global $DB;
+        $record = new \stdClass();
+        $record->id = $user->id;
+        $record->timestamp = YEARAGO;
+        $DB->update_record_raw('tool_cleanupusers', $record);
+
+        $this->assertEqualsUsersArrays($this->checker->get_to_delete(), $user);
+
+        $DB->delete_records('tool_cleanupusers', ['id' => $user->id]);
+        $this->assertEquals(0, count($this->checker->get_to_delete()));
+    }
+
+
+    public function test_delete_incomplete_no_delete_2() {
+        $user = $this->typical_scenario_for_suspension();
+        // run cron
+        $cronjob = new \tool_cleanupusers\task\archive_user_task();
+        $cronjob->execute();
+
+        // Fake: Update timestamp so that it seems as if
+        // the record has been inserted a year ago
+        // => data can be deleted
+        global $DB;
+        $record = new \stdClass();
+        $record->id = $user->id;
+        $record->timestamp = YEARAGO;
+        $DB->update_record_raw('tool_cleanupusers', $record);
+
+        $this->assertEqualsUsersArrays($this->checker->get_to_delete(), $user);
+
+        $DB->delete_records('tool_cleanupusers_archive', ['id' => $user->id]);
+        $this->assertEquals(0, count($this->checker->get_to_delete()));
+    }
+
+    public function test_delete_incomplete_no_delete_3() {
+        $user = $this->typical_scenario_for_suspension();
+        // run cron
+        $cronjob = new \tool_cleanupusers\task\archive_user_task();
+        $cronjob->execute();
+
+        // Fake: Update timestamp so that it seems as if
+        // the record has been inserted a year ago
+        // => data can be deleted
+        global $DB;
+        $record = new \stdClass();
+        $record->id = $user->id;
+        $record->timestamp = YEARAGO;
+        $DB->update_record_raw('tool_cleanupusers', $record);
+
+        $this->assertEqualsUsersArrays($this->checker->get_to_delete(), $user);
+
+        $DB->delete_records('tool_cleanupusers_archive', ['id' => $user->id]);
+        $DB->delete_records('tool_cleanupusers', ['id' => $user->id]);
+        $this->assertEquals(0, count($this->checker->get_to_delete()));
     }
 
     /**

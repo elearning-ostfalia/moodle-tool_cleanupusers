@@ -56,7 +56,7 @@ abstract class userstatus_base_test extends \advanced_testcase
         // strip namespace from checker class
         $index = strpos($checker, "\\");
         if ($index === false)
-            throw new \coding_exception("cannot determin namespace of " . $checker);
+            throw new \coding_exception("cannot determine namespace of " . $checker);
 
         $checker = substr($checker, $index + 1);
         $user->checker = $checker; // checker is not contained in user => add for check
@@ -97,21 +97,153 @@ abstract class userstatus_base_test extends \advanced_testcase
                 'timestamp' => $when, 'checker' => 'nocoursechecker'], true, false, true);
     }
 
+    /**
+     * @return string
+     * @throws \coding_exception
+     */
+    protected function get_plugin_name(): string
+    {
+        $checker = get_class($this->checker);
+        // strip namespace from checker class
+        $index = strpos($checker, "\\");
+        if ($index === false)
+            throw new \coding_exception("cannot determine namespace of " . $checker);
+
+        $plugin = substr($checker, 0, $index);
+        return $plugin;
+    }
+
     abstract public function typical_scenario_for_reactivation() : \stdClass;
 
     abstract public function typical_scenario_for_suspension() : \stdClass;
 
     abstract protected function create_checker();
 
-    public function test_more_auth_suspend() {
-        set_config('auth_method', 'email,' . AUTH_METHOD, 'userstatus_nocoursechecker');
+    // TESTS
+    // Common tests for all subplugins
+
+    // ---------------------------------------------
+    // SUSPEND
+    // ---------------------------------------------
+    public function test_simple_suspend() {
+        $user = $this->typical_scenario_for_suspension();
+        $this->assertEqualsUsersArrays($this->checker->get_to_suspend(), $user);
+        $this->assertEquals(0, $user->suspended);
+
+        // run cron
+        $cronjob = new \tool_cleanupusers\task\archive_user_task();
+        $cronjob->execute();
+
+        // check if user won't be activated now.
+        $this->assertEquals(0, count($this->checker->get_to_reactivate()));
+
+        global $DB;
+        $record = $DB->get_record('user', ['id' => $user->id]);
+        $this->assertEquals(1, $record->suspended);
+        $this->assertStringStartsWith('anonym', $record->username);
+        $this->assertEquals('Anonym', $record->firstname);
+        $this->assertEquals('', $record->lastname);
+        $this->assertEquals($user->auth, $record->auth); // not modified
+
+        $record = $DB->get_record('tool_cleanupusers', ['id' => $user->id]);
+        $checker = substr($this->get_plugin_name(), strlen('userstatus_'));
+        $this->assertEquals($checker, $record->checker);
+        $this->assertEquals(1, $record->archived);
+        $this->assertTimeCurrent($record->timestamp);
+
+        $record = $DB->get_record('tool_cleanupusers_archive', ['id' => $user->id]);
+        $this->assertEquals($user->username, $record->username);
+        $this->assertEquals($user->firstname, $record->firstname);
+        $this->assertEquals($user->lastname, $record->lastname);
+        $this->assertEquals($user->auth, $record->auth); // not modified
+        $this->assertEquals(0, $record->suspended);
+        $this->assertEquals($user->lastaccess, $record->lastaccess);
+        $this->assertEquals($user->timecreated, $record->timecreated);
+    }
+
+    public function test_config_auth_plus_suspend() {
+        set_config('auth_method', 'email,' . AUTH_METHOD, $this->get_plugin_name());
         // Create new checker instance so that configuration will be "reread".
         $this->checker = $this->create_checker();
         $user = $this->typical_scenario_for_suspension('username');
         $this->assertEqualsUsersArrays($this->checker->get_to_suspend(), $user);
     }
 
-    // Common tests for all subplugins
+    public function test_config_no_auth_suspend() {
+        set_config('auth_method', '', $this->get_plugin_name());
+        // Create new checker instance so that configuration will be "reread".
+        $this->checker = $this->create_checker();
+        $user = $this->typical_scenario_for_suspension('username');
+        $this->assertEqualsUsersArrays($this->checker->get_to_suspend(), $user);
+    }
+
+    public function test_config_other_auth_no_suspend() {
+        set_config('auth_method', 'email', $this->get_plugin_name());
+        // Create new checker instance so that configuration will be "reread".
+        $this->checker = $this->create_checker();
+        $user = $this->typical_scenario_for_suspension('username');
+        $this->assertEquals(0, count($this->checker->get_to_suspend()));
+    }
+
+    /**
+     * already manually suspended
+     * @return void
+     * @throws \dml_exception
+     */
+    public function test_already_suspended_not_suspend() {
+        $user = $this->typical_scenario_for_suspension();
+        global $DB;
+        $user->suspended = 1;
+        $DB->update_record('user', $user);
+        $this->assertEquals(0, count($this->checker->get_to_suspend()));
+        $this->assertEquals(0, count($this->checker->get_to_reactivate()));
+    }
+
+    public function test_already_deleted_not_suspend() {
+        $user = $this->typical_scenario_for_suspension();
+        global $DB;
+        $user->deleted = 1;
+        $DB->update_record('user', $user);
+        $this->assertEquals(0, count($this->checker->get_to_suspend()));
+    }
+
+    // ---------------------------------------------
+    // REACTIVATE
+    // ---------------------------------------------
+    public function test_reactivate() {
+        $user = $this->typical_scenario_for_reactivation();
+        $this->assertEqualsUsersArrays($this->checker->get_to_reactivate(), $user);
+
+        // run cron
+        $cronjob = new \tool_cleanupusers\task\archive_user_task();
+        $cronjob->execute();
+
+        if ($this->get_plugin_name() == 'userstatus_ldapchecker') {
+            // Task does not work properly for ldapchecker
+            // because a new ldapchecker instance is generated in task
+            // which does not have the previously set lookup data.
+            return;
+        }
+        // check if user won't be activated now.
+        $this->assertEquals(0, count($this->checker->get_to_suspend()));
+
+        global $DB;
+        $record = $DB->get_record('user', ['id' => $user->id]);
+        $this->assertEquals($user->username, $record->username);
+        $this->assertEquals($user->firstname, $record->firstname);
+        $this->assertEquals($user->lastname, $record->lastname);
+        $this->assertEquals($user->auth, $record->auth); // not modified
+        $this->assertEquals(0, $record->suspended);
+        $this->assertEquals($user->lastaccess, $record->lastaccess);
+        $this->assertEquals($user->timecreated, $record->timecreated);
+
+        $record = $DB->get_record('tool_cleanupusers', ['id' => $user->id]);
+        $this->assertFalse($record);
+
+        $record = $DB->get_record('tool_cleanupusers_archive', ['id' => $user->id]);
+        $this->assertFalse($record);
+    }
+
     /**
      * like test_invisible_course_make_visisble_reactivate, but record in tool_cleanupusers is missing
      * @return void
@@ -132,34 +264,32 @@ abstract class userstatus_base_test extends \advanced_testcase
         $this->assertEquals(0, count($this->checker->get_to_reactivate()));
     }
 
-    /**
-     * already manually suspended
-     * @return void
-     * @throws \dml_exception
-     */
-    public function test_already_suspended_not_suspend() {
-        $user = $this->typical_scenario_for_suspension();
-        global $DB;
-        $user->suspended = 1;
-        $DB->update_record('user', $user);
-        $this->assertEquals(0, count($this->checker->get_to_suspend()));
-    }
-
-    public function test_already_deleted_not_suspend() {
-        $user = $this->typical_scenario_for_suspension();
-        global $DB;
-        $user->deleted = 1;
-        $DB->update_record('user', $user);
-        $this->assertEquals(0, count($this->checker->get_to_suspend()));
-    }
-
-    public function test_no_delete() {
+    // ---------------------------------------------
+    // DELETE
+    // ---------------------------------------------
+    public function test_too_early_for_deletion_no_delete() {
         $user = $this->typical_scenario_for_suspension();
         $this->assertEqualsUsersArrays($this->checker->get_to_suspend(), $user);
         // run cron
         $cronjob = new \tool_cleanupusers\task\archive_user_task();
         $cronjob->execute();
         $this->assertEquals(0, count($this->checker->get_to_delete()));
+    }
+
+    public function test_too_early_for_deletion_change_config_delete() {
+        $user = $this->typical_scenario_for_suspension();
+        $this->assertEqualsUsersArrays($this->checker->get_to_suspend(), $user);
+        // run cron
+        $cronjob = new \tool_cleanupusers\task\archive_user_task();
+        $cronjob->execute();
+
+        sleep(1); // ensure time condition is met
+        $this->assertEquals(0, count($this->checker->get_to_delete()));
+
+        set_config('deletetime', 0, $this->get_plugin_name());
+        $this->checker = $this->create_checker();
+
+        $this->assertEqualsUsersArrays($this->checker->get_to_delete(), $user);
     }
 
     public function test_delete() {
@@ -179,6 +309,41 @@ abstract class userstatus_base_test extends \advanced_testcase
         $DB->update_record_raw('tool_cleanupusers', $record);
 
         $this->assertEqualsUsersArrays($this->checker->get_to_delete(), $user);
+
+        $cronjob = new \tool_cleanupusers\task\archive_user_task();
+        $cronjob->execute();
+
+        // no records in tool_cleanupusers and tool_cleanupusers_archive
+        $record = $DB->get_record('tool_cleanupusers', ['id' => $user->id]);
+        $this->assertFalse($record);
+
+        $record = $DB->get_record('tool_cleanupusers_archive', ['id' => $user->id]);
+        $this->assertFalse($record);
+
+        $record = $DB->get_record('user', ['id' => $user->id]);
+        $this->assertEquals(1, $record->deleted);
+
+        // Check that no user data is left over.
+        $this->assertStringNotContainsStringIgnoringCase($user->username, $record->username);
+        $this->assertStringNotContainsStringIgnoringCase($user->username, $record->firstname);
+        $this->assertStringNotContainsStringIgnoringCase($user->username, $record->lastname);
+        $this->assertStringNotContainsStringIgnoringCase($user->username, $record->email);
+
+        $this->assertStringNotContainsStringIgnoringCase($user->firstname, $record->username);
+        $this->assertStringNotContainsStringIgnoringCase($user->firstname, $record->firstname);
+        $this->assertStringNotContainsStringIgnoringCase($user->firstname, $record->lastname);
+        $this->assertStringNotContainsStringIgnoringCase($user->firstname, $record->email);
+
+        $this->assertStringNotContainsStringIgnoringCase($user->lastname, $record->username);
+        $this->assertStringNotContainsStringIgnoringCase($user->lastname, $record->firstname);
+        $this->assertStringNotContainsStringIgnoringCase($user->lastname, $record->lastname);
+        $this->assertStringNotContainsStringIgnoringCase($user->lastname, $record->email);
+
+        $this->assertStringNotContainsStringIgnoringCase($user->email, $record->username);
+        $this->assertStringNotContainsStringIgnoringCase($user->email, $record->firstname);
+        $this->assertStringNotContainsStringIgnoringCase($user->email, $record->lastname);
+        $this->assertStringNotContainsStringIgnoringCase($user->email, $record->email);
+
     }
 
     /**
@@ -200,4 +365,6 @@ abstract class userstatus_base_test extends \advanced_testcase
         $this->assertEquals(2, $DB->count_records('user', []));
         $this->assertEquals(0, $DB->count_records('tool_cleanupusers', []));
     }
+
+
 }

@@ -100,14 +100,6 @@ class userstatus_ldapchecker_test extends \tool_cleanupusers\userstatus_base_tes
         $this->assertEquals(0, count($this->checker->get_to_suspend()));
     }
 
-    // ---------------------------------------------
-    // Reactivate
-    // ---------------------------------------------
-    public function test_not_in_ldap_then_in_ldap_reactivate() {
-        $user = $this->typical_scenario_for_reactivation();
-        $this->assertEqualsUsersArrays($this->checker->get_to_reactivate(), $user);
-    }
-
 
     /**
      * Function to test the class ldapchecker.

@@ -154,14 +154,6 @@ final class userstatus_nocoursechecker_test extends \tool_cleanupusers\userstatu
         $this->assertEqualsUsersArrays($this->checker->get_to_suspend(), $user);
     }
 
-    // ---------------------------------------------
-    // Reactivate
-    // ---------------------------------------------
-    public function test_invisible_course_make_visisble_reactivate() {
-        $user = $this->typical_scenario_for_reactivation();
-        $this->assertEqualsUsersArrays($this->checker->get_to_reactivate(), $user);
-    }
-
     /**
      * precondition: user is enrolled in a course that is already finished
      *

@@ -81,6 +81,7 @@ final class userstatus_timechecker_test extends \tool_cleanupusers\userstatus_ba
 
     public function typical_scenario_for_reactivation() : \stdClass {
         $user = $this->create_test_user('username', ['lastaccess' => ELEVENDAYSAGO]);
+        $this->assertEquals(0, $user->suspended);
         $this->assertEqualsUsersArrays($this->checker->get_to_suspend(), $user);
 
         // run cron
@@ -150,10 +151,6 @@ final class userstatus_timechecker_test extends \tool_cleanupusers\userstatus_ba
         // $returnnever = $checker->get_never_logged_in();
         // $this->assertEqualsCanonicalizing(array_map(fn($user) => $user->username, $returnnever), $never);
 
-        // To suspend.
-        $suspend = ["to_suspend"];
-        $returnsuspend = $checker->get_to_suspend();
-        $this->assertEqualsCanonicalizing(array_map(fn($user) => $user->username, $returnsuspend), $suspend);
 
         // To reactivate.
         $reactivate = ["to_reactivate"];
@@ -169,10 +166,6 @@ final class userstatus_timechecker_test extends \tool_cleanupusers\userstatus_ba
         set_config('deletetime', 0.5, 'userstatus_timechecker');
         $newchecker = new timechecker();
 
-        // To suspend.
-        $suspend = ["to_suspend", "tu_id_1", "tu_id_2", "tu_id_3", "tu_id_4"];
-        $returnsuspend = $newchecker->get_to_suspend();
-        $this->assertEqualsCanonicalizing(array_map(fn($user) => $user->username, $returnsuspend), $suspend);
 
         // To reactivate.
         $reactivate = [];

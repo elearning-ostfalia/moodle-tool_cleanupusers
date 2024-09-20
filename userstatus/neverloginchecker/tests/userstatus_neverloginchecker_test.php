@@ -104,11 +104,6 @@ class userstatus_neverloginchecker_test extends \tool_cleanupusers\userstatus_ba
     // ---------------------------------------------
     // Suspend: scenarios handled by this plugin
     // ---------------------------------------------
-    public function test_11_days_ago_suspend() {
-        $user = $this->typical_scenario_for_suspension();
-        $this->assertEqualsUsersArrays($this->checker->get_to_suspend(), $user);
-    }
-
     public function test_9_days_ago_change_suspend_time_suspend() {
         $user = $this->create_test_user('username', ['timecreated' => NINEDAYSAGO]);
         $this->assertEquals(0, count($this->checker->get_to_suspend()));
@@ -118,14 +113,6 @@ class userstatus_neverloginchecker_test extends \tool_cleanupusers\userstatus_ba
         $this->checker = new \userstatus_neverloginchecker\neverloginchecker();
 
         $this->assertEqualsUsersArrays($this->checker->get_to_suspend(), $user);
-    }
-
-    // ---------------------------------------------
-    // Reactivate
-    // ---------------------------------------------
-    public function test_change_suspend_time_reactivate() {
-        $user = $this->typical_scenario_for_reactivation();
-        $this->assertEqualsUsersArrays($this->checker->get_to_reactivate(), $user);
     }
 
 

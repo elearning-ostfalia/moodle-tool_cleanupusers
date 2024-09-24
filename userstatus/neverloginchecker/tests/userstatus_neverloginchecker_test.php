@@ -39,8 +39,8 @@ use advanced_testcase;
  * @copyright  2016/17 N Herrmann
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  *
- * @covers \userstatus_neveloginchecker\neverloginchecker::get_to_suspend()
- * @covers \userstatus_neveloginchecker\neverloginchecker::get_to_reactivate()
+ * @covers \userstatus_neverloginchecker\neverloginchecker::get_to_suspend()
+ * @covers \userstatus_neverloginchecker\neverloginchecker::get_to_reactivate()
  *
  */
 class userstatus_neverloginchecker_test extends \tool_cleanupusers\userstatus_base_test {

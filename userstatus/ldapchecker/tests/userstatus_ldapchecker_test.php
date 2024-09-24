@@ -49,7 +49,7 @@ class userstatus_ldapchecker_test extends \tool_cleanupusers\userstatus_base_tes
     }
 
     protected function create_checker() {
-        return new \userstatus_ldapchecker\ldapchecker();
+        return new \userstatus_ldapchecker\ldapchecker(true);
     }
 
     public function typical_scenario_for_reactivation() : \stdClass {

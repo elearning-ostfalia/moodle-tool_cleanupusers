@@ -270,7 +270,8 @@ class tool_cleanupusers_renderer extends plugin_renderer_base {
             $output .= $this->render_table_of_users($rendertoreactivate, [get_string('willbereactivated', 'tool_cleanupusers'),
                 get_string('lastaccess', 'tool_cleanupusers'), get_string('Archived', 'tool_cleanupusers'),
                 get_string('authmethod', 'tool_cleanupusers'),
-                get_string('Willbe', 'tool_cleanupusers')]);
+                get_string('Willbe', 'tool_cleanupusers')],
+                $checker);
         }
 /*        if (!empty($renderneverloggedin)) {
             $output .= $this->render_table_of_users($renderneverloggedin, [get_string('Neverloggedin', 'tool_cleanupusers'),
@@ -282,14 +283,16 @@ class tool_cleanupusers_renderer extends plugin_renderer_base {
                 get_string('lastaccess', 'tool_cleanupusers'),
                 get_string('Archived', 'tool_cleanupusers'),
                 get_string('authmethod', 'tool_cleanupusers'),
-                get_string('Willbe', 'tool_cleanupusers')]);
+                get_string('Willbe', 'tool_cleanupusers')],
+                $checker);
         }
         if (!empty($rendertodelete)) {
             $output .= $this->render_table_of_users($rendertodelete, [get_string('willbedeleted', 'tool_cleanupusers'),
                 get_string('lastaccess', 'tool_cleanupusers'),
                 get_string('Archived', 'tool_cleanupusers'),
                 get_string('authmethod', 'tool_cleanupusers'),
-                get_string('Willbe', 'tool_cleanupusers')]);
+                get_string('Willbe', 'tool_cleanupusers')],
+                $checker);
         }
 
         return $output;
@@ -496,7 +499,7 @@ class tool_cleanupusers_renderer extends plugin_renderer_base {
      * @param array $tableheadings
      * @return string html-table
      */
-    private function render_table_of_users($users, $tableheadings) {
+    private function render_table_of_users($users, $tableheadings, $checker) {
         $table = new html_table();
         $table->head = $tableheadings;
         $table->attributes['class'] = 'generaltable admintable cleanupusers';
@@ -508,8 +511,14 @@ class tool_cleanupusers_renderer extends plugin_renderer_base {
         }
 
         if (count($users) > $limit) {
+            global $OUTPUT;
+            $url = new \moodle_url('/admin/tool/cleanupusers/toarchive.php', ['checker' => $checker]);
+            $link = \html_writer::link(
+                $url, '(watch full table)'
+            );
+
             $table->data['last'] = new archiveduser(
-                '<i>... truncated!</i>',
+                '... ' . $link, // '<i>... truncated!</i>',
                 '',
                 '',
                 '',

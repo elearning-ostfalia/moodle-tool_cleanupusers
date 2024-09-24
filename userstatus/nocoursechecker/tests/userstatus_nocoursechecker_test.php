@@ -37,8 +37,9 @@ use advanced_testcase;
  * @copyright  2016/17 N Herrmann / 2024 Ostfalia
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  *
- * @covers \userstatus_timechecker\timechecker::get_to_suspend()
- * @covers \userstatus_timechecker\timechecker::get_to_reactivate()
+ * @covers \userstatus_nocoursechecker\nocoursechecker::get_to_suspend()
+ * @covers \userstatus_nocoursechecker\nocoursechecker::get_to_reactivate()
+ * @covers \userstatus_nocoursechecker\nocoursechecker::get_to_delete()
  *
  * get to delete is not handled here as the suplugin is not envolved
  */

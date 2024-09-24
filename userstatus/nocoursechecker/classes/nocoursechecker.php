@@ -44,31 +44,40 @@ class nocoursechecker extends userstatuschecker {
         $courses = enrol_get_all_users_courses($user->id, true, "startdate, enddate, visible");
 
         foreach ($courses as $course) {
-            if ($course->visible) {
-                if (isset($course->enddate) && $course->enddate > time()) {
-                    // Enddate in the future
-                    return false;
-                }
-                if (isset($course->startdate)) {
-                    if ($course->startdate >= time()) {
-                        // Startdate in the future => future course
-                        return false;
-                    } else {
-                        // Startdate in the past
-                        if (!(isset($course->enddate) && $course->enddate < time())) {
-                            // and enddate is not in the past
-                            return false;
-                        }
-                        // Special case enddate = '0'
-                        if (isset($course->enddate) && $course->enddate == '0') {
-                            // missing enddate
-                            return false;
-                        }
+            if (!$course->visible) {
+                // invisible courses are not active
+                continue;
+            }
+            if (!isset($course->enddate)) {
+                // missing enddate means that the course has not been ended
+                // => course is still active
+                return false;
+            }
+            assert(isset($course->enddate));
+            assert(isset($course->visible));
 
-                    }
-                } else {
-                    debugging('missing course startdate');
-                }
+            if ($course->enddate == '0') {
+                // Special case enddate = '0'
+                // => means missing enddate
+                // => course is still active
+                return false;
+            }
+
+            if ($course->enddate > time()) {
+                // Enddate in the future
+                // => Course is still active
+                return false;
+            }
+
+            if ($course->enddate < time()) {
+                // Enddate is not in the past
+                // => course is not active
+                continue;
+            }
+
+            if (!isset($course->startdate)) {
+                debugging('missing course startdate');
+                // => ????
             }
         }
         return true;

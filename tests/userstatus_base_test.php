@@ -165,7 +165,7 @@ abstract class userstatus_base_test extends \advanced_testcase
         set_config('auth_method', 'email,' . AUTH_METHOD, $this->get_plugin_name());
         // Create new checker instance so that configuration will be "reread".
         $this->checker = $this->create_checker();
-        $user = $this->typical_scenario_for_suspension('username');
+        $user = $this->typical_scenario_for_suspension();
         $this->assertEqualsUsersArrays($this->checker->get_to_suspend(), $user);
     }
 
@@ -173,7 +173,7 @@ abstract class userstatus_base_test extends \advanced_testcase
         set_config('auth_method', '', $this->get_plugin_name());
         // Create new checker instance so that configuration will be "reread".
         $this->checker = $this->create_checker();
-        $user = $this->typical_scenario_for_suspension('username');
+        $user = $this->typical_scenario_for_suspension();
         $this->assertEqualsUsersArrays($this->checker->get_to_suspend(), $user);
     }
 
@@ -181,7 +181,7 @@ abstract class userstatus_base_test extends \advanced_testcase
         set_config('auth_method', 'email', $this->get_plugin_name());
         // Create new checker instance so that configuration will be "reread".
         $this->checker = $this->create_checker();
-        $user = $this->typical_scenario_for_suspension('username');
+        $user = $this->typical_scenario_for_suspension();
         $this->assertEquals(0, count($this->checker->get_to_suspend()));
     }
 

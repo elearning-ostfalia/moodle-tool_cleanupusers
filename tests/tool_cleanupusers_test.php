@@ -37,7 +37,6 @@ use advanced_testcase;
  * @covers \tool_cleanupusers\archiveduser::archive_me()
  * @covers \tool_cleanupusers\archiveduser::delete_me()
  * @covers \tool_cleanupusers\archiveduser::activate_me()
- * @covers \tool_cleanupusers\subplugin_select_form::validation()
  * @covers \tool_cleanupusers\task\archive_user_task::execute()
  *
  */

@@ -29,6 +29,11 @@
         <testsuite name="cleanupusers_files_testsuite">
             <directory suffix="_test.php">tests</directory>
             <directory suffix="_test.php">userstatus</directory>
+<!--
+            <directory>./userstatus/nocoursechecker/tests</directory>
+            <directory>./userstatus/ldapchecker/tests</directory>
+            <directory suffix="_test.php">./userstatus/timechecker/tests</directory>
+            <directory suffix="_test.php">./userstatus/neverloginchecker/tests</directory> -->
         </testsuite>
     </testsuites>
 
@@ -37,9 +42,13 @@
             <directory suffix=".php">./classes</directory>
             <directory suffix=".php">./lang</directory>
             <directory suffix=".php">./userstatus</directory>
+<!--            <directory suffix=".php">./userstatus/neverloginchecker</directory>
+            <directory suffix=".php">./userstatus/nocoursechecker</directory>
+            <directory suffix=".php">./userstatus/timechecker</directory>
+            <directory suffix=".php">./userstatus/ldapchecker</directory> -->
         </include>
         <exclude>
-            <directory suffix="test.php">./userstatus</directory>
+<!--            <directory suffix="test.php">./userstatus</directory> -->
             <directory suffix=".php">./classes/table</directory>
         </exclude>
     </coverage>

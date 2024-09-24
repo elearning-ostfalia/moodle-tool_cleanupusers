@@ -46,13 +46,64 @@ Feature: Cleanup settings
       | deletetime | 200  | userstatus_neverloginchecker |
       | auth_method | manual  | userstatus_neverloginchecker |
 
-  @javascript
-  Scenario: Test users to suspend
+#  @javascript
+  Scenario: Check suspension tables
     Given I log in as "admin"
-    And I navigate to "Users > Clean up users > General settings" in site administration
-    And I pause
-#    When I set the field "Authentication method" in the "LDAP Checker" "row" to "ldap"
 
-   And I run the scheduled task "\tool_cleanupusers\task\archive_user_task"
-    And I pause
+    And I navigate to "Users > Clean up users > Manage users who will be archived by Last Login Checker" in site administration
+    And I should see "user1"
+    And I should not see "user2"
+    And I should not see "user3"
+    And I should not see "user4"
+    And I should not see "user5"
+    And I should not see "user6"
+    And I should not see "user7"
+    And I should not see "user8"
+
+    And I navigate to "Users > Clean up users > Manage users who will be archived by Never Login Checker" in site administration
+    And I should see "user3"
+    And I should see "user4"
+    And I should not see "user1"
+    And I should not see "user2"
+    And I should not see "user5"
+    And I should not see "user6"
+    And I should not see "user7"
+    And I should not see "user8"
+
+    And I navigate to "Users > Clean up users > Manage users who will be archived by Not enrolled in active course Checker" in site administration
+    And I should see "user5"
+    And I should see "user6"
+    And I should see "user7"
+    And I should see "user8"
+    And I should not see "user1"
+    And I should not see "user2"
+    And I should not see "user3"
+    And I should not see "user4"
+
+    # run task and check that all tables are empty
+    And I run the scheduled task "\tool_cleanupusers\task\archive_user_task"
+
     And I navigate to "Users > Clean up users > General settings" in site administration
+
+    And I navigate to "Users > Clean up users > Manage users who will be archived by Last Login Checker" in site administration
+    And I should see "Currently no users will be suspended by the next cronjob for checker Last Login Checker."
+
+
+    And I navigate to "Users > Clean up users > Manage users who will be archived by Never Login Checker" in site administration
+    And I should see "Currently no users will be suspended by the next cronjob for checker Never Login Checker."
+
+    And I navigate to "Users > Clean up users > Manage users who will be archived by Not enrolled in active course Checker" in site administration
+    And I should see "Currently no users will be suspended by the next cronjob for checker Not enrolled in active course Checker."
+
+@javascript
+  Scenario: Manually suspend user
+    Given I log in as "admin"
+
+    And I navigate to "Users > Clean up users > Manage users who will be archived by Last Login Checker" in site administration
+    And I should see "user1"
+
+
+    And I pause
+    Then ".availability-children .availability-eye" "css_element" should not be visible
+    And I click on ".availability-item .availability-eye img" "css_element"
+    And I click on "Suspend User" "link"

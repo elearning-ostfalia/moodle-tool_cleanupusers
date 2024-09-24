@@ -60,7 +60,7 @@ class reactivate_table extends \table_sql {
         if ($sqlwhere != null && $sqlwhere != '') {
             $where = $sqlwhere;
         } else {
-            $where = '1';
+            $where = '1=1';
         }
 
         // read all users from archive table

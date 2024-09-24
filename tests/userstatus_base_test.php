@@ -169,9 +169,17 @@ abstract class userstatus_base_test extends \advanced_testcase
         $this->assertEqualsUsersArrays($this->checker->get_to_suspend(), $user);
     }
 
-    public function test_config_no_auth_suspend() {
+    public function test_config_no_auth_suspend_1() {
         set_config('auth_method', '', $this->get_plugin_name());
         // Create new checker instance so that configuration will be "reread".
+        $this->checker = $this->create_checker();
+        $user = $this->typical_scenario_for_suspension();
+        $this->assertEqualsUsersArrays($this->checker->get_to_suspend(), $user);
+    }
+
+    public function test_config_no_auth_method_2()
+    {
+        unset_config('auth_method', $this->get_plugin_name());
         $this->checker = $this->create_checker();
         $user = $this->typical_scenario_for_suspension();
         $this->assertEqualsUsersArrays($this->checker->get_to_suspend(), $user);
@@ -507,6 +515,18 @@ abstract class userstatus_base_test extends \advanced_testcase
         $DB->delete_records('tool_cleanupusers', ['id' => $user->id]);
         $this->assertEquals(0, count($this->checker->get_to_delete()));
     }
+
+    /*
+     * does not work: checker does not check if it is enabled! ???
+    public function test_config_no_plugin_enabled()
+    {
+        set_config('userstatus_plugins_enabled', "");
+        $this->checker = $this->create_checker();
+        $user = $this->typical_scenario_for_suspension();
+        $this->assertEquals(0, count($this->checker->get_to_suspend()));
+    }*/
+
+
 
     /**
      * Methodes recommended by moodle to assure database and dataroot is reset.

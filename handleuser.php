@@ -97,6 +97,8 @@ switch ($action) {
     // User should be deleted.
     case 'delete':
         if (!is_siteadmin($user) && $user->deleted != 1 && $USER->id != $userid) {
+            $archiveuser = $DB->get_record('tool_cleanupusers_archive', ['id' => $userid],
+                '*', MUST_EXIST);
             $deprovisionuser = new \tool_cleanupusers\archiveduser(
                 $userid,
                 $user->suspended,
@@ -113,7 +115,7 @@ switch ($action) {
                 // Notice user could not be deleted.
                 notice(get_string('errormessagenoaction', 'tool_cleanupusers'), $url);
             }
-            notice(get_string('usersdeleted', 'tool_cleanupusers', $user->username), $url);
+            notice(get_string('usersdeleted', 'tool_cleanupusers', $archiveuser->username), $url);
         } else {
             // Notice user could not be deleted.
             notice(get_string('errormessagenoaction', 'tool_cleanupusers'), $url);

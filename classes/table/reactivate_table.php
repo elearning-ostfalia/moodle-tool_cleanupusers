@@ -45,28 +45,20 @@ class reactivate_table extends \table_sql {
         parent::__construct($uniqueid);
 
         // Define the list of columns to show.
-        $columns = ['id', 'username', 'fullname', 'lastaccess', 'auth', $intention];
-        $this->define_columns($columns);
+        $columns = [
+            'id'         => get_string('id', 'tool_cleanupusers'),
+            'username'   => '',
+            'fullname'   => get_string('fullname'),
+            'lastaccess' => get_string('lastaccess', 'tool_cleanupusers'),
+            'auth'       => get_string('authmethod', 'tool_cleanupusers'),
+            'checker'    => 'checker',
+            $intention   => get_string($intention=='reactivate'?'willbesuspended':'willbedeleted',
 
-        switch ($intention) { // todo make enum or something like that.
-            case 'reactivate':
-                $header = get_string('willbesuspended', 'tool_cleanupusers');
-                break;
-            case 'delete':
-                $header = get_string('willbedeleted', 'tool_cleanupusers');
-                break;
-            default:
-                break;
-        }
+                'tool_cleanupusers')
+        ];
 
-        $headers = [
-            get_string('id', 'tool_cleanupusers'),
-            '',
-            get_string('fullname'),
-            get_string('lastaccess', 'tool_cleanupusers'),
-            get_string('authmethod', 'tool_cleanupusers'),
-            ''];
-        $this->define_headers($headers);
+        $this->define_columns(array_keys($columns));
+        $this->define_headers(array_values($columns));
 
         if ($sqlwhere != null && $sqlwhere != '') {
             $where = $sqlwhere;
@@ -75,13 +67,17 @@ class reactivate_table extends \table_sql {
         }
 
         // read all users from archive table
-        $this->set_sql('id, username, lastaccess, auth, ' .
-            implode(', ', fields::get_name_fields()), '{tool_cleanupusers_archive}', $where, $param);
+        $fields = 'a.id, a.username, a.lastaccess, a.auth, a.firstname, a.lastname, c.checker, c.timestamp, '.
+            implode(', ', fields::get_name_fields());
+        $this->set_sql($fields,
+            '{tool_cleanupusers_archive} a JOIN {tool_cleanupusers} c ON c.id = a.id',
+            $where, $param);
     }
 
     public function col_reactivate($user) {
         global $OUTPUT;
-        $url = new \moodle_url('/admin/tool/cleanupusers/handleuser.php', ['userid' => $user->id, 'action' => 'reactivate']);
+        $url = new \moodle_url('/admin/tool/cleanupusers/handleuser.php',
+            ['userid' => $user->id, 'action' => 'reactivate']);
         return \html_writer::link(
             $url,
             $OUTPUT->pix_icon(
@@ -95,7 +91,7 @@ class reactivate_table extends \table_sql {
 
     public function col_delete($user) {
         $url = new \moodle_url('/admin/tool/cleanupusers/handleuser.php',
-            ['userid' => $user->id, 'action' => 'delete', 'checker' => 'TODO checker' /*$checker*/]);
+            ['userid' => $user->id, 'action' => 'delete', 'checker' => $user->checker]);
 
         global $OUTPUT;
         return \html_writer::link(

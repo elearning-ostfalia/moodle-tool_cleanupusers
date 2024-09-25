@@ -69,7 +69,7 @@ function output_user_table(mixed $userstatuschecker, mixed $PAGE): void
         $userfilter->display_active();
         [$sql, $param] = $userfilter->get_sql_filter();
         $archivetable = new \tool_cleanupusers\table\users_table('tool_cleanupusers_toarchive_table',
-            $archivearray, $sql, $param, "suspend");
+            $archivearray, $sql, $param, "suspend", $userstatuschecker->get_name());
         $archivetable->define_baseurl($PAGE->url);
         $archivetable->out(20, false);
     }

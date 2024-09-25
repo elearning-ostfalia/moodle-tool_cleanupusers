@@ -55,7 +55,6 @@ Feature: Cleanup settings
     And I navigate to "Users > Clean up users > Manage users who will be deleted" in site administration
     And I should see "user1"
     And I delete "user1"
-    And I pause
     And I should see "User 'user1' has been deleted."
     And I navigate to "Users > Clean up users > Manage users who will be deleted" in site administration
     And I should not see "user1"
@@ -77,7 +76,6 @@ Feature: Cleanup settings
     Then I should see "The user has been reactivated"
     And I navigate to "Users > Clean up users > Browse archived users" in site administration
     And I should not see "user7"
-    And I pause
 
 #  @javascript
   Scenario: Run task for suspend

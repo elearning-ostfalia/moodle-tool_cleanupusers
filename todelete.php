@@ -48,30 +48,45 @@ $content = '';
 echo $OUTPUT->header();
 echo $renderer->get_heading(get_string('todelete', 'tool_cleanupusers'));
 
-/*$pluginsenabled =  \core_plugin_manager::instance()->get_enabled_plugins("userstatus");
+$pluginsenabled =  \core_plugin_manager::instance()->get_enabled_plugins("userstatus");
+$deletearray = [];
+
+$userfilter = new user_filtering();
+$userfilter->display_add();
+$userfilter->display_active();
+[$sql, $param] = $userfilter->get_sql_filter();
+
+
 foreach ($pluginsenabled as $subplugin => $dir) {
     $mysubpluginname = "\\userstatus_" . $subplugin . "\\" . $subplugin;
     $userstatuschecker = new $mysubpluginname();
 
     // Request arrays from the sub-plugin.
-    $deletearray = $userstatuschecker->get_to_delete();
-
+    $result = $userstatuschecker->get_to_delete();
     if (empty($deletearray)) {
         echo "Currently no users will be deleted by the next cronjob for checker " .
             $userstatuschecker->get_displayname() . ".<br>";
-    } else {
-*/
-        $userfilter = new user_filtering();
-        $userfilter->display_add();
-        $userfilter->display_active();
-        [$sql, $param] = $userfilter->get_sql_filter();
+    }
+    $deletearray = array_merge($deletearray, $result);
+}
+
+if (count($deletearray) > 0) {
+    var_dump($sql);
+    var_dump($deletearray);
+    if (!empty($sql)) {
+        $sql .= 'and ';
+    }
+    $sql .= 'id in (' . implode(',', array_keys($deletearray)) . ')';
+    var_dump($sql);
+    if (!empty($sql)) {
         $deletetable = new \tool_cleanupusers\table\reactivate_table('tool_cleanupusers_todelete_table',
 //            $deletearray, $sql, $param, "delete");
             $sql, $param, "delete");
+
         $deletetable->define_baseurl($PAGE->url);
         $deletetable->out(20, false);
-/*    }
-}*/
+    }
+}
 
 echo $content;
 echo $OUTPUT->footer();

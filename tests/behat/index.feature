@@ -47,7 +47,7 @@ Feature: Cleanup settings
       | auth_method | manual  | userstatus_neverloginchecker |
 
 #  @javascript
-  Scenario: Check suspension tables
+  Scenario: Run task for suspend
     Given I log in as "admin"
 
     And I navigate to "Users > Clean up users > Manage users who will be archived by Last Login Checker" in site administration
@@ -95,15 +95,51 @@ Feature: Cleanup settings
     And I navigate to "Users > Clean up users > Manage users who will be archived by Not enrolled in active course Checker" in site administration
     And I should see "Currently no users will be suspended by the next cronjob for checker Not enrolled in active course Checker."
 
+  @javascript
+  Scenario: Manually suspend user for Not enrolled in active course Checker
+    Given I log in as "admin"
+
+    And I navigate to "Users > Clean up users > Manage users who will be archived by Not enrolled in active course Checker" in site administration
+    And I should see "user5"
+
+    And ".fa-eye" "css_element" should be visible
+    # User 5 is in first row
+    When I click on ".fa-eye" "css_element"
+    Then I should see "The Users have been archived"
+
+    And I navigate to "Users > Clean up users > Manage users who will be archived by Not enrolled in active course Checker" in site administration
+    And I should not see "user5"
+
+  @javascript
+  Scenario: Manually suspend user for Never Login Checker
+    Given I log in as "admin"
+
+    And I navigate to "Users > Clean up users > Manage users who will be archived by Never Login Checker" in site administration
+    And I should see "user3"
+
+    Then ".fa-eye" "css_element" should be visible
+    # User 3 is in first row
+    When I click on ".fa-eye" "css_element"
+#    And I click on "Suspend User" "link"
+
+    Then I should see "The Users have been archived"
+
+    And I navigate to "Users > Clean up users > Manage users who will be archived by Never Login Checker" in site administration
+    And I should not see "user3"
+
+
 @javascript
-  Scenario: Manually suspend user
+  Scenario: Manually suspend user for Last Login Checker
     Given I log in as "admin"
 
     And I navigate to "Users > Clean up users > Manage users who will be archived by Last Login Checker" in site administration
     And I should see "user1"
 
+    Then ".fa-eye" "css_element" should be visible
+    When I click on ".fa-eye" "css_element"
+#    And I click on "Suspend User" "link"
 
-    And I pause
-    Then ".availability-children .availability-eye" "css_element" should not be visible
-    And I click on ".availability-item .availability-eye img" "css_element"
-    And I click on "Suspend User" "link"
+    Then I should see "The Users have been archived"
+
+    And I navigate to "Users > Clean up users > Manage users who will be archived by Last Login Checker" in site administration
+    And I should see "Currently no users will be suspended by the next cronjob for checker Last Login Checker."

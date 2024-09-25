@@ -69,6 +69,19 @@ class behat_cleanupusers extends behat_base {
         $record = $DB->get_record('tool_cleanupusers_archive', ['username' => $username], 'id',
             MUST_EXIST);
         $this->execute('behat_general::i_click_on', ['.imggroup-' . $record->id, 'css']);
+    }
 
+    /**
+     * reactivate username
+     *
+     * @Then /^I reactivate "(?P<username_string>(?:[^"]|\\")*)"$/
+     * @return void
+     */
+    public function I_reactivate($username) {
+        global $DB;
+        // Look up identifier
+        $record = $DB->get_record('tool_cleanupusers_archive', ['username' => $username], 'id',
+            MUST_EXIST);
+        $this->execute('behat_general::i_click_on', ['.imggroup-' . $record->id, 'css']);
     }
 }

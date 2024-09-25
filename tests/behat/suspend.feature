@@ -49,6 +49,7 @@ Feature: Cleanup settings
   @javascript
   Scenario: Manually delete users
     Given I log in as "admin"
+    # archive all users ready for archive
     And I run the scheduled task "\tool_cleanupusers\task\archive_user_task"
     And simulate that "101" days have passed since the archiving of "user1"
     And I navigate to "Users > Clean up users > Manage users who will be deleted" in site administration
@@ -58,6 +59,25 @@ Feature: Cleanup settings
     And I should see "User 'user1' has been deleted."
     And I navigate to "Users > Clean up users > Manage users who will be deleted" in site administration
     And I should not see "user1"
+
+  @javascript
+  Scenario: Manually reactivate users
+    Given I log in as "admin"
+    And I run the scheduled task "\tool_cleanupusers\task\archive_user_task"
+    And I navigate to "Users > Clean up users > Browse archived users" in site administration
+    And I should see "Archived users"
+    And I should see "user1"
+    And I should see "user3"
+    And I should see "user4"
+    And I should see "user5"
+    And I should see "user6"
+    And I should see "user7"
+    And I should see "user8"
+    When I reactivate "user7"
+    Then I should see "The user has been reactivated"
+    And I navigate to "Users > Clean up users > Browse archived users" in site administration
+    And I should not see "user7"
+    And I pause
 
 #  @javascript
   Scenario: Run task for suspend

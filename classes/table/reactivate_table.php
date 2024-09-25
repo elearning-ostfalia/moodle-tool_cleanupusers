@@ -52,6 +52,7 @@ class reactivate_table extends \table_sql {
             'lastaccess' => get_string('lastaccess', 'tool_cleanupusers'),
             'auth'       => get_string('authmethod', 'tool_cleanupusers'),
             'checker'    => 'checker',
+            'timestamp'    => get_string('timestamp', 'tool_cleanupusers'),
             $intention   => get_string($intention=='reactivate'?'willbesuspended':'willbedeleted',
 
                 'tool_cleanupusers')
@@ -103,6 +104,10 @@ class reactivate_table extends \table_sql {
                 ['class' => "imggroup-" . $user->id]
             )
         );
+    }
+
+    public function col_timestamp($user) {
+        return date('d.m.Y h:i:s', $user->timestamp);
     }
 
     public function col_lastaccess($user) {

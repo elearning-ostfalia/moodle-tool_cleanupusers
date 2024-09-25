@@ -3,23 +3,23 @@ Feature: Cleanup settings
 
   Background:
     Given the following "users" exist:
-      | username | firstname | lastname  |  relativedatesmode | timecreated | lastaccess |
-      | user1    | Teacher   | Miller1   | 1                  | ## -320 days## | ## -11 days##|
-      | user2    | Teaching  | Miller2   | 1                  | ## -32 days## | ## -9 days## |
-      | user3    | Student   | Miller3   | 1                  | ## -15 days## |  |
-      | user4    | Student   | Miller4   | 1                  | ## -14 days## |  |
-      | user5    | Student   | Miller5   | 1                  | ## -12 days## |  |
-      | user6    | Student   | Miller6   | 1                  | ## -12 days## |  |
-      | user7    | Student   | Miller7   | 1                  | ## -12 days## |  |
-      | user8    | Student   | Miller8   | 1                  | ## -12 days## |  |
+      | username | firstname | lastname  | relativedatesmode | timecreated    | lastaccess |
+      | user1    | Teacher   | Miller1   | 1                 | ## -320 days## | ## -11 days ## |
+      | user2    | Teaching  | Miller2   | 1                 | ## -32 days##  | ## -9 days## |
+      | user3    | Student   | Miller3   | 1                 | ## -15 days##  | 0  |
+      | user4    | Student   | Miller4   | 1                 | ## -14 days##  | 0  |
+      | user5    | Student   | Miller5   | 1                 | ## -12 days##  | 0  |
+      | user6    | Student   | Miller6   | 1                 | ## -12 days##  | 0  |
+      | user7    | Student   | Miller7   | 1                 | ## -12 days##  | 0  |
+      | user8    | Student   | Miller8   | 1                 | ## -12 days##  | 0  |
     And the following "courses" exist:
       | fullname  | shortname  | category  | relativedatesmode  | startdate      | enddate     | visible |
       | Active1   | CA1         | 0         | 1                  | ##-32 days##  |             | 1       |
       | Active2   | CA2         | 0         | 1                  | ##-32 days##  | ##32 days## | 1       |
-      | Active3   | CA3         | 0         | 1                  | ## 9 days##   | ##100days## | 1 |
-      | Active4   | CA4         | 0         | 1                  | ## 9 days##   |             | 1 |
-      | Inactive1 | CI1         | 0         | 1                  | ##-32 days##  | ##-10days## | 1        |
-      | Inactive2 | CI2         | 0         | 1                  | ##-32 days##  | ##10days##  | 0        |
+      | Active3   | CA3         | 0         | 1                  | ## 9 days##   | ##100days## | 1       |
+      | Active4   | CA4         | 0         | 1                  | ## 9 days##   |             | 1       |
+      | Inactive1 | CI1         | 0         | 1                  | ##-32 days##  | ##-10days## | 1       |
+      | Inactive2 | CI2         | 0         | 1                  | ##-32 days##  | ##10days##  | 0       |
 
     And the following "course enrolments" exist:
       | user     | course | role           |
@@ -45,6 +45,19 @@ Feature: Cleanup settings
       | suspendtime | 14  | userstatus_neverloginchecker |
       | deletetime | 200  | userstatus_neverloginchecker |
       | auth_method | manual  | userstatus_neverloginchecker |
+
+  @javascript
+  Scenario: Manually delete users
+    Given I log in as "admin"
+    And I run the scheduled task "\tool_cleanupusers\task\archive_user_task"
+    And simulate that "101" days have passed since the archiving of "user1"
+    And I navigate to "Users > Clean up users > Manage users who will be deleted" in site administration
+    And I should see "user1"
+    And I delete "user1"
+    And I pause
+    And I should see "User 'user1' has been deleted."
+    And I navigate to "Users > Clean up users > Manage users who will be deleted" in site administration
+    And I should not see "user1"
 
 #  @javascript
   Scenario: Run task for suspend
@@ -101,11 +114,8 @@ Feature: Cleanup settings
 
     And I navigate to "Users > Clean up users > Manage users who will be archived by Not enrolled in active course Checker" in site administration
     And I should see "user5"
-
-    And ".fa-eye" "css_element" should be visible
-    # User 5 is in first row
-    When I click on ".fa-eye" "css_element"
-    Then I should see "The Users have been archived"
+    When I archive "user5"
+    Then I should see "User 'user5' has been archived"
 
     And I navigate to "Users > Clean up users > Manage users who will be archived by Not enrolled in active course Checker" in site administration
     And I should not see "user5"
@@ -117,12 +127,8 @@ Feature: Cleanup settings
     And I navigate to "Users > Clean up users > Manage users who will be archived by Never Login Checker" in site administration
     And I should see "user3"
 
-    Then ".fa-eye" "css_element" should be visible
-    # User 3 is in first row
-    When I click on ".fa-eye" "css_element"
-#    And I click on "Suspend User" "link"
-
-    Then I should see "The Users have been archived"
+    When I archive "user3"
+    Then I should see "User 'user3' has been archived"
 
     And I navigate to "Users > Clean up users > Manage users who will be archived by Never Login Checker" in site administration
     And I should not see "user3"
@@ -135,11 +141,8 @@ Feature: Cleanup settings
     And I navigate to "Users > Clean up users > Manage users who will be archived by Last Login Checker" in site administration
     And I should see "user1"
 
-    Then ".fa-eye" "css_element" should be visible
-    When I click on ".fa-eye" "css_element"
-#    And I click on "Suspend User" "link"
-
-    Then I should see "The Users have been archived"
+  When I archive "user1"
+  Then I should see "User 'user1' has been archived"
 
     And I navigate to "Users > Clean up users > Manage users who will be archived by Last Login Checker" in site administration
     And I should see "Currently no users will be suspended by the next cronjob for checker Last Login Checker."

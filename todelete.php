@@ -22,8 +22,6 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-use userstatus_timechecker\timechecker;
-
 require_once(__DIR__ . '/../../../config.php');
 require_once($CFG->libdir . '/adminlib.php');
 require_once($CFG->dirroot . '/user/filters/lib.php');
@@ -50,7 +48,7 @@ $content = '';
 echo $OUTPUT->header();
 echo $renderer->get_heading(get_string('todelete', 'tool_cleanupusers'));
 
-$pluginsenabled =  \core_plugin_manager::instance()->get_enabled_plugins("userstatus");
+/*$pluginsenabled =  \core_plugin_manager::instance()->get_enabled_plugins("userstatus");
 foreach ($pluginsenabled as $subplugin => $dir) {
     $mysubpluginname = "\\userstatus_" . $subplugin . "\\" . $subplugin;
     $userstatuschecker = new $mysubpluginname();
@@ -62,16 +60,18 @@ foreach ($pluginsenabled as $subplugin => $dir) {
         echo "Currently no users will be deleted by the next cronjob for checker " .
             $userstatuschecker->get_displayname() . ".<br>";
     } else {
+*/
         $userfilter = new user_filtering();
         $userfilter->display_add();
         $userfilter->display_active();
         [$sql, $param] = $userfilter->get_sql_filter();
-        $deletetable = new \tool_cleanupusers\table\users_table('tool_cleanupusers_todelete_table',
-            $deletearray, $sql, $param, "delete");
+        $deletetable = new \tool_cleanupusers\table\reactivate_table('tool_cleanupusers_todelete_table',
+//            $deletearray, $sql, $param, "delete");
+            $sql, $param, "delete");
         $deletetable->define_baseurl($PAGE->url);
         $deletetable->out(20, false);
-    }
-}
+/*    }
+}*/
 
 echo $content;
 echo $OUTPUT->footer();

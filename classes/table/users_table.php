@@ -106,15 +106,5 @@ class users_table extends \table_sql {
                 ['class' => "imggroup-" . $user->id]
             )
         );
-/*
-        $userinformation['link'] = \html_writer::link(
-            $url,
-            $this->output->pix_icon(
-                't/hide',
-                get_string('hideuser', 'tool_cleanupusers'),
-                'moodle',
-                ['class' => "imggroup-" . $user->id]
-            )
-        );*/
     }
 }

@@ -63,7 +63,7 @@ switch ($action) {
                 notice(get_string('errormessagenoaction', 'tool_cleanupusers'), $url);
             }
             // User was successfully suspended.
-            notice(get_string('usersarchived', 'tool_cleanupusers'), $url);
+            notice(get_string('usersarchived', 'tool_cleanupusers', $user->username), $url);
         } else {
             // Notice user could not be suspended.
             notice(get_string('errormessagenotsuspend', 'tool_cleanupusers'), $url);
@@ -113,7 +113,7 @@ switch ($action) {
                 // Notice user could not be deleted.
                 notice(get_string('errormessagenoaction', 'tool_cleanupusers'), $url);
             }
-            notice(get_string('usersdeleted', 'tool_cleanupusers'), $url);
+            notice(get_string('usersdeleted', 'tool_cleanupusers', $user->username), $url);
         } else {
             // Notice user could not be deleted.
             notice(get_string('errormessagenoaction', 'tool_cleanupusers'), $url);

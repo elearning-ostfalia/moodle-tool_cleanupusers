@@ -41,12 +41,23 @@ class reactivate_table extends \table_sql {
      * @param String $sqlwhere
      * @param array $param
      */
-    public function __construct($uniqueid, $sqlwhere, $param = null) {
+    public function __construct($uniqueid, $sqlwhere, $param, $intention) {
         parent::__construct($uniqueid);
 
         // Define the list of columns to show.
-        $columns = ['id', 'username', 'fullname', 'lastaccess', 'auth', 'reactivate_all'];
+        $columns = ['id', 'username', 'fullname', 'lastaccess', 'auth', $intention];
         $this->define_columns($columns);
+
+        switch ($intention) { // todo make enum or something like that.
+            case 'reactivate':
+                $header = get_string('willbesuspended', 'tool_cleanupusers');
+                break;
+            case 'delete':
+                $header = get_string('willbedeleted', 'tool_cleanupusers');
+                break;
+            default:
+                break;
+        }
 
         $headers = [
             get_string('id', 'tool_cleanupusers'),
@@ -68,7 +79,7 @@ class reactivate_table extends \table_sql {
             implode(', ', fields::get_name_fields()), '{tool_cleanupusers_archive}', $where, $param);
     }
 
-    public function col_reactivate_all($user) {
+    public function col_reactivate($user) {
         global $OUTPUT;
         $url = new \moodle_url('/admin/tool/cleanupusers/handleuser.php', ['userid' => $user->id, 'action' => 'reactivate']);
         return \html_writer::link(
@@ -80,7 +91,22 @@ class reactivate_table extends \table_sql {
                 ['class' => "imggroup-" . $user->id]
             )
         );
+    }
 
+    public function col_delete($user) {
+        $url = new \moodle_url('/admin/tool/cleanupusers/handleuser.php',
+            ['userid' => $user->id, 'action' => 'delete', 'checker' => 'TODO checker' /*$checker*/]);
+
+        global $OUTPUT;
+        return \html_writer::link(
+            $url,
+            $OUTPUT->pix_icon(
+                't/delete',
+                get_string('deleteuser', 'tool_cleanupusers'),
+                'moodle',
+                ['class' => "imggroup-" . $user->id]
+            )
+        );
     }
 
     public function col_lastaccess($user) {

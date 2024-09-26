@@ -84,4 +84,20 @@ class behat_cleanupusers extends behat_base {
             MUST_EXIST);
         $this->execute('behat_general::i_click_on', ['.imggroup-' . $record->id, 'css']);
     }
+
+    /**
+     * create large number of users
+     *
+     * @Then /^create "(?P<count_string>(?:[^"]|\\")*)" users$/
+     * @return void
+     */
+    public function create_users($count) {
+        $generator = testing_util::get_data_generator(); // $this->get_data_generator();
+        for ($i = 1; $i <= $count; $i++) {
+            $user = $generator->create_user([
+                'username' => 'user' . $i,
+                'timecreated' => time() - (60*60*24*366) // created one year ago
+            ]);
+        }
+    }
 }

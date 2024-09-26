@@ -38,7 +38,11 @@ admin_externalpage_setup('cleanupusers');
 $checker = optional_param('checker', '', PARAM_ALPHANUMEXT);
 
 // $pagetitle = get_string('toarchive', 'tool_cleanupusers', $checker);
-$PAGE->set_title(get_string('toarchive', 'tool_cleanupusers', $checker));
+
+$subpluginname = "\\userstatus_" . $checker . "\\" . $checker;
+$plugin = new $subpluginname();
+
+$PAGE->set_title(get_string('toarchive', 'tool_cleanupusers', $plugin->get_displayname()));
 // $PAGE->set_heading(get_string('toarchive', 'tool_cleanupusers', $checker));
 $PAGE->set_pagelayout('standard');
 $PAGE->set_url(new moodle_url('/admin/tool/cleanupusers/toarchive.php'), ['checker' => $checker]);
@@ -47,7 +51,7 @@ $renderer = $PAGE->get_renderer('tool_cleanupusers');
 
 $content = '';
 echo $OUTPUT->header();
-echo $renderer->get_heading(get_string('toarchive', 'tool_cleanupusers', $checker));
+echo $renderer->get_heading(get_string('toarchive', 'tool_cleanupusers', $plugin->get_displayname()));
 
 /**
  * @param mixed $userstatuschecker

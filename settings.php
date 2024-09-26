@@ -67,7 +67,7 @@ if ($hassiteconfig) {
 
         $ADMIN->add('tool_cleanupusers', new admin_externalpage(
             'Manage to archive by ' . $userstatuschecker->get_name(),
-            get_string('toarchive', 'tool_cleanupusers',
+            get_string('toarchivelink', 'tool_cleanupusers',
                 $userstatuschecker->get_displayname()),
             "$CFG->wwwroot/$CFG->admin/tool/cleanupusers/toarchive.php?checker=" . $userstatuschecker->get_name()
         ));

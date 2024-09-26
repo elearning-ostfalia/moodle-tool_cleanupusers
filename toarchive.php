@@ -44,7 +44,7 @@ $plugin = new $subpluginname();
 
 $PAGE->set_title(get_string('toarchive', 'tool_cleanupusers', $plugin->get_displayname()));
 // $PAGE->set_heading(get_string('toarchive', 'tool_cleanupusers', $checker));
-$PAGE->set_pagelayout('standard');
+$PAGE->set_pagelayout('admin');
 $PAGE->set_url(new moodle_url('/admin/tool/cleanupusers/toarchive.php'), ['checker' => $checker]);
 
 $renderer = $PAGE->get_renderer('tool_cleanupusers');

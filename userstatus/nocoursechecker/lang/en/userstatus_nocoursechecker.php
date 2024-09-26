@@ -21,7 +21,7 @@
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-$string['pluginname'] = 'Not enrolled in active course Checker';
+$string['pluginname'] = 'No active course Checker';
 $string['settingsinformation'] = 'Subplugin information';
 $string['condition'] = 'User is not enrolled in an active course';
 // $string['suspendtime'] = 'Time since user is created [days]';

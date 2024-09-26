@@ -41,7 +41,7 @@ $userstatus   = optional_param('userstatus', '', PARAM_PLUGIN);
 $pagetitle = get_string('pluginname', 'tool_cleanupusers');
 $PAGE->set_title(get_string('pluginname', 'tool_cleanupusers'));
 // $PAGE->set_heading(get_string('pluginname', 'tool_cleanupusers'));
-$PAGE->set_pagelayout('standard');
+$PAGE->set_pagelayout('admin');
 
 $renderer = $PAGE->get_renderer('tool_cleanupusers');
 

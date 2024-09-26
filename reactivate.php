@@ -41,7 +41,7 @@ admin_externalpage_setup('cleanupusers');
 // $pagetitle = get_string('toarchive', 'tool_cleanupusers', $checker);
 // $PAGE->set_title(get_string('achivedusers', 'tool_cleanupusers'));
 // $PAGE->set_heading(get_string('achivedusers', 'tool_cleanupusers'));
-$PAGE->set_pagelayout('standard');
+$PAGE->set_pagelayout('admin');
 $PAGE->set_url(new moodle_url('/admin/tool/cleanupusers/reactivate.php'));
 
 $renderer = $PAGE->get_renderer('tool_cleanupusers');

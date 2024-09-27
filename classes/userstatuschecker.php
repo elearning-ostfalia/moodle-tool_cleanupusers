@@ -251,11 +251,12 @@ abstract  class userstatuschecker
      * All users who should be deleted will be returned in the array.
      * The array includes merely the necessary information which comprises the userid, lastaccess, suspended, deleted
      * and the username.
-     * The function checks the user table and the tool_cleanupusers_archive table. Therefore users who are suspended by
-     * the tool_cleanupusers plugin and users who are suspended manually are screened.
+     * The function only checks the tool_cleanupusers_archive table.
+     * Therefore users who are suspended manually are NOT screened.
      *
      * @return array of users who should be deleted.
      */
+    /*
     public function get_to_delete() {
         if ($this->get_deletetime() < 0) {
             // No delete time configured => skip.
@@ -314,6 +315,121 @@ abstract  class userstatuschecker
 
         return $todelete;
     }
+*/
+
+    /**
+     * All users who should be deleted will be returned in the array.
+     * The array includes merely the necessary information which comprises
+     * the userid, lastaccess, suspended, deleted and the username.
+     * The function only checks the tool_cleanupusers_archive table.
+     * Therefore users who are suspended manually are NOT screened.
+     *
+     * @return array of users who should be deleted.
+     */
+    public static function get_to_delete_sql($checker = null) : array {
+        // Get list with enabled subplugins.
+        $pluginsenabled =  \core_plugin_manager::instance()->get_enabled_plugins("userstatus");
+        if (!$pluginsenabled) {
+            \core\notification::warning("No userstatus plugin enabled");
+            return [];
+        }
+        // Get delete time value for each subplugin.
+        $checkers = [];
+        foreach ($pluginsenabled as $subpluginname => $dir) {
+            if (empty($subpluginname)) {
+                continue;
+            }
+            $subplugin = "\\userstatus_" . $subpluginname . "\\" . $subpluginname;
+            if (!class_exists($subplugin)) {
+                // plugin might have been uninstalled?
+                continue;
+            }
+            $subplugin = new $subplugin();
+            if ($subplugin->get_deletetime() >= 0) {
+                $checkers[] = '(tc.checker=\'' . $subpluginname . '\' 
+                and tc.timestamp < '. time() - $subplugin->get_deletetime_in_sec().')';
+            }
+        }
+
+        if (count($checkers) == 0) {
+            \core\notification::warning("No valid and active userstatus plugin enabled for deletion");
+            return [];
+        }
+        // var_dump($checkers);
+        $condition = implode(' OR ', $checkers);
+
+        // Full join means that only users will be handled who are already
+        // suspended with the cleanupusers plugin
+        $sql = [
+            // fields
+            'fields' =>
+            'tca.id, tca.suspended, tca.lastaccess, tca.username, tca.deleted, tca.auth, 
+                tc.checker, tca.firstname, tca.lastname, tc.timestamp, 
+                tca.firstnamephonetic, tca.lastnamephonetic, tca.middlename, tca.alternatename, 
+                tca.firstname, tca.lastname',
+            // from
+            'from' => '{user} u
+                JOIN {tool_cleanupusers} tc ON u.id = tc.id 
+                JOIN {tool_cleanupusers_archive} tca ON u.id = tca.id',
+            // where
+            'where' => 'u.suspended = 1 AND u.deleted = 0 AND (' . $condition . ')'
+            ];
+        return $sql;
+/*
+        global $DB;
+        $users = $DB->get_records_sql(
+            "SELECT tca.id, tca.suspended, tca.lastaccess, tca.username, 
+                    tca.deleted, tca.auth, tc.checker
+                FROM {user} u
+                JOIN {tool_cleanupusers} tc ON u.id = tc.id 
+                JOIN {tool_cleanupusers_archive} tca ON u.id = tca.id
+                WHERE 
+                    u.suspended = 1
+                    AND u.deleted = 0
+                    AND (" . $condition . ")"
+        );
+        var_dump($users);
+        return $users;
+*/
+/*
+        // debugging($this->name);
+        // debugging("get_to_delete 1");
+        // var_dump($users);
+        $todelete = [];
+        foreach ($users as $key => $user) {
+            if (!is_siteadmin($user) && !isguestuser($user)) {
+                $deleteuser = new archiveduser(
+                    $user->id,
+                    $user->suspended,
+                    $user->lastaccess,
+                    $user->username,
+                    $user->deleted,
+                    $user->auth,
+                    $user->checker
+                );
+                $todelete[$key] = $deleteuser;
+            }
+        }
+*/
+        /*
+        // get all users who need to be reactivated by this plugin
+        // and remove them from the list of users to be deleted.
+        // => prevent users from deletion if they shall be reactivated
+        if (count($todelete) > 0) {
+            $toreactivate = $this->get_to_reactivate();
+            foreach ($todelete as $key => $user) {
+                if (array_key_exists($key, $toreactivate)) {
+                    unset($todelete[$key]);
+                }
+            }
+            // $todelete = array_diff($todelete, $toreactivate);
+            // var_dump($todelete);
+        }*/
+
+        // return $todelete;
+    }
+
+
 
     /**
      * All users that should be reactivated will be returned.

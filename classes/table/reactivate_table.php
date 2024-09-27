@@ -41,7 +41,7 @@ class reactivate_table extends \table_sql {
      * @param String $sqlwhere
      * @param array $param
      */
-    public function __construct($uniqueid, $sqlwhere, $param, $intention) {
+    public function __construct($uniqueid, $sqlwhere, $param, $intention, $sql) {
         parent::__construct($uniqueid);
 
         // Define the list of columns to show.
@@ -68,11 +68,16 @@ class reactivate_table extends \table_sql {
         }
 
         // read all users from archive table
-        $fields = 'a.id, a.username, a.lastaccess, a.auth, a.firstname, a.lastname, c.checker, c.timestamp, '.
-            implode(', ', fields::get_name_fields());
-        $this->set_sql($fields,
-            '{tool_cleanupusers_archive} a JOIN {tool_cleanupusers} c ON c.id = a.id',
-            $where, $param);
+        if (count($sql) > 0) {
+            $this->set_sql($sql['fields'],
+                    $sql['from'], $sql['where'] . ' and ' . $where, $param);
+        } else {
+            $fields = 'a.id, a.username, a.lastaccess, a.auth, a.firstname, a.lastname, c.checker, c.timestamp, '.
+                implode(', ', fields::get_name_fields());
+            $this->set_sql($fields,
+                '{tool_cleanupusers_archive} a JOIN {tool_cleanupusers} c ON c.id = a.id',
+                $where, $param);
+        }
     }
 
     public function col_reactivate($user) {

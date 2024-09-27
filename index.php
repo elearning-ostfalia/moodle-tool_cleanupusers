@@ -141,7 +141,7 @@ if (!$pluginsenabled) {
 
         try {
             $archivearray = $userstatuschecker->get_to_suspend();
-            $arraytodelete = $userstatuschecker->get_to_delete();
+            $arraytodelete = []; // $userstatuschecker->get_to_delete();
             $arrayneverloggedin = [];
 //            $arrayneverloggedin = $userstatuschecker->get_never_logged_in();
             $arrayreactivate = $userstatuschecker->get_to_reactivate();

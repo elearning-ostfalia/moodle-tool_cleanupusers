@@ -57,7 +57,7 @@ $userfilter->display_add();
 $userfilter->display_active();
 [$sql, $param] = $userfilter->get_sql_filter();
 $archivetable = new \tool_cleanupusers\table\reactivate_table('tool_cleanupusers_toarchive_table',
-    $sql, $param, "reactivate");
+    $sql, $param, "reactivate", []);
 $archivetable->define_baseurl($PAGE->url);
 $archivetable->out(20, false);
 

@@ -328,10 +328,15 @@ abstract  class userstatuschecker
      */
     public static function get_to_delete_sql($checker = null) : array {
         // Get list with enabled subplugins.
-        $pluginsenabled =  \core_plugin_manager::instance()->get_enabled_plugins("userstatus");
-        if (!$pluginsenabled) {
-            \core\notification::warning("No userstatus plugin enabled");
-            return [];
+        if (empty($checker)) {
+            $pluginsenabled =  \core_plugin_manager::instance()->get_enabled_plugins("userstatus");
+            if (count($pluginsenabled) == 0) {
+                \core\notification::warning("No userstatus plugin enabled");
+                return [];
+            }
+        } else {
+            $pluginsenabled = [];
+            $pluginsenabled[$checker] = $checker;
         }
         // Get delete time value for each subplugin.
         $checkers = [];

@@ -51,6 +51,7 @@ $string['hideuser'] = 'Suspend User';
 $string['deleteuser'] = 'Delete User';
 $string['aresuspended'] = 'Users currently suspended';
 $string['archive_user_task'] = 'Archive Users';
+$string['delete_user_task'] = 'Delete Users';
 $string['willbe_archived'] = 'archived in the next cron-job';
 $string['pluginsettingstitle'] = 'General settings';
 $string['sett_suspendfirstname'] = 'Firstname for suspended';

@@ -39,21 +39,21 @@ use core\task\scheduled_task;
  * @copyright  2016 N Herrmann
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class archive_user_task extends scheduled_task {
+class delete_user_task extends scheduled_task {
     /**
      * Get a descriptive name for this task (shown to admins).
      *
      * @return string
      */
     public function get_name() {
-        return get_string('archive_user_task', 'tool_cleanupusers');
+        return get_string('delete_user_task', 'tool_cleanupusers');
     }
 
     /**
      * Runs the cron job - Calls for the currently activated sub-plugin to return arrays of users.
-     * Distinguishes between users to reactivate, suspend and delete.
-     * Subsequently, sends an e-mail to the admin containing information about the amount of successfully changed users
-     * and the amount of failures.
+     * Distinguishes between users to reactivate and suspend.
+     * Subsequently, sends an e-mail to the admin containing information about the amount
+     * of successfully changed users and the amount of failures.
      * Last but not least triggers an event with the same information.
      *
      * @return true
@@ -71,13 +71,11 @@ class archive_user_task extends scheduled_task {
             $userstatuschecker = new $mysubpluginname();
 
             // Private function is executed to suspend, delete and activate users.
-            $archivearray = $userstatuschecker->get_to_suspend();
+            $archivearray = [];
             $reactivatearray = $userstatuschecker->get_to_reactivate();
-            $arraytodelete = []; // $userstatuschecker->get_to_delete();
+            // $arraytodelete = $userstatuschecker->get_to_delete();
 
-            $suspendresult = $this->change_user_deprovisionstatus($archivearray, 'suspend', $subplugin);
-            $unabletoarchive = $suspendresult['failures'];
-            $userarchived = $suspendresult['countersuccess'];
+            $suspendresult = [];
 
             $result = $this->change_user_deprovisionstatus($reactivatearray, 'reactivate', $subplugin);
             $unabletoactivate = $result['failures'];
@@ -91,8 +89,8 @@ class archive_user_task extends scheduled_task {
 
             $admin = get_admin();
             // Number of users suspended or deleted.
-            $messagetext = get_string('e-mail-archived', 'tool_cleanupusers', $userarchived) .
-//                "\r\n" . get_string('e-mail-deleted', 'tool_cleanupusers', $userdeleted) .
+            $messagetext =
+                "\r\n" . get_string('e-mail-deleted', 'tool_cleanupusers', $userdeleted) .
                 "\r\n" . get_string('e-mail-activated', 'tool_cleanupusers', $useractivated);
 
             // No Problems occured during the cron-job.
@@ -100,19 +98,15 @@ class archive_user_task extends scheduled_task {
                 $messagetext .= "\r\n\r\n" . get_string('e-mail-noproblem', 'tool_cleanupusers');
             } else {
                 // Extra information for problematic users.
-                $messagetext .= /*"\r\n\r\n" . get_string(
+                $messagetext .= "\r\n\r\n" . get_string(
                     'e-mail-problematic_delete',
                     'tool_cleanupusers',
                     count($unabletodelete)
-                ) . */ "\r\n\r\n" . get_string(
-                        'e-mail-problematic_suspend',
-                        'tool_cleanupusers',
-                        count($unabletoarchive)
-                    ) . "\r\n\r\n" . get_string(
-                        'e-mail-problematic_reactivate',
-                        'tool_cleanupusers',
-                        count($unabletoactivate)
-                    );
+                ) . "\r\n\r\n" . get_string(
+                    'e-mail-problematic_reactivate',
+                    'tool_cleanupusers',
+                    count($unabletoactivate)
+                );
             }
 
             // Email is send from the do not reply user.
@@ -121,7 +115,7 @@ class archive_user_task extends scheduled_task {
 
             // Triggers deprovisionusercronjob_completed event.
             $context = \context_system::instance();
-            $event = deprovisionusercronjob_completed::create_simple($context, $userarchived, $userdeleted);
+            $event = deprovisionusercronjob_completed::create_simple($context, [], $userdeleted);
             $event->trigger();
         }
 

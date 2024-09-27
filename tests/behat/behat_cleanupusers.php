@@ -60,7 +60,7 @@ class behat_cleanupusers extends behat_base {
         // var_dump($to);
 
         // var_dump($DB->get_records('tool_cleanupusers_archive', null, '', 'id, username'));
-        $sql1 = 'select id, username, ' . $DB->sql_substr("username", strlen(DEFAULT_USERNAME)+1) .
+/*        $sql1 = 'select id, username, ' . $DB->sql_substr("username", strlen(DEFAULT_USERNAME)+1) .
                 ' from {tool_cleanupusers_archive} ';
         var_dump($sql1);
         var_dump($DB->get_records_sql($sql1));
@@ -72,7 +72,7 @@ class behat_cleanupusers extends behat_base {
             . $DB->sql_cast_char2int($DB->sql_substr("a.username", strlen(DEFAULT_USERNAME)+1)) . ' <= :to';
         var_dump($sql1);
         var_dump($DB->get_records_sql($sql1, ['from' => $from, 'to' => $to]));
-
+*/
         if ($DB->get_dbfamily() == 'postgres') {
             $sql = 'update {tool_cleanupusers} as u
             set timestamp = u.timestamp - ' . ($days * 60 * 60 * 24). '
@@ -81,9 +81,9 @@ class behat_cleanupusers extends behat_base {
                 . $DB->sql_cast_char2int($DB->sql_substr("a.username", strlen(DEFAULT_USERNAME)+1)) . ' >= :from AND '
                 . $DB->sql_cast_char2int($DB->sql_substr("a.username", strlen(DEFAULT_USERNAME)+1)) . ' <= :to';
         } else {
-            $sql = 'update {tool_cleanupusers} as u
-            set timestamp = u.timestamp - ' . ($days * 60 * 60 * 24). '
-                from {tool_cleanupusers_archive} a WHERE a.id = u.id 
+            $sql = 'update {tool_cleanupusers} u, {tool_cleanupusers_archive} a 
+            set u.timestamp = u.timestamp - ' . ($days * 60 * 60 * 24). '
+                WHERE a.id = u.id 
                 AND '
                 . $DB->sql_cast_char2int($DB->sql_substr("a.username", strlen(DEFAULT_USERNAME)+1)) . ' >= :from AND '
                 . $DB->sql_cast_char2int($DB->sql_substr("a.username", strlen(DEFAULT_USERNAME)+1)) . ' <= :to';

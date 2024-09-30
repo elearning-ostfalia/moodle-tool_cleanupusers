@@ -60,15 +60,18 @@ class archiveuser_filtering extends \user_filtering
         return null;
     }
 
-    public function get_sql_filter($extra='', array $params=null) {
-/*        global $SESSION;
-        $extra = [];
-        $params = [];
-        if (!empty($SESSION->checker)) {
-            $extra[] = 'checker = :checker';
-            $params['checker'] = $SESSION->checker;
-            debugging("get_sql_filter => checker data available");
-        } */
+    public function get_full_sql_filter($withchecker = false) {
+        $extra='';
+        $params=null;
+        if ($withchecker) {
+            global $SESSION;
+            if (!empty($SESSION->checker)) {
+                $params = [];
+                $extra = 'checker = :checker';
+                $params['checker'] = $SESSION->checker;
+                // debugging("get_sql_filter => checker data available");
+            }
+        }
         return parent::get_sql_filter($extra, $params);
     }
 

@@ -71,7 +71,7 @@ $checker = '';
     $userfilter->display();
 /*    $userfilter->display_add();
     $userfilter->display_active();*/
-    [$sqlfilter, $paramfilter] = $userfilter->get_sql_filter();
+    [$sqlfilter, $paramfilter] = $userfilter->get_full_sql_filter();
     // var_dump($sqlfilter);echo '<br>';
     // var_dump($paramfilter);
     $sql = \tool_cleanupusers\userstatuschecker::get_to_delete_sql($userfilter->get_checker());

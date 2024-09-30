@@ -51,7 +51,7 @@ echo $renderer->get_heading(get_string('achivedusers', 'tool_cleanupusers'));
 
 core\notification::warning(get_string('warn_reactivate', 'tool_cleanupusers'));
 
-
+/*
 
 $mform = new \tool_cleanupusers\subplugin_select_form();
 $checker = null;
@@ -64,19 +64,24 @@ if ($formdata = $mform->get_data()) {
     }
 }
 $mform->display();
+*/
 
+$userfilter = new \tool_cleanupusers\archiveuser_filtering(); // user_filtering();
+$userfilter->display();
 
-$userfilter = new user_filtering();
+/*$userfilter = new user_filtering();
 $userfilter->display_add();
-$userfilter->display_active();
-[$sql, $param] = $userfilter->get_sql_filter();
-if (!empty($checker)) {
+$userfilter->display_active();*/
+[$sql, $param] = $userfilter->get_full_sql_filter(true);
+// var_dump($sql);echo '<br>';
+// var_dump($param);
+/*if (!empty($checker)) {
     if (!empty($sql)) {
         $sql .= ' AND checker = \'' . $checker . '\'';
     } else {
         $sql = 'checker = \'' . $checker . '\'';
     }
-}
+}*/
 $archivetable = new \tool_cleanupusers\table\reactivate_table('tool_cleanupusers_toarchive_table',
     $sql, $param, "reactivate", []);
 $archivetable->define_baseurl($PAGE->url);

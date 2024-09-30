@@ -35,11 +35,6 @@ abstract  class userstatuschecker
 
     protected $name;
 
-    /** @var int seconds until a user should be suspended */
-    // private $timesuspend;
-    /** @var int seconds until a user should be deleted */
-    // private $timedelete;
-
     public function __construct($name, $testing = false) {
 
         $this->baseconfig = get_config('tool_cleanupusers');
@@ -49,12 +44,6 @@ abstract  class userstatuschecker
 
         $this->name = $name;
         $this->config = get_config('userstatus_' . $name);
-        // var_dump($this->config);
-
-        // Calculates days to seconds.
-        // $this->timedelete = $this->config->deletetime * 86400;
-        // $this->timesuspend = $this->config->suspendtime * 86400;
-//        $this->testing = $testing;
     }
 
 
@@ -385,11 +374,13 @@ abstract  class userstatuschecker
                 tca.firstnamephonetic, tca.lastnamephonetic, tca.middlename, tca.alternatename, 
                 tca.firstname, tca.lastname',
             // from
-            'from' => '{user} u
-                JOIN {tool_cleanupusers} tc ON u.id = tc.id 
-                JOIN {tool_cleanupusers_archive} tca ON u.id = tca.id',
+            'from' => '{tool_cleanupusers_archive} tca  
+                JOIN {tool_cleanupusers} tc ON tc.id = tca.id',
+                // JOIN {user} u ON u.id = tca.id // avoid join accross user table because otherwise
+                // the user filter does not work (ambiguous attributes)
             // where
-            'where' => 'u.suspended = 1 AND u.deleted = 0 AND (' . $condition . ')'
+            'where' => $condition
+//            'where' => 'u.suspended = 1 AND u.deleted = 0 AND (' . $condition . ')'
             ];
         return $sql;
 /*

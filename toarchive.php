@@ -39,10 +39,15 @@ $checker = optional_param('checker', '', PARAM_ALPHANUMEXT);
 
 // $pagetitle = get_string('toarchive', 'tool_cleanupusers', $checker);
 
-$subpluginname = "\\userstatus_" . $checker . "\\" . $checker;
-$plugin = new $subpluginname();
+if (!empty($checker)) {
+    $subpluginname = "\\userstatus_" . $checker . "\\" . $checker;
+    $plugin = new $subpluginname();
 
-$PAGE->set_title(get_string('toarchive', 'tool_cleanupusers', $plugin->get_displayname()));
+    $PAGE->set_title(get_string('toarchive', 'tool_cleanupusers', $plugin->get_displayname()));
+} else {
+    $PAGE->set_title(get_string('toarchive', 'tool_cleanupusers'));
+}
+
 // $PAGE->set_heading(get_string('toarchive', 'tool_cleanupusers', $checker));
 $PAGE->set_pagelayout('admin');
 $PAGE->set_url(new moodle_url('/admin/tool/cleanupusers/toarchive.php'), ['checker' => $checker]);
@@ -51,7 +56,11 @@ $renderer = $PAGE->get_renderer('tool_cleanupusers');
 
 $content = '';
 echo $OUTPUT->header();
-echo $renderer->get_heading(get_string('toarchive', 'tool_cleanupusers', $plugin->get_displayname()));
+if (!empty($checker)) {
+    echo $renderer->get_heading(get_string('toarchive', 'tool_cleanupusers', $plugin->get_displayname()));
+} else {
+    echo $renderer->get_heading(get_string('toarchive', 'tool_cleanupusers'));
+}
 
 /**
  * @param mixed $userstatuschecker
@@ -77,6 +86,20 @@ function output_user_table(mixed $userstatuschecker, mixed $PAGE): void
         $archivetable->define_baseurl($PAGE->url);
         $archivetable->out(20, false);
     }
+}
+
+if (empty($checker)) {
+    $mform = new \tool_cleanupusers\subplugin_select_form();
+    $checker = null;
+    if ($formdata = $mform->get_data()) {
+        // debugging("get form data");
+        $arraydata = get_object_vars($formdata);
+        if ($mform->is_validated()) {
+            $checker = $arraydata['subplugin'];
+            // debugging($checker);
+        }
+    }
+    $mform->display();
 }
 
 

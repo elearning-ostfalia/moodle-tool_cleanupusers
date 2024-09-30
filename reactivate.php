@@ -34,7 +34,6 @@ $PAGE->set_context(context_system::instance());
 $context = context_system::instance();
 // Check permissions.
 require_admin();
-// require_capability('moodle/site:config', $context);
 
 admin_externalpage_setup('cleanupusers');
 
@@ -52,10 +51,32 @@ echo $renderer->get_heading(get_string('achivedusers', 'tool_cleanupusers'));
 
 core\notification::warning(get_string('warn_reactivate', 'tool_cleanupusers'));
 
+
+
+$mform = new \tool_cleanupusers\subplugin_select_form();
+$checker = null;
+if ($formdata = $mform->get_data()) {
+    // debugging("get form data");
+    $arraydata = get_object_vars($formdata);
+    if ($mform->is_validated()) {
+        $checker = $arraydata['subplugin'];
+        // debugging($checker);
+    }
+}
+$mform->display();
+
+
 $userfilter = new user_filtering();
 $userfilter->display_add();
 $userfilter->display_active();
 [$sql, $param] = $userfilter->get_sql_filter();
+if (!empty($checker)) {
+    if (!empty($sql)) {
+        $sql .= ' AND checker = \'' . $checker . '\'';
+    } else {
+        $sql = 'checker = \'' . $checker . '\'';
+    }
+}
 $archivetable = new \tool_cleanupusers\table\reactivate_table('tool_cleanupusers_toarchive_table',
     $sql, $param, "reactivate", []);
 $archivetable->define_baseurl($PAGE->url);

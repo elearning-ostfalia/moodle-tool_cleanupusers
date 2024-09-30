@@ -61,6 +61,7 @@ if ($hassiteconfig) {
     $ADMIN->add('tool_cleanupusers', $settings);
 
     // Add entry for users to be archived.
+    /*
     foreach (core_plugin_manager::instance()->get_enabled_plugins('userstatus') as $plugin) {
         $mysubpluginname = "\\userstatus_" . $plugin . "\\" . $plugin;
         $userstatuschecker = new $mysubpluginname();
@@ -72,6 +73,12 @@ if ($hassiteconfig) {
             "$CFG->wwwroot/$CFG->admin/tool/cleanupusers/toarchive.php?checker=" . $userstatuschecker->get_name()
         ));
     }
+    */
+    $ADMIN->add('tool_cleanupusers', new admin_externalpage(
+        'Manage to archive',
+        get_string('toarchivelink', 'tool_cleanupusers'),
+        "$CFG->wwwroot/$CFG->admin/tool/cleanupusers/toarchive.php"
+    ));
     // Add entry for users to be deleted.
     $ADMIN->add('tool_cleanupusers', new admin_externalpage(
         'Manage to delete',

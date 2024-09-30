@@ -48,6 +48,7 @@ echo $renderer->get_heading(get_string('todelete', 'tool_cleanupusers'));
 
 $content = '';
 
+/*
 $mform = new \tool_cleanupusers\subplugin_select_form();
 $checker = null;
 if ($formdata = $mform->get_data()) {
@@ -59,22 +60,28 @@ if ($formdata = $mform->get_data()) {
     }
 }
 $mform->display();
+*/
 
+$checker = '';
+// var_dump($sql);
+// $sql = \tool_cleanupusers\userstatuschecker::get_to_delete_sql($checker);
 
-$sql = \tool_cleanupusers\userstatuschecker::get_to_delete_sql($checker);
-if (count($sql) > 0) {
-
-    $userfilter = new user_filtering();
-    $userfilter->display_add();
-    $userfilter->display_active();
+// if (count($sql) > 0) {
+    $userfilter = new \tool_cleanupusers\archiveuser_filtering(); // user_filtering();
+    $userfilter->display();
+/*    $userfilter->display_add();
+    $userfilter->display_active();*/
     [$sqlfilter, $paramfilter] = $userfilter->get_sql_filter();
+    // var_dump($sqlfilter);echo '<br>';
+    // var_dump($paramfilter);
+    $sql = \tool_cleanupusers\userstatuschecker::get_to_delete_sql($userfilter->get_checker());
 
     $deletetable = new \tool_cleanupusers\table\reactivate_table('tool_cleanupusers_todelete_table',
         $sqlfilter, $paramfilter, "delete", $sql);
 
     $deletetable->define_baseurl($PAGE->url);
     $deletetable->out(20, false);
-}
+// }
 
 echo $content;
 echo $OUTPUT->footer();

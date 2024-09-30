@@ -152,6 +152,18 @@ abstract  class userstatuschecker
         return $this->get_suspendtime() * 86400;
     }
 
+    /**
+     * what shall be done if a user is about to be suspended (archived) but
+     * he or she has never logged in
+     * @return bool
+     */
+    public function delete_if_never_logged_in_on_suspendtime() : bool {
+        if (!isset($this->config->deleteifneverloggedin) || $this->config->deleteifneverloggedin == null) {
+            return false;
+        }
+        return $this->config->deleteifneverloggedin;
+    }
+
     protected function log($text) {
         /*
         file_put_contents($this->baseconfig->log_folder . "/debug_log_ldapchecker.log",

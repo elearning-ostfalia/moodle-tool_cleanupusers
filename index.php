@@ -29,8 +29,7 @@ require_once($CFG->libdir . '/adminlib.php');
 $PAGE->set_context(context_system::instance());
 $context = context_system::instance();
 // Check permissions.
-require_login();
-require_capability('moodle/site:config', $context);
+require_admin();
 
 admin_externalpage_setup('cleanupusers');
 

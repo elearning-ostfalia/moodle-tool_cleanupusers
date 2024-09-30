@@ -26,7 +26,6 @@ namespace userstatus_neveloginchecker;
 
 require_once(__DIR__.'/../../../tests/userstatus_base_test.php');
 
-// use userstatus_neverloginchecker\neverloginchecker;
 
 use advanced_testcase;
 

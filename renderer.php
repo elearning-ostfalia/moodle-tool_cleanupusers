@@ -46,12 +46,13 @@ class tool_cleanupusers_renderer extends plugin_renderer_base {
         $txt->condition = get_string('condition', 'tool_cleanupusers');
         $txt->deletetime = get_string('deletetime', 'tool_cleanupusers');
         $txt->suspendtime = get_string('suspendtime', 'tool_cleanupusers');
+        $txt->deleteifneverloggedin = get_string('deleteifneverloggedin', 'tool_cleanupusers');
 
         $authsavailable = core_plugin_manager::instance()->get_plugins_of_type('userstatus');
         // var_dump($authsavailable);
-        $class = \core_plugin_manager::resolve_plugininfo_class('userstatus');
-        $authsenabled = $class::get_enabled_plugins();
-        // $authsenabled = core_plugin_manager::instance()->get_enabled_plugins("userstatus");
+        // $class = \core_plugin_manager::resolve_plugininfo_class('userstatus');
+        // $authsenabled = $class::get_enabled_plugins();
+        $authsenabled = core_plugin_manager::instance()->get_enabled_plugins("userstatus");
         if (!$authsenabled) {
             $authsenabled = [];
         }
@@ -89,9 +90,10 @@ class tool_cleanupusers_renderer extends plugin_renderer_base {
         $return .= $OUTPUT->box_start('generalbox authsui');
 
         $table = new html_table();
-        $table->head  = array($txt->name, $txt->condition, $txt->authmethod, $txt->suspendtime, $txt->deletetime,
+        $table->head  = array($txt->name, $txt->condition, $txt->authmethod,
+            $txt->suspendtime, $txt->deletetime, $txt->deleteifneverloggedin,
             $txt->enable, $txt->updown, $txt->settings);
-        $table->colclasses = array('leftalign', 'centeralign', 'centeralign', 'centeralign', 'centeralign');
+        $table->colclasses = array('leftalign', 'leftalign', 'centeralign', 'centeralign', 'centeralign', 'centeralign', 'centeralign');
         $table->data  = array();
         $table->attributes['class'] = 'admintable generaltable';
         $table->id = 'manageauthtable';
@@ -144,7 +146,7 @@ class tool_cleanupusers_renderer extends plugin_renderer_base {
                 'authmethod',
                 $pluginname,
                 has_capability('moodle/site:config', context_system::instance()),
-                $authvalues,
+                empty(trim($authvalues))?get_string('all-authmethods', 'tool_cleanupusers'):$authvalues,
                 $strkeylist,
                 get_string('authmethod_info', 'tool_cleanupusers'),
                 get_string('authmethod', 'tool_cleanupusers')
@@ -186,6 +188,24 @@ class tool_cleanupusers_renderer extends plugin_renderer_base {
             );
             $timetodelete = $OUTPUT->render($tmpl);
 
+            // deleteifneverloggedin
+            $neverloggendin = $userstatuschecker->delete_if_never_logged_in_on_suspendtime();
+            $keylist = [];
+            $keylist[0] = get_string('suspend', 'tool_cleanupusers');
+            $keylist[1] = get_string('delete', 'tool_cleanupusers');
+            $tmpl = new \core\output\inplace_editable(
+                'tool_cleanupusers',
+                'neverloggedin',
+                $pluginname,
+                has_capability('moodle/site:config', context_system::instance()),
+                null,
+                empty($neverloggendin)?0:$neverloggendin,
+                get_string('neverloggedin_info', 'tool_cleanupusers'),
+                get_string('neverloggedin_info', 'tool_cleanupusers')
+            );
+            $tmpl->set_type_select($keylist);
+            $neverloggendin = $OUTPUT->render($tmpl);
+
             // up/down link (only if pluginname is enabled)
             $updown = '';
             if ($enabled) {
@@ -215,7 +235,7 @@ class tool_cleanupusers_renderer extends plugin_renderer_base {
 
             // Add a row to the table.
             $row = new html_table_row(array($displayname, $condition, $authmethod, $timetosuspend, $timetodelete,
-                $hideshow, $updown, $settings));
+                $neverloggendin, $hideshow, $updown, $settings));
             if ($class) {
                 $row->attributes['class'] = $class;
             }

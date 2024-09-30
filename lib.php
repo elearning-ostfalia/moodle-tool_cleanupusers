@@ -29,8 +29,7 @@ function tool_cleanupusers_inplace_editable($itemtype, $plugin, $newvalue1) {
         external_api::validate_context(context_system::instance());
 
         // Check permission of the user to update this item.
-        require_login();
-        require_capability('moodle/site:config', context_system::instance());
+        require_admin();
 
         // Clean input and update the record.
         $newvalue1 = clean_param($newvalue1, PARAM_NOTAGS);
@@ -65,7 +64,7 @@ function tool_cleanupusers_inplace_editable($itemtype, $plugin, $newvalue1) {
             'authmethod',
             $plugin,
             has_capability('moodle/site:config', context_system::instance()),
-            $newvaluetext,
+            empty(trim($newvaluetext))?get_string('all-authmethods', 'tool_cleanupusers'):$newvaluetext,
             $newvalue1,
             'Type authentication method', // new lang_string('editmytestnamefield', 'tool_mytest'),
             'Authent. method', // new lang_string('newvaluestring', 'tool_mytest', format_string($record->name))
@@ -81,8 +80,7 @@ function tool_cleanupusers_inplace_editable($itemtype, $plugin, $newvalue1) {
         external_api::validate_context(context_system::instance());
 
         // Check permission of the user to update this item.
-        require_login();
-        require_capability('moodle/site:config', context_system::instance());
+        require_admin();
 
         // Clean input and update configuration.
         $newvalue1 = clean_param($newvalue1, PARAM_INT);
@@ -111,8 +109,7 @@ function tool_cleanupusers_inplace_editable($itemtype, $plugin, $newvalue1) {
         external_api::validate_context(context_system::instance());
 
         // Check permission of the user to update this item.
-        require_login();
-        require_capability('moodle/site:config', context_system::instance());
+        require_admin();
 
         // Clean input and update configuration.
         $newvalue1 = clean_param($newvalue1, PARAM_INT);
@@ -131,5 +128,38 @@ function tool_cleanupusers_inplace_editable($itemtype, $plugin, $newvalue1) {
         );
         return $templ;
     }
+
+    if ($itemtype === 'neverloggedin') {
+        // Must call validate_context for either system, or course or course module context.
+        // This will both check access and set current context.
+        external_api::validate_context(context_system::instance());
+
+        // Check permission of the user to update this item.
+        require_admin();
+
+        // Clean input and update the record.
+        $newvalue1 = clean_param($newvalue1, PARAM_NOTAGS);
+
+        // Prepare the element for the output:
+        $keylist = [];
+        $keylist[0] = get_string('suspend', 'tool_cleanupusers');
+        $keylist[1] = get_string('delete', 'tool_cleanupusers');
+
+        set_config('deleteifneverloggedin', $newvalue1, 'userstatus_' . $plugin);
+
+        $templ = new \core\output\inplace_editable(
+            'tool_cleanupusers',
+            'neverloggedin',
+            $plugin,
+            has_capability('moodle/site:config', context_system::instance()),
+            null,
+            empty($newvalue1)?0:$newvalue1,
+            get_string('neverloggedin_info', 'tool_cleanupusers'),
+            get_string('neverloggedin_info', 'tool_cleanupusers')
+        );
+        $templ->set_type_select($keylist);
+        return $templ;
+    }
+
 
 }

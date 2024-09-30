@@ -35,8 +35,8 @@ require_admin();
 
 admin_externalpage_setup('cleanupusers');
 
-$pagetitle = get_string('todelete', 'tool_cleanupusers');
-$PAGE->set_title(get_string('todelete', 'tool_cleanupusers'));
+$pagetitle = get_string('todelete2', 'tool_cleanupusers');
+$PAGE->set_title(get_string('todelete2', 'tool_cleanupusers'));
 // $PAGE->set_heading(get_string('todelete', 'tool_cleanupusers'));
 $PAGE->set_pagelayout('admin');
 $PAGE->set_url(new moodle_url('/admin/tool/cleanupusers/todelete.php'));
@@ -44,7 +44,7 @@ $PAGE->set_url(new moodle_url('/admin/tool/cleanupusers/todelete.php'));
 $renderer = $PAGE->get_renderer('tool_cleanupusers');
 
 echo $OUTPUT->header();
-echo $renderer->get_heading(get_string('todelete', 'tool_cleanupusers'));
+echo $renderer->get_heading(get_string('todelete2', 'tool_cleanupusers'));
 
 $content = '';
 

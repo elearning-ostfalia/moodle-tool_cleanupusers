@@ -39,14 +39,8 @@ $checker = optional_param('checker', '', PARAM_ALPHANUMEXT);
 
 // $pagetitle = get_string('toarchive', 'tool_cleanupusers', $checker);
 
-if (!empty($checker)) {
-    $subpluginname = "\\userstatus_" . $checker . "\\" . $checker;
-    $plugin = new $subpluginname();
+// $PAGE->set_title(get_string('toarchive', 'tool_cleanupusers'));
 
-    $PAGE->set_title(get_string('toarchive', 'tool_cleanupusers', $plugin->get_displayname()));
-} else {
-    $PAGE->set_title(get_string('toarchive', 'tool_cleanupusers'));
-}
 
 // $PAGE->set_heading(get_string('toarchive', 'tool_cleanupusers', $checker));
 $PAGE->set_pagelayout('admin');
@@ -56,17 +50,20 @@ $renderer = $PAGE->get_renderer('tool_cleanupusers');
 
 $content = '';
 echo $OUTPUT->header();
+/*
 if (!empty($checker)) {
     echo $renderer->get_heading(get_string('toarchive', 'tool_cleanupusers', $plugin->get_displayname()));
 } else {
     echo $renderer->get_heading(get_string('toarchive', 'tool_cleanupusers'));
-}
+}*/
+echo $renderer->get_heading(get_string('achivedusers', 'tool_cleanupusers'));
 
 /**
  * @param mixed $userstatuschecker
  * @param mixed $PAGE
  * @return void
  */
+/*
 function output_user_table(mixed $userstatuschecker, mixed $PAGE): void
 {
 // Request arrays from the sub-plugin.
@@ -77,17 +74,23 @@ function output_user_table(mixed $userstatuschecker, mixed $PAGE): void
             $userstatuschecker->get_displayname() . ".<br>";
     } else {
         // var_dump($archivearray);
-        $userfilter = new user_filtering();
-        $userfilter->display_add();
-        $userfilter->display_active();
-        [$sql, $param] = $userfilter->get_sql_filter();
+        $userfilter = new \tool_cleanupusers\archiveuser_filtering(); // user_filtering();
+        $userfilter->display();
+
+//        $userfilter = new user_filtering();
+//        $userfilter->display_add();
+//        $userfilter->display_active();
+
+        [$sql, $param] = $userfilter->get_full_sql_filter();
         $archivetable = new \tool_cleanupusers\table\users_table('tool_cleanupusers_toarchive_table',
             $archivearray, $sql, $param, "suspend", $userstatuschecker->get_name());
         $archivetable->define_baseurl($PAGE->url);
         $archivetable->out(20, false);
     }
 }
+*/
 
+/*
 if (empty($checker)) {
     $mform = new \tool_cleanupusers\subplugin_select_form();
     $checker = null;
@@ -103,6 +106,7 @@ if (empty($checker)) {
 }
 
 
+
 if (empty($checker)) {
     $pluginsenabled =  \core_plugin_manager::instance()->get_enabled_plugins("userstatus");
     foreach ($pluginsenabled as $subplugin => $dir) {
@@ -113,7 +117,39 @@ if (empty($checker)) {
     $mysubpluginname = "\\userstatus_" . $checker . "\\" . $checker;
     output_user_table(new $mysubpluginname(), $PAGE);
 }
+*/
 
+// $checker = '';
+
+$userfilter = new \tool_cleanupusers\archiveuser_filtering(false); // user_filtering();
+$userfilter->display();
+[$sql, $param] = $userfilter->get_full_sql_filter();
+// var_dump($sqlfilter);echo '<br>';
+// var_dump($paramfilter);
+$checker = $userfilter->get_checker();
+if (!empty($checker)) {
+    $mysubpluginname = "\\userstatus_" . $checker . "\\" . $checker;
+    $userstatuschecker = new $mysubpluginname();
+
+    $PAGE->set_title(get_string('toarchiveby', 'tool_cleanupusers', $userstatuschecker->get_displayname()));
+    echo $renderer->get_heading(get_string('toarchiveby', 'tool_cleanupusers', $userstatuschecker->get_displayname()));
+    // debugging($userstatuschecker->get_displayname());
+
+    $archivearray = $userstatuschecker->get_to_suspend();
+    if (count($archivearray) == 0) {
+        echo "Currently no users will be suspended by the next cronjob for checker " .
+            $userstatuschecker->get_displayname() . ".<br>";
+    } else {
+        $archivetable = new \tool_cleanupusers\table\users_table('tool_cleanupusers_toarchive_table',
+            $archivearray, $sql, $param, "suspend", $userstatuschecker->get_name());
+
+        $archivetable->define_baseurl($PAGE->url);
+        $archivetable->out(20, false);
+    }
+} else {
+    $PAGE->set_title(get_string('achivedusers', 'tool_cleanupusers'));
+    echo $renderer->get_heading(get_string('achivedusers', 'tool_cleanupusers'));
+}
 
 echo $content;
 echo $OUTPUT->footer();

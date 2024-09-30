@@ -37,6 +37,15 @@ use core_plugin_manager;
  */
 
 class subplugin_select_form extends moodleform {
+
+    private $withall;
+
+    public function __construct($withall = true)
+    {
+        $this->withall = $withall;
+        parent::__construct();
+    }
+
     /**
      * Defines the sub-plugin select form.
      */
@@ -46,7 +55,9 @@ class subplugin_select_form extends moodleform {
         $mform = $this->_form;
         // Gets all enabled plugins of type userstatus.
         $plugins = core_plugin_manager::instance()->get_enabled_plugins("userstatus");
-        $plugins[''] = '[all]';
+        if ($this->withall) {
+            $plugins[''] = '[all]';
+        }
 /*
         $types = [];
 

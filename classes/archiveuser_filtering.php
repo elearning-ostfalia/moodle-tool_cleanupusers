@@ -28,10 +28,10 @@ class archiveuser_filtering extends \user_filtering
 {
     protected $checkerform;
 
-    public function __construct($baseurl = null) {
+    public function __construct($withall = true, $baseurl = null) {
         global $SESSION;
         parent::__construct(null, $baseurl);
-        $this->checkerform = new \tool_cleanupusers\subplugin_select_form();
+        $this->checkerform = new \tool_cleanupusers\subplugin_select_form($withall);
         if ($formdata = $this->checkerform->get_data()) {
             $arraydata = get_object_vars($formdata);
             if ($this->checkerform->is_validated()) {

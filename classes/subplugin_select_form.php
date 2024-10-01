@@ -73,10 +73,22 @@ class subplugin_select_form extends moodleform {
         }
 */
         $mform->addElement('select', 'subplugin', 'Please select a subplugin', $plugins);
+        if ($this->withall) {
+            $mform->setDefault('subplugin', '[all]');
+        } else {
+            $mform->setDefault('subplugin', '');
+        }
 
-        $mform->setDefault('subplugin', '');
-//        }
-        $mform->addElement('submit', 'reset', 'Submit');
+        $context = [
+            'trigger' => 'id_subplugin'
+        ];
+
+        // Render invisible submit button
+        global $OUTPUT;
+        $mform->addElement('html', $OUTPUT->render_from_template('tool_cleanupusers/filterform', $context));
+        //        }
+        // $mform->addElement('submit', 'reset', 'Submit');
+
     }
 
     /**

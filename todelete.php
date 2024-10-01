@@ -67,7 +67,7 @@ $checker = '';
 // $sql = \tool_cleanupusers\userstatuschecker::get_to_delete_sql($checker);
 
 // if (count($sql) > 0) {
-    $userfilter = new \tool_cleanupusers\archiveuser_filtering(); // user_filtering();
+    $userfilter = new \tool_cleanupusers\archiveuser_filtering(false); // user_filtering();
     $userfilter->display();
 /*    $userfilter->display_add();
     $userfilter->display_active();*/

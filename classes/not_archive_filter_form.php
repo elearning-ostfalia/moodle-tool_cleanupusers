@@ -36,11 +36,10 @@ use core_plugin_manager;
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-class archive_filter_form extends moodleform {
-
-    const REACTIVATED = 0;
-    const DELETED = 1;
-    const ALL_USERS = 2;
+class not_archive_filter_form extends moodleform {
+    
+    const MANUALLY_SUSPENDED = 0;
+    const ARCHIVED = 1;
 
     public function __construct()
     {
@@ -51,8 +50,6 @@ class archive_filter_form extends moodleform {
      * Defines the sub-plugin select form.
      */
     public function definition() {
-        global $CFG;
-
         $mform = $this->_form;
         // Gets all enabled plugins of type userstatus.
         $plugins = core_plugin_manager::instance()->get_enabled_plugins("userstatus");
@@ -60,18 +57,17 @@ class archive_filter_form extends moodleform {
             \core\notification::warning(get_string('errormessagenoplugin', 'tool_cleanupusers'));
         }
         $actions = [];
-        $actions[self::REACTIVATED] = 'users to be reactivated by';
-        $actions[self::DELETED] = 'users to be deleted by';
-        $actions[self::ALL_USERS] = 'all archived users';
+        $actions[self::MANUALLY_SUSPENDED] = 'users manually suspended';
+        $actions[self::ARCHIVED] = 'users to be archived by';
 
         $selectline = [];
         $selectline[] = &$mform->createElement('select', 'action', '', $actions);
         $selectline[] = &$mform->createElement('select', 'subplugin', '', $plugins);
         $mform->addGroup($selectline, 'selectline', 'Show', array(' '), false);
 
-        $mform->hideIf('subplugin', 'action', 'eq', self::ALL_USERS);
+        $mform->hideIf('subplugin', 'action', 'eq', self::MANUALLY_SUSPENDED);
 
-        $mform->setDefault('action', self::REACTIVATED);
+        $mform->setDefault('action', self::MANUALLY_SUSPENDED);
         $mform->setDefault('subplugin', '0');
 
         // Add invisible submit button
@@ -95,15 +91,22 @@ class archive_filter_form extends moodleform {
      * @return bool|array array in case the sub-plugin is not valid, otherwise true.
      */
     public function validation($data, $files) {
+        var_dump($data);
         switch ($data['action']) {
-            case self::ALL_USERS:
+            case self::MANUALLY_SUSPENDED:
                 return true;
-            case self::REACTIVATED:
-            case self::DELETED:
+            case self::ARCHIVED:
                 $plugins = core_plugin_manager::instance()->get_enabled_plugins("userstatus");
                 $issubplugin = false;
+                if (key_exists('subplugin', $data)) {
+                    $plugin = $data['subplugin'];
+
+                } else {
+                    global $SESSION;
+                    $plugin = $SESSION->checker;
+                }
                 foreach ($plugins as $key => $value) {
-                    if ($key == $data['subplugin']) {
+                    if ($key == $plugin) {
                         $issubplugin = true;
                         break;
                     }

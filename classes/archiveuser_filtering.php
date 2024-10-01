@@ -35,12 +35,17 @@ class archiveuser_filtering extends \user_filtering
         if ($archive) {
             $this->checkerform = new \tool_cleanupusers\archive_filter_form(true);
         } else {
-            $this->checkerform = new \tool_cleanupusers\subplugin_select_form(true);
+            $this->checkerform = new \tool_cleanupusers\not_archive_filter_form(true);
         }
         if ($formdata = $this->checkerform->get_data()) {
             $arraydata = get_object_vars($formdata);
             if ($this->checkerform->is_validated()) {
-                $SESSION->checker = $arraydata['subplugin'];
+                if (isset($arraydata['subplugin'])) {
+                    $SESSION->checker = $arraydata['subplugin'];
+                }
+                if (isset($arraydata['action'])) {
+                    $SESSION->action = $arraydata['action'];
+                }
             }
         } else {
             if (isset($SESSION->checker)) {

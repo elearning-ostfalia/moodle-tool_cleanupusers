@@ -133,5 +133,4 @@ Available at https://github.com/eLearning-TUDarmstadt/moodle-cleanupusers_ldapch
   Problem: Vor dem Löschen muss noch getestet werden, ob die Nutzer nicht doch 
   reaktiviert werden müssen und dazu muss der jeweilige Checker befragt werden.
 * Tests
-* Task zum Löschen abtrennen (damit er standardmäßig aus ist)
 

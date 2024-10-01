@@ -404,7 +404,8 @@ class tool_cleanupusers_renderer extends plugin_renderer_base {
             if (!empty($user)) {
                 $userinformation = $this->set_user_information_for_table($user, $userinformation, $cleanupusers);
                 $userinformation['Willbe'] = get_string('shouldbedelted', 'tool_cleanupusers');
-                $url = new moodle_url('/admin/tool/cleanupusers/handleuser.php', ['userid' => $user->id, 'action' => 'delete']);
+                $url = new moodle_url('/admin/tool/cleanupusers/handleuser.php',
+                    ['userid' => $user->id, 'action' => 'delete', 'returnurl' => '/admin/tool/cleanupusers/index.php']);
                 $userinformation['link'] = \html_writer::link(
                     $url,
                     $this->output->pix_icon(
@@ -435,7 +436,9 @@ class tool_cleanupusers_renderer extends plugin_renderer_base {
                 $userinformation = $this->set_user_information_for_table($user, $userinformation, $cleanupusers);
                 $userinformation['Willbe'] = 'Reactivated';
 
-                $url = new moodle_url('/admin/tool/cleanupusers/handleuser.php', ['userid' => $user->id, 'action' => 'reactivate']);
+                $url = new moodle_url('/admin/tool/cleanupusers/handleuser.php',
+                    ['userid' => $user->id, 'action' => 'reactivate',
+                        'returnurl' => '/admin/tool/cleanupusers/index.php']);
                 $userinformation['link'] = \html_writer::link(
                     $url,
                     $this->output->pix_icon(
@@ -466,7 +469,8 @@ class tool_cleanupusers_renderer extends plugin_renderer_base {
 
                 $userinformation['Willbe'] = get_string('willbe_archived', 'tool_cleanupusers');
                 $url = new moodle_url('/admin/tool/cleanupusers/handleuser.php',
-                    ['userid' => $user->id, 'action' => 'suspend', 'checker' => $checker]);
+                    ['userid' => $user->id, 'action' => 'suspend', 'checker' => $checker,
+                        'returnurl' => '/admin/tool/cleanupusers/index.php']);
 
                 $userinformation['link'] = \html_writer::link(
                     $url,

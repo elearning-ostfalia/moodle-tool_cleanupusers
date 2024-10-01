@@ -38,6 +38,7 @@ Feature: Cleanup settings with large number of users
     # archive all users ready for archive
     And I run the scheduled task "\tool_cleanupusers\task\archive_user_task"
     And simulate that "101" days have passed since archiving from "user1" to "user4"
+    And I pause
     And I navigate to "Users > Clean up users > Manage users who will be deleted" in site administration
     And I pause
     And I should see "user1"

@@ -32,6 +32,8 @@ require_once($CFG->dirroot . '/user/lib.php');
 $userid         = required_param('userid', PARAM_INT);
 // One of: suspend, reactivate or delete.
 $action         = required_param('action', PARAM_TEXT);
+$returnurl      = required_param('returnurl', PARAM_URL);
+
 
 $PAGE->set_url('/admin/tool/cleanupusers/handleuser.php');
 $PAGE->set_context(context_system::instance());
@@ -39,7 +41,7 @@ $PAGE->set_context(context_system::instance());
 $user = $DB->get_record('user', ['id' => $userid]);
 require_capability('moodle/user:update', $PAGE->context);
 
-$url = new moodle_url('/admin/tool/cleanupusers/index.php');
+$url = $returnurl; // new moodle_url('/admin/tool/cleanupusers/index.php');
 
 switch ($action) {
     // User should be suspended.

@@ -82,8 +82,11 @@ class reactivate_table extends \table_sql {
 
     public function col_reactivate($user) {
         global $OUTPUT;
-        $url = new \moodle_url('/admin/tool/cleanupusers/handleuser.php',
-            ['userid' => $user->id, 'action' => 'reactivate']);
+        $url = new \moodle_url('/admin/tool/cleanupusers/handleuser.php', [
+            'userid' => $user->id,
+            'action' => 'reactivate',
+            'returnurl' => '/admin/tool/cleanupusers/reactivate.php'
+        ]);
         return \html_writer::link(
             $url,
             $OUTPUT->pix_icon(
@@ -97,7 +100,8 @@ class reactivate_table extends \table_sql {
 
     public function col_delete($user) {
         $url = new \moodle_url('/admin/tool/cleanupusers/handleuser.php',
-            ['userid' => $user->id, 'action' => 'delete', 'checker' => $user->checker]);
+            ['userid' => $user->id, 'action' => 'delete', 'checker' => $user->checker,
+                'returnurl' => '/admin/tool/cleanupusers/todelete.php']);
 
         global $OUTPUT;
         return \html_writer::link(

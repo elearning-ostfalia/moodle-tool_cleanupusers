@@ -52,7 +52,7 @@ echo $renderer->get_heading(get_string('achivedusers', 'tool_cleanupusers'));
 core\notification::warning(get_string('warn_reactivate', 'tool_cleanupusers'));
 
 
-$userfilter = new \tool_cleanupusers\archiveuser_filtering();
+$userfilter = new \tool_cleanupusers\archiveuser_filtering(true);
 $userfilter->display();
 
 [$sql, $param] = $userfilter->get_full_sql_filter(true);

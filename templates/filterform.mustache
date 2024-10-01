@@ -43,13 +43,21 @@
     let submit = document.getElementById('{{uniqid}}-submit');
     if (submit) {
         submit.style.display = 'None';
-        let selectelem = document.getElementById('{{ trigger }}');
+        let selectelem = document.getElementById('{{ trigger1 }}');
         if (selectelem) {
             selectelem.addEventListener('change', function() {
                 submit.click();
             });
         } else {
-            console.error('template context error: cannot find element {{ trigger }}')
+            console.error('template context error: cannot find element {{ trigger1 }}')
+        }
+        selectelem = document.getElementById('{{ trigger2 }}');
+        if (selectelem) {
+            selectelem.addEventListener('change', function() {
+                submit.click();
+            });
+        } else {
+            console.error('template context error: cannot find element {{ trigger2 }}')
         }
     }
 })();

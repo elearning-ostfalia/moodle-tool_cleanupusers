@@ -36,13 +36,14 @@ use core_plugin_manager;
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-class subplugin_select_form extends moodleform {
+class archive_filter_form extends moodleform {
+    
+    const REACTIVATED = 0;
+    const DELETED = 1;
+    const ALL_USERS = 2;
 
-    private $withall;
-
-    public function __construct($withall = true)
+    public function __construct()
     {
-        $this->withall = $withall;
         parent::__construct();
     }
 
@@ -58,37 +59,26 @@ class subplugin_select_form extends moodleform {
         if (count($plugins) == 0) {
             \core\notification::warning(get_string('errormessagenoplugin', 'tool_cleanupusers'));
         }
-        if ($this->withall) {
-            $plugins[''] = '[all]';
-        } else {
-            return; // no plugin available => do form
-        }
-/*
-        $types = [];
+        $actions = [];
+        $actions[self::REACTIVATED] = 'users to be reactivated by';
+        $actions[self::DELETED] = 'users to be deleted by';
+        $actions[self::ALL_USERS] = 'all archived users';
 
-        foreach ($plugins as $value) {
-            $types[$value] = $value;
-        }
-        $isnopluginselected = empty(get_config('tool_cleanupusers'));
-        // Different text in case no plugin was selected beforehand.
-        if ($isnopluginselected) {
-            $text = 'Please select a subplugin';
-        } else {
-            $text = 'Change the subplugin';
-        }
-*/
-        $mform->addElement('select', 'subplugin', 'Please select a subplugin', $plugins);
-        if ($this->withall) {
-            $mform->setDefault('subplugin', '[all]');
-        } else {
-            $mform->setDefault('subplugin', $plugins[0]);
-        }
+        $selectline = [];
+        $selectline[] = &$mform->createElement('select', 'action', '', $actions);
+        $selectline[] = &$mform->createElement('select', 'subplugin', '', $plugins);
+        $mform->addGroup($selectline, 'selectline', 'Show', array(' '), false);
 
+        $mform->hideIf('subplugin', 'action', 'eq', self::ALL_USERS);
+
+        $mform->setDefault('action', self::REACTIVATED);
+        $mform->setDefault('subplugin', '0');
+
+        // Add invisible submit button
         $context = [
-            'trigger1' => 'id_subplugin'
+            'trigger1' => 'id_subplugin',
+            'trigger2' => 'id_action'
         ];
-
-        // Render invisible submit button
         global $OUTPUT;
         $mform->addElement('html', $OUTPUT->render_from_template('tool_cleanupusers/filterform', $context));
         //        }
@@ -105,6 +95,8 @@ class subplugin_select_form extends moodleform {
      * @return bool|array array in case the sub-plugin is not valid, otherwise true.
      */
     public function validation($data, $files) {
+        return true;
+        /*
         $plugins = core_plugin_manager::instance()->get_enabled_plugins("userstatus");
         $plugins[''] = '[all]';
         // debugging($data['subplugin']);
@@ -119,6 +111,6 @@ class subplugin_select_form extends moodleform {
         if ($issubplugin == false) {
             return ['subplugin' => get_string('errormessagesubplugin', 'tool_cleanupusers')];
         }
-        return $issubplugin;
+        return $issubplugin;*/
     }
 }

@@ -53,9 +53,8 @@ class reactivate_table extends \table_sql {
             'auth'       => get_string('authmethod', 'tool_cleanupusers'),
             'checker'    => 'checker',
             'timestamp'    => get_string('timestamp', 'tool_cleanupusers'),
-            $intention   => get_string($intention=='reactivate'?'willbesuspended':'willbedeleted',
-
-                'tool_cleanupusers')
+            $intention   => '' /*get_string($intention=='reactivate'?'willbesuspended':'willbedeleted',
+                'tool_cleanupusers')*/
         ];
 
         $this->define_columns(array_keys($columns));

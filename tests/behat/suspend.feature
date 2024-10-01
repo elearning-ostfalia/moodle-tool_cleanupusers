@@ -51,12 +51,12 @@ Feature: Cleanup settings
     Given I log in as "admin"
     # archive all users ready for archive
     And I run the scheduled task "\tool_cleanupusers\task\archive_user_task"
-    And simulate that "101" days have passed since the archiving of "user1"
-    And I navigate to "Users > Clean up users > Manage users who will be deleted" in site administration
+    And simulate that "101" days have passed since archiving of "user1"
+    And I navigate to "Users > Clean up users > Manage users to be deleted" in site administration
     And I should see "user1"
     And I delete "user1"
     And I should see "User 'user1' has been deleted."
-    And I navigate to "Users > Clean up users > Manage users who will be deleted" in site administration
+    And I navigate to "Users > Clean up users > Manage users to be deleted" in site administration
     And I should not see "user1"
 
   @javascript
@@ -77,11 +77,14 @@ Feature: Cleanup settings
     And I navigate to "Users > Clean up users > Browse archived users" in site administration
     And I should not see "user7"
 
-#  @javascript
+  @javascript
   Scenario: Run task for suspend
     Given I log in as "admin"
 
-    And I navigate to "Users > Clean up users > Manage users who will be archived by Last Login Checker" in site administration
+    # timechecker
+    And I navigate to "Users > Clean up users > Manage users to be archived" in site administration
+    And I set the field "Please select a subplugin" to "timechecker"
+    And I pause
     And I should see "user1"
     And I should not see "user2"
     And I should not see "user3"
@@ -101,7 +104,8 @@ Feature: Cleanup settings
     And I should not see "user7"
     And I should not see "user8"
 
-    And I navigate to "Users > Clean up users > Manage users who will be archived by Not enrolled in active course Checker" in site administration
+    And I navigate to "Users > Clean up users > Manage users to be archived" in site administration
+    And I set the field "Please select a subplugin" to "nocoursechecker"
     And I should see "user5"
     And I should see "user6"
     And I should see "user7"

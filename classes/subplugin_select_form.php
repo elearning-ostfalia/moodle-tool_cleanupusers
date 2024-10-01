@@ -55,8 +55,13 @@ class subplugin_select_form extends moodleform {
         $mform = $this->_form;
         // Gets all enabled plugins of type userstatus.
         $plugins = core_plugin_manager::instance()->get_enabled_plugins("userstatus");
+        if (count($plugins) == 0) {
+            \core\notification::warning(get_string('errormessagenoplugin', 'tool_cleanupusers'));
+        }
         if ($this->withall) {
             $plugins[''] = '[all]';
+        } else {
+            return; // no plugin available => do form
         }
 /*
         $types = [];
@@ -76,7 +81,7 @@ class subplugin_select_form extends moodleform {
         if ($this->withall) {
             $mform->setDefault('subplugin', '[all]');
         } else {
-            $mform->setDefault('subplugin', '');
+            $mform->setDefault('subplugin', $plugins[0]);
         }
 
         $context = [

@@ -2,7 +2,7 @@
 Feature: Cleanup settings with large number of users
 
   Background:
-    Given create "10" users
+    Given create "10000" users
     # Values are set per checker as otherwise only one value
     # with the same first column will be set (bug?)
     And the following config values are set as admin:
@@ -25,11 +25,11 @@ Feature: Cleanup settings with large number of users
     # archive all users ready for archive
     And I run the scheduled task "\tool_cleanupusers\task\archive_user_task"
     And simulate that "101" days have passed since archiving of "user1"
-    And I navigate to "Users > Clean up users > Manage users who will be deleted" in site administration
+    And I navigate to "Users > Clean up users > Manage users to be deleted" in site administration
     And I should see "user1"
     And I delete "user1"
     And I should see "User 'user1' has been deleted."
-    And I navigate to "Users > Clean up users > Manage users who will be deleted" in site administration
+    And I navigate to "Users > Clean up users > Manage users to be deleted" in site administration
     And I should not see "user1"
 
   @javascript
@@ -37,12 +37,13 @@ Feature: Cleanup settings with large number of users
     Given I log in as "admin"
     # archive all users ready for archive
     And I run the scheduled task "\tool_cleanupusers\task\archive_user_task"
-    And simulate that "101" days have passed since archiving from "user1" to "user4"
-    And I pause
-    And I navigate to "Users > Clean up users > Manage users who will be deleted" in site administration
-    And I pause
-    And I should see "user1"
-    And I delete "user1"
-    And I should see "User 'user1' has been deleted."
-    And I navigate to "Users > Clean up users > Manage users who will be deleted" in site administration
-    And I should not see "user1"
+    And simulate that "101" days have passed since archiving from "user1" to "user400"
+    And I navigate to "Users > Clean up users > Manage users to be deleted" in site administration
+    And I should see "user8"
+    And I delete "user8"
+    And I should see "User 'user8' has been deleted."
+    And I press "Continue"
+    # check correct redirect
+    And I should see "Users to be deleted"
+    And I should not see "user8"
+    And I should see "user2"

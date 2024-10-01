@@ -133,4 +133,9 @@ Available at https://github.com/eLearning-TUDarmstadt/moodle-cleanupusers_ldapch
   Problem: Vor dem Löschen muss noch getestet werden, ob die Nutzer nicht doch 
   reaktiviert werden müssen und dazu muss der jeweilige Checker befragt werden.
 * Tests
+* Soll der Zeitstempel des Archivierens so gesetzt werden, als wenn das Archivieren auch zu 
+  dem Zeitpunkt stattgefunden hat, wenn es hätte stattfinden können?
+  (Ziel: Wenn das Plugin installiert wird, müssen ja alte Nutzerdaten abgearbeitet werden)
+* Es muss auch möglich sein, dass Nutzer, die manuell suspendiert wurden, archiviert und 
+  später gelöscht werden. Allerdings ist die Frage, mit welchem Checker (welcher Algorithmus soll da greifen)? 
 

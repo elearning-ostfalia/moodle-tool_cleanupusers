@@ -56,7 +56,7 @@ if (!empty($checker)) {
 } else {
     echo $renderer->get_heading(get_string('toarchive', 'tool_cleanupusers'));
 }*/
-echo $renderer->get_heading(get_string('achivedusers', 'tool_cleanupusers'));
+echo $renderer->get_heading(get_string('toarchive', 'tool_cleanupusers'));
 
 /**
  * @param mixed $userstatuschecker
@@ -127,6 +127,7 @@ $userfilter->display();
 // var_dump($sqlfilter);echo '<br>';
 // var_dump($paramfilter);
 $checker = $userfilter->get_checker();
+var_dump($checker);
 if (!empty($checker)) {
     $mysubpluginname = "\\userstatus_" . $checker . "\\" . $checker;
     $userstatuschecker = new $mysubpluginname();

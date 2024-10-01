@@ -408,9 +408,9 @@ class tool_cleanupusers_renderer extends plugin_renderer_base {
                     ['userid' => $user->id, 'action' => 'delete', 'returnurl' => '/admin/tool/cleanupusers/index.php']);
                 $userinformation['link'] = \html_writer::link(
                     $url,
-                    $this->output->pix_icon(
+                    '<red>' . $this->output->pix_icon(
                         't/delete',
-                        get_string('deleteuser', 'tool_cleanupusers'),
+                        get_string('deleteuser', 'tool_cleanupusers') . '</red>',
                         'moodle',
                         ['class' => "imggroup-" . $user->id]
                     )

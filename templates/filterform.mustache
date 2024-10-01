@@ -18,7 +18,10 @@
     @template tool_cleanupusers/filterform
 
     The purpose of this template is implement an invisible submit button in a for
-    which is clicked if the user changes the input of another input field
+    which is clicked if the user changes the input of another input field.
+    Do not use Moodle hideIf because when the value is shown again
+    it is not posted in the submit (maybe because if the action order)
+
 
     Classes required for JS:
     * none
@@ -43,21 +46,35 @@
     let submit = document.getElementById('{{uniqid}}-submit');
     if (submit) {
         submit.style.display = 'None';
-        let selectelem = document.getElementById('{{ trigger1 }}');
-        if (selectelem) {
-            selectelem.addEventListener('change', function() {
+        let pluginelem = document.getElementById('{{ pluginid }}');
+        if (pluginelem) {
+            pluginelem.addEventListener('change', function() {
                 submit.click();
             });
         } else {
-            console.error('template context error: cannot find element {{ trigger1 }}')
+            console.error('template context error: cannot find element {{ pluginid }}')
         }
-        selectelem = document.getElementById('{{ trigger2 }}');
-        if (selectelem) {
-            selectelem.addEventListener('change', function() {
+
+        actionelem = document.getElementById('{{ actionid }}');
+        if (actionelem) {
+            actionelem.addEventListener("change", (event) => {
+                if (event.target.value == '{{hidevalue}}') {
+                    pluginelem.style.display = 'None';
+                } else {
+                    // show before submit!!!
+                    // hideIf in Moodle does not show the element before submit is processed
+                    pluginelem.style.display = '';
+                }
                 submit.click();
             });
+
+            if (actionelem.value == '{{hidevalue}}') {
+                pluginelem.style.display = 'None';
+            } else {
+                pluginelem.style.display = '';
+            }
         } else {
-            console.error('template context error: cannot find element {{ trigger2 }}')
+            console.error('template context error: cannot find element {{ actionid }}')
         }
     }
 })();

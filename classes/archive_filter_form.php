@@ -69,15 +69,16 @@ class archive_filter_form extends moodleform {
         $selectline[] = &$mform->createElement('select', 'subplugin', '', $plugins);
         $mform->addGroup($selectline, 'selectline', 'Show', array(' '), false);
 
-        $mform->hideIf('subplugin', 'action', 'eq', self::ALL_USERS);
+        // $mform->hideIf('subplugin', 'action', 'eq', self::ALL_USERS);
 
         $mform->setDefault('action', self::REACTIVATED);
         $mform->setDefault('subplugin', '0');
 
         // Add invisible submit button
         $context = [
-            'trigger1' => 'id_subplugin',
-            'trigger2' => 'id_action'
+            'pluginid' => 'id_subplugin',
+            'actionid' => 'id_action',
+            'hidevalue' => self::ALL_USERS
         ];
         global $OUTPUT;
         $mform->addElement('html', $OUTPUT->render_from_template('tool_cleanupusers/filterform', $context));
@@ -95,6 +96,7 @@ class archive_filter_form extends moodleform {
      * @return bool|array array in case the sub-plugin is not valid, otherwise true.
      */
     public function validation($data, $files) {
+        var_dump($data);
         switch ($data['action']) {
             case self::ALL_USERS:
                 return true;

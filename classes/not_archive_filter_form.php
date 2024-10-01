@@ -65,15 +65,16 @@ class not_archive_filter_form extends moodleform {
         $selectline[] = &$mform->createElement('select', 'subplugin', '', $plugins);
         $mform->addGroup($selectline, 'selectline', 'Show', array(' '), false);
 
-        $mform->hideIf('subplugin', 'action', 'eq', self::MANUALLY_SUSPENDED);
+        // $mform->hideIf('subplugin', 'action', 'eq', self::MANUALLY_SUSPENDED);
 
         $mform->setDefault('action', self::MANUALLY_SUSPENDED);
         $mform->setDefault('subplugin', '0');
 
         // Add invisible submit button
         $context = [
-            'trigger1' => 'id_subplugin',
-            'trigger2' => 'id_action'
+            'pluginid' => 'id_subplugin',
+            'actionid' => 'id_action',
+            'hidevalue' => self::MANUALLY_SUSPENDED
         ];
         global $OUTPUT;
         $mform->addElement('html', $OUTPUT->render_from_template('tool_cleanupusers/filterform', $context));

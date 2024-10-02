@@ -127,17 +127,6 @@ A sub-plugin developed by TU Darmstadt; uses data from an external server connec
 Server can be chosen and configured in settings.
 Available at https://github.com/eLearning-TUDarmstadt/moodle-cleanupusers_ldapchecker
 
-# TODO:
-
-* Löschen: eine Tabelle für alle, weil das mit einer SQL-Anfrage erledigt werden kann??
-  Problem: Vor dem Löschen muss noch getestet werden, ob die Nutzer nicht doch 
-  reaktiviert werden müssen und dazu muss der jeweilige Checker befragt werden.
-* Tests
-* Soll der Zeitstempel des Archivierens so gesetzt werden, als wenn das Archivieren auch zu 
-  dem Zeitpunkt stattgefunden hat, wenn es hätte stattfinden können?
-  (Ziel: Wenn das Plugin installiert wird, müssen ja alte Nutzerdaten abgearbeitet werden)
-* Es muss auch möglich sein, dass Nutzer, die manuell suspendiert wurden, archiviert und 
-  später gelöscht werden. Allerdings ist die Frage, mit welchem Checker (welcher Algorithmus soll da greifen)? 
 
 # User interface
 
@@ -177,4 +166,16 @@ Aktionen ggf. auch für alle Nutzer aus dem Filter anwenden mit Nachfrage!
    * reactivated => Link zu "Manage archived users" mit passendem Filter
    * suspended => Link zu "Manage users to be archived" mit passendem Filter
    * deleted => Link zu "Manage users to be archived" mit passendem Filter
-   
+
+# TODO:
+
+* Löschen: eine Tabelle für alle, weil das mit einer SQL-Anfrage erledigt werden kann??
+  Problem: Vor dem Löschen muss noch getestet werden, ob die Nutzer nicht doch
+  reaktiviert werden müssen und dazu muss der jeweilige Checker befragt werden.
+* Tests
+* Soll der Zeitstempel des Archivierens so gesetzt werden, als wenn das Archivieren auch zu
+  dem Zeitpunkt stattgefunden hat, wenn es hätte stattfinden können?
+  (Ziel: Wenn das Plugin installiert wird, müssen ja alte Nutzerdaten abgearbeitet werden)
+* Es muss auch möglich sein, dass Nutzer, die manuell suspendiert wurden, archiviert und
+  später gelöscht werden. Allerdings ist die Frage, mit welchem Checker (welcher Algorithmus soll da greifen)?
+* Handeln von "never logged in" (auch mit Tests)

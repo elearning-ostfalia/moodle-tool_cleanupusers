@@ -33,7 +33,6 @@ $action  = optional_param('action', null, PARAM_INT);
 $checker = optional_param('checker', null, PARAM_ALPHANUMEXT);
 
 $PAGE->set_context(context_system::instance());
-$context = context_system::instance();
 // Check permissions.
 require_admin();
 
@@ -73,7 +72,7 @@ switch ($userfilter->get_action()) {
                 $arrayreactivate = $userstatuschecker->get_to_reactivate();
 
                 if (count($arrayreactivate) > 0) {
-                    var_dump($arrayreactivate);
+                    // var_dump($arrayreactivate);
                     // create SQL filter from id list
                     $idsasstring = '';
                     foreach ($arrayreactivate as $user) {

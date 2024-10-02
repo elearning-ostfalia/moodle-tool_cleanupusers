@@ -94,7 +94,7 @@ class not_archive_filter_form extends moodleform {
      * @return bool|array array in case the sub-plugin is not valid, otherwise true.
      */
     public function validation($data, $files) {
-        var_dump($data);
+        // var_dump($data);
         switch ($data['action']) {
             case self::MANUALLY_SUSPENDED:
                 return true;

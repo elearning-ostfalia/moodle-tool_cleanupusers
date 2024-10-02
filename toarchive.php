@@ -26,18 +26,16 @@ require_once($CFG->libdir . '/adminlib.php');
 require_once($CFG->dirroot . '/user/filters/lib.php');
 
 // Get URL parameters.
+$action  = optional_param('action', null, PARAM_INT);
+$checker = optional_param('checker', null, PARAM_ALPHANUMEXT);
+
 
 $PAGE->set_context(context_system::instance());
-$context = context_system::instance();
 // Check permissions.
-require_login();
-require_capability('moodle/site:config', $context);
+require_admin();
 
 admin_externalpage_setup('cleanupusers');
 
-// Get URL parameters.
-$action  = optional_param('action', null, PARAM_INT);
-$checker = optional_param('checker', null, PARAM_ALPHANUMEXT);
 
 // $pagetitle = get_string('toarchive', 'tool_cleanupusers', $checker);
 
@@ -126,32 +124,45 @@ if (empty($checker)) {
 $userfilter = new \tool_cleanupusers\archiveuser_filtering(false, $action, $checker); // user_filtering();
 $userfilter->display();
 [$sql, $param] = $userfilter->get_full_sql_filter();
+
+$returnurl = new moodle_url('/admin/tool/cleanupusers/toarchive.php',
+    ['action' => $userfilter->get_action(), 'checker' => $userfilter->get_checker()]);
+
+switch ($userfilter->get_action()) {
+    case \tool_cleanupusers\not_archive_filter_form::TO_BE_ARCHIVED:
 // var_dump($sqlfilter);echo '<br>';
 // var_dump($paramfilter);
-$checker = $userfilter->get_checker();
-var_dump($checker);
-if (!empty($checker)) {
-    $mysubpluginname = "\\userstatus_" . $checker . "\\" . $checker;
-    $userstatuschecker = new $mysubpluginname();
+        $checker = $userfilter->get_checker();
+        $subpluginname = "\\userstatus_" . $checker . "\\" . $checker;
+        if (!class_exists($subpluginname)) {
+            core\notification::warning($subpluginname . ' does not exist');
+        } else {
+            // var_dump($checker);
+            $userstatuschecker = new $subpluginname();
+            $PAGE->set_title(get_string('toarchiveby', 'tool_cleanupusers', $userstatuschecker->get_displayname()));
+            echo $renderer->get_heading(get_string('toarchiveby', 'tool_cleanupusers', $userstatuschecker->get_displayname()));
+            // debugging($userstatuschecker->get_displayname());
 
-    $PAGE->set_title(get_string('toarchiveby', 'tool_cleanupusers', $userstatuschecker->get_displayname()));
-    echo $renderer->get_heading(get_string('toarchiveby', 'tool_cleanupusers', $userstatuschecker->get_displayname()));
-    // debugging($userstatuschecker->get_displayname());
+            $archivearray = $userstatuschecker->get_to_suspend();
+            if (count($archivearray) == 0) {
+                echo "Currently no users will be suspended by the next cronjob for checker " .
+                    $userstatuschecker->get_displayname() . ".<br>";
+            } else {
+                $archivetable = new \tool_cleanupusers\table\users_table(
+                    'tool_cleanupusers_toarchive_table',
+                    $archivearray, $sql, $param, "suspend", $userstatuschecker->get_name(), $returnurl);
 
-    $archivearray = $userstatuschecker->get_to_suspend();
-    if (count($archivearray) == 0) {
-        echo "Currently no users will be suspended by the next cronjob for checker " .
-            $userstatuschecker->get_displayname() . ".<br>";
-    } else {
-        $archivetable = new \tool_cleanupusers\table\users_table('tool_cleanupusers_toarchive_table',
-            $archivearray, $sql, $param, "suspend", $userstatuschecker->get_name());
+                $archivetable->define_baseurl($PAGE->url);
+                $archivetable->out(20, false);
+            }
+        }
+        break;
+    case \tool_cleanupusers\not_archive_filter_form::MANUALLY_SUSPENDED:
+        echo 'TODO MANUALLY_SUSPENDED';
+        break;
+    default:
+        throw new coding_exception('invalid action');
 
-        $archivetable->define_baseurl($PAGE->url);
-        $archivetable->out(20, false);
-    }
-} else {
-    $PAGE->set_title(get_string('achivedusers', 'tool_cleanupusers'));
-    echo $renderer->get_heading(get_string('achivedusers', 'tool_cleanupusers'));
 }
 
 echo $content;

@@ -34,6 +34,7 @@ use core_user\fields;
  */
 class users_table extends \table_sql {
     private $checker;
+    private $returnurl;
     /**
      * Constructor
      * @param int $uniqueid all tables have to have a unique id, this is used
@@ -42,9 +43,10 @@ class users_table extends \table_sql {
      * @param String $sqlwhere
      * @param array $param
      */
-    public function __construct($uniqueid, $users, $sqlwhere, $param, $intention, $checker) {
+    public function __construct($uniqueid, $users, $sqlwhere, $param, $intention, $checker, $returnurl) {
         parent::__construct($uniqueid);
         $this->checker = $checker;
+        $this->returnurl = $returnurl;
 
         // Define the list of columns to show.
         $columns = ['id', 'username', 'fullname', 'lastaccess', 'auth', $intention];
@@ -97,7 +99,7 @@ class users_table extends \table_sql {
     public function col_suspend($user) {
         $url = new \moodle_url('/admin/tool/cleanupusers/handleuser.php',
             ['userid' => $user->id, 'action' => 'suspend', 'checker' => $this->checker,
-                'returnurl' => '/admin/tool/cleanupusers/toarchive.php'
+                'returnurl' => $this->returnurl
                 ]);
 
         global $OUTPUT;

@@ -32,7 +32,8 @@ use core_user\fields;
  * @copyright 2019 Justus Dieckmann
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class reactivate_table extends \table_sql {
+class archive_table extends \table_sql {
+    private $returnurl;
     /**
      * Constructor
      * @param int $uniqueid all tables have to have a unique id, this is used
@@ -41,9 +42,10 @@ class reactivate_table extends \table_sql {
      * @param String $sqlwhere
      * @param array $param
      */
-    public function __construct($uniqueid, $sqlwhere, $param, $intention, $sql) {
+    public function __construct($uniqueid, $sqlwhere, $param, $intention, $sql, $returnurl) {
         parent::__construct($uniqueid);
 
+        $this->returnurl = $returnurl;
         // Define the list of columns to show.
         $columns = [
             'id'         => get_string('id', 'tool_cleanupusers'),
@@ -84,7 +86,7 @@ class reactivate_table extends \table_sql {
         $url = new \moodle_url('/admin/tool/cleanupusers/handleuser.php', [
             'userid' => $user->id,
             'action' => 'reactivate',
-            'returnurl' => '/admin/tool/cleanupusers/reactivate.php'
+            'returnurl' => $this->returnurl
         ]);
         return \html_writer::link(
             $url,
@@ -100,7 +102,7 @@ class reactivate_table extends \table_sql {
     public function col_delete($user) {
         $url = new \moodle_url('/admin/tool/cleanupusers/handleuser.php',
             ['userid' => $user->id, 'action' => 'delete', 'checker' => $user->checker,
-                'returnurl' => '/admin/tool/cleanupusers/todelete.php']);
+                'returnurl' => $this->returnurl]);
 
         global $OUTPUT;
         return \html_writer::link(

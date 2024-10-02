@@ -27,15 +27,17 @@ namespace tool_cleanupusers;
 class archiveuser_filtering extends \user_filtering
 {
     protected $checkerform;
+    protected $archive;
 
-    public function __construct($archive, $baseurl = null) { // $withall = true, $baseurl = null) {
+    public function __construct($archive, $action, $checker) {
         global $SESSION;
-        parent::__construct(null, $baseurl);
+        parent::__construct();
 
+        $this->archive = $archive;
         if ($archive) {
-            $this->checkerform = new \tool_cleanupusers\archive_filter_form(true);
+            $this->checkerform = new archive_filter_form();
         } else {
-            $this->checkerform = new \tool_cleanupusers\not_archive_filter_form(true);
+            $this->checkerform = new not_archive_filter_form();
         }
         if ($formdata = $this->checkerform->get_data()) {
             $arraydata = get_object_vars($formdata);
@@ -48,10 +50,16 @@ class archiveuser_filtering extends \user_filtering
                 }
             }
         } else {
-            if (isset($SESSION->checker)) {
-                $default_values = [];
-                $default_values['checker'] = $SESSION->checker;
-                $this->checkerform->set_data($default_values);
+            if (isset($action)) {
+                // set default values from URL
+                $this->checkerform->set_data(['action' => $action, 'checker' => $checker]);
+            } else {
+                if (isset($SESSION->checker)) {
+                    // set default values from session
+                    $default_values = [];
+                    $default_values['checker'] = $SESSION->checker;
+                    $this->checkerform->set_data($default_values);
+                }
             }
         }
     }
@@ -68,6 +76,15 @@ class archiveuser_filtering extends \user_filtering
             return $SESSION->checker;
         }
         return null;
+    }
+
+    public function get_action() {
+        global $SESSION;
+        if (!empty($SESSION->action)) {
+            return $SESSION->action;
+        }
+        // Return default action which does not require a plugin to be selected.
+        return $this->checkerform::DEFAULT_ACTION;
     }
 
     public function get_full_sql_filter($withchecker = false) {

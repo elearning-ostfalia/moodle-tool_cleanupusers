@@ -19,7 +19,7 @@ Feature: Cleanup settings with large number of users
       | auth_method | manual  | userstatus_neverloginchecker |
 
   @javascript
-  Scenario: Index page
+  Scenario: Large: Index page
     Given I log in as "admin"
     And I pause
     # archive all users ready for archive
@@ -33,7 +33,7 @@ Feature: Cleanup settings with large number of users
     And I should not see "user1"
 
   @javascript
-  Scenario: Manually delete users (large number)
+  Scenario: Large: manually delete users
     Given I log in as "admin"
     # archive all users ready for archive
     And I run the scheduled task "\tool_cleanupusers\task\archive_user_task"

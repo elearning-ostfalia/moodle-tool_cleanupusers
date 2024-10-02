@@ -35,7 +35,9 @@ require_capability('moodle/site:config', $context);
 
 admin_externalpage_setup('cleanupusers');
 
-$checker = optional_param('checker', '', PARAM_ALPHANUMEXT);
+// Get URL parameters.
+$action  = optional_param('action', null, PARAM_INT);
+$checker = optional_param('checker', null, PARAM_ALPHANUMEXT);
 
 // $pagetitle = get_string('toarchive', 'tool_cleanupusers', $checker);
 
@@ -121,7 +123,7 @@ if (empty($checker)) {
 
 // $checker = '';
 
-$userfilter = new \tool_cleanupusers\archiveuser_filtering(false); // user_filtering();
+$userfilter = new \tool_cleanupusers\archiveuser_filtering(false, $action, $checker); // user_filtering();
 $userfilter->display();
 [$sql, $param] = $userfilter->get_full_sql_filter();
 // var_dump($sqlfilter);echo '<br>';

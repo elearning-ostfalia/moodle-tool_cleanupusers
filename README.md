@@ -139,30 +139,41 @@ Available at https://github.com/eLearning-TUDarmstadt/moodle-cleanupusers_ldapch
 * Es muss auch möglich sein, dass Nutzer, die manuell suspendiert wurden, archiviert und 
   später gelöscht werden. Allerdings ist die Frage, mit welchem Checker (welcher Algorithmus soll da greifen)? 
 
-UI: 
+# User interface
 
-1. Manage users to be archived:
-   Filter:
-    * To be archived by [checker]
-    * Manually suspended
-   Actions: 
-    * archive (unabhängig vom Filter)
+## Manage users to be archived
+
+ Filter
+
+* To be archived by [checker]
+* Manually suspended
+
+ Actions
+
+* archive (unabhängig vom Filter)
    
-    Aktionen ggf. auch für alle Nutzer aus dem Filter anwenden mit Nachfrage!
+Aktionen ggf. auch für alle Nutzer aus dem Filter anwenden mit Nachfrage!
 
-2. Manage archived users:
-   Filter:
-   * to be reactivated by [checker]
-   * to be deleted by [checker]
-   * all
-   Actions:
-   * reactivate (immer)
-   * delete (nur wenn im delete-Filter)
-   (ggf. Anzeige, wann gelöscht wird)
+## Manage archived users
 
-   Aktionen ggf. auch für alle Nutzer aus dem Filter anwenden mit Nachfrage!
+Filter
 
-3. Vorschau, über anstehende Aktionen (index)
+1. to be reactivated by [checker]
+2. to be deleted by [checker]
+3. all
+
+
+Actions
+
+* reactivate (immer)
+* delete (nur wenn im delete-Filter)
+
+(ggf. Anzeige, wann gelöscht wird)
+
+Aktionen ggf. auch für alle Nutzer aus dem Filter anwenden mit Nachfrage!
+
+## Vorschau, über anstehende Aktionen (index)
+
    * reactivated => Link zu "Manage archived users" mit passendem Filter
    * suspended => Link zu "Manage users to be archived" mit passendem Filter
    * deleted => Link zu "Manage users to be archived" mit passendem Filter

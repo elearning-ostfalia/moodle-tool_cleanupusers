@@ -38,9 +38,11 @@ use core_plugin_manager;
 
 class archive_filter_form extends moodleform {
 
-    const REACTIVATED = 0;
-    const DELETED = 1;
-    const ALL_USERS = 2;
+    const TO_BE_REACTIVATED = 1;
+    const TO_BE_DELETED = 2;
+    const ALL_USERS = 3;
+
+    const DEFAULT_ACTION = self::ALL_USERS; // does not require plugin!
 
     public function __construct()
     {
@@ -51,8 +53,6 @@ class archive_filter_form extends moodleform {
      * Defines the sub-plugin select form.
      */
     public function definition() {
-        global $CFG;
-
         $mform = $this->_form;
         // Gets all enabled plugins of type userstatus.
         $plugins = core_plugin_manager::instance()->get_enabled_plugins("userstatus");
@@ -60,8 +60,8 @@ class archive_filter_form extends moodleform {
             \core\notification::warning(get_string('errormessagenoplugin', 'tool_cleanupusers'));
         }
         $actions = [];
-        $actions[self::REACTIVATED] = 'users to be reactivated by';
-        $actions[self::DELETED] = 'users to be deleted by';
+        $actions[self::TO_BE_REACTIVATED] = 'users to be reactivated by';
+        $actions[self::TO_BE_DELETED] = 'users to be deleted by';
         $actions[self::ALL_USERS] = 'all archived users';
 
         $selectline = [];
@@ -71,7 +71,7 @@ class archive_filter_form extends moodleform {
 
         // $mform->hideIf('subplugin', 'action', 'eq', self::ALL_USERS);
 
-        $mform->setDefault('action', self::REACTIVATED);
+        $mform->setDefault('action', self::DEFAULT_ACTION);
         $mform->setDefault('subplugin', '0');
 
         // Add invisible submit button
@@ -96,12 +96,11 @@ class archive_filter_form extends moodleform {
      * @return bool|array array in case the sub-plugin is not valid, otherwise true.
      */
     public function validation($data, $files) {
-        var_dump($data);
         switch ($data['action']) {
             case self::ALL_USERS:
                 return true;
-            case self::REACTIVATED:
-            case self::DELETED:
+            case self::TO_BE_REACTIVATED:
+            case self::TO_BE_DELETED:
                 $plugins = core_plugin_manager::instance()->get_enabled_plugins("userstatus");
                 $issubplugin = false;
                 foreach ($plugins as $key => $value) {
@@ -113,11 +112,10 @@ class archive_filter_form extends moodleform {
                 if ($issubplugin == false) {
                     return ['subplugin' => get_string('errormessagesubplugin', 'tool_cleanupusers')];
                 }
-
                 return $issubplugin;
             default:
                 break;
         }
-        return false;
+        return ['action' => get_string('errormessageaction', 'tool_cleanupusers')];
     }
 }

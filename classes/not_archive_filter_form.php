@@ -38,8 +38,10 @@ use core_plugin_manager;
 
 class not_archive_filter_form extends moodleform {
     
-    const MANUALLY_SUSPENDED = 0;
-    const ARCHIVED = 1;
+    const MANUALLY_SUSPENDED = 1;
+    const TO_BE_ARCHIVED = 2;
+
+    const DEFAULT_ACTION = self::MANUALLY_SUSPENDED; // does not require plugin!
 
     public function __construct()
     {
@@ -58,7 +60,7 @@ class not_archive_filter_form extends moodleform {
         }
         $actions = [];
         $actions[self::MANUALLY_SUSPENDED] = 'users manually suspended';
-        $actions[self::ARCHIVED] = 'users to be archived by';
+        $actions[self::TO_BE_ARCHIVED] = 'users to be archived by';
 
         $selectline = [];
         $selectline[] = &$mform->createElement('select', 'action', '', $actions);
@@ -67,7 +69,7 @@ class not_archive_filter_form extends moodleform {
 
         // $mform->hideIf('subplugin', 'action', 'eq', self::MANUALLY_SUSPENDED);
 
-        $mform->setDefault('action', self::MANUALLY_SUSPENDED);
+        $mform->setDefault('action', self::DEFAULT_ACTION);
         $mform->setDefault('subplugin', '0');
 
         // Add invisible submit button
@@ -96,7 +98,7 @@ class not_archive_filter_form extends moodleform {
         switch ($data['action']) {
             case self::MANUALLY_SUSPENDED:
                 return true;
-            case self::ARCHIVED:
+            case self::TO_BE_ARCHIVED:
                 $plugins = core_plugin_manager::instance()->get_enabled_plugins("userstatus");
                 $issubplugin = false;
                 if (key_exists('subplugin', $data)) {
@@ -120,6 +122,6 @@ class not_archive_filter_form extends moodleform {
             default:
                 break;
         }
-        return false;
+        return ['action' => get_string('errormessageaction', 'tool_cleanupusers')];
     }
 }

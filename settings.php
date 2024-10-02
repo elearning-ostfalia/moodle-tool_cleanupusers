@@ -79,13 +79,15 @@ if ($hassiteconfig) {
         get_string('toarchivelink', 'tool_cleanupusers'),
         "$CFG->wwwroot/$CFG->admin/tool/cleanupusers/toarchive.php"
     ));
+
+/*
     // Add entry for users to be deleted.
     $ADMIN->add('tool_cleanupusers', new admin_externalpage(
         'Manage to delete',
         get_string('todelete', 'tool_cleanupusers'),
         "$CFG->wwwroot/$CFG->admin/tool/cleanupusers/todelete.php"
     ));
-
+*/
     // Add entry for achived users.
     $ADMIN->add('tool_cleanupusers', new admin_externalpage(
         'Browse acrhived users',

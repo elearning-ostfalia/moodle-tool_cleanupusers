@@ -47,24 +47,52 @@ Feature: Cleanup settings
       | auth_method | manual  | userstatus_neverloginchecker |
 
   @javascript
-  Scenario: Manually delete users
+  Scenario: Manually reactivate user (preselected by nocoursechecker)
+    Given I log in as "admin"
+    # archive all users ready for archive
+    And I run the scheduled task "\tool_cleanupusers\task\archive_user_task"
+    And I navigate to "Users > Clean up users > Manage archived users" in site administration
+    And I pause
+    And I set the field with xpath "//select[@name='action']" to "users to be reactivated by"
+    And I set the field with xpath "//select[@name='subplugin']" to "nocoursechecker"
+    And I should see "user1"
+    And I delete "user1"
+    And I should see "User 'user1' has been deleted."
+    And I press "Continue"
+    And I should see "Archived users"
+    And I should see "users to be deleted by"
+    And I should see "timechecker"
+    And I should not see "user1"
+    And I set the field with xpath "//select[@name='action']" to "all archived users"
+    And I should not see "user1"
+
+  @javascript
+  Scenario: Manually delete user (preselected by timechecker)
     Given I log in as "admin"
     # archive all users ready for archive
     And I run the scheduled task "\tool_cleanupusers\task\archive_user_task"
     And simulate that "101" days have passed since archiving of "user1"
-    And I navigate to "Users > Clean up users > Manage users to be deleted" in site administration
+    And I navigate to "Users > Clean up users > Manage archived users" in site administration
+    And I set the field with xpath "//select[@name='action']" to "users to be deleted by"
+    And I set the field with xpath "//select[@name='subplugin']" to "timechecker"
     And I should see "user1"
     And I delete "user1"
     And I should see "User 'user1' has been deleted."
-    And I navigate to "Users > Clean up users > Manage users to be deleted" in site administration
+    And I press "Continue"
+    And I should see "Archived users"
+    And I should see "users to be deleted by"
+    And I should see "timechecker"
+    And I should not see "user1"
+    And I set the field with xpath "//select[@name='action']" to "all archived users"
     And I should not see "user1"
 
   @javascript
-  Scenario: Manually reactivate users
+  Scenario: Manually reactivate user (all archived users filter)
     Given I log in as "admin"
     And I run the scheduled task "\tool_cleanupusers\task\archive_user_task"
-    And I navigate to "Users > Clean up users > Browse archived users" in site administration
+    And I navigate to "Users > Clean up users > Manage archived users" in site administration
     And I should see "Archived users"
+    And I should see "all archived users"
     And I should see "user1"
     And I should see "user3"
     And I should see "user4"
@@ -74,7 +102,10 @@ Feature: Cleanup settings
     And I should see "user8"
     When I reactivate "user7"
     Then I should see "The user has been reactivated"
-    And I navigate to "Users > Clean up users > Browse archived users" in site administration
+    And I press "Continue"
+    And I should see "Archived users"
+    And I should see "all archived users"
+    # And I navigate to "Users > Clean up users > Browse archived users" in site administration
     And I should not see "user7"
 
   @javascript

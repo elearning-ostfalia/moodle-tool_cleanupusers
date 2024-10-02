@@ -29,6 +29,8 @@ require_once($CFG->libdir . '/adminlib.php');
 require_once($CFG->dirroot . '/user/filters/lib.php');
 
 // Get URL parameters.
+$action  = optional_param('action', null, PARAM_INT);
+$checker = optional_param('checker', null, PARAM_ALPHANUMEXT);
 
 $PAGE->set_context(context_system::instance());
 $context = context_system::instance();
@@ -49,17 +51,58 @@ $content = '';
 echo $OUTPUT->header();
 echo $renderer->get_heading(get_string('achivedusers', 'tool_cleanupusers'));
 
-core\notification::warning(get_string('warn_reactivate', 'tool_cleanupusers'));
+// core\notification::warning(get_string('warn_reactivate', 'tool_cleanupusers'));
 
 
-$userfilter = new \tool_cleanupusers\archiveuser_filtering(true);
+$userfilter = new \tool_cleanupusers\archiveuser_filtering(true, $action, $checker);
 $userfilter->display();
+[$sqlfilter, $paramfilter] = $userfilter->get_full_sql_filter();
 
-[$sql, $param] = $userfilter->get_full_sql_filter(true);
-$archivetable = new \tool_cleanupusers\table\reactivate_table('tool_cleanupusers_toarchive_table',
-    $sql, $param, "reactivate", []);
-$archivetable->define_baseurl($PAGE->url);
-$archivetable->out(20, false);
+$returnurl = new moodle_url('/admin/tool/cleanupusers/reactivate.php',
+    ['action' => $userfilter->get_action(), 'checker' => $userfilter->get_checker()]);
+
+switch ($userfilter->get_action()) {
+    case \tool_cleanupusers\archive_filter_form::TO_BE_REACTIVATED:
+        debugging('REACTIVATED');
+        $checker = $userfilter->get_checker();
+        $subpluginname = "\\userstatus_" . $checker . "\\" . $checker;
+        if (!class_exists($subpluginname)) {
+            core\notification::warning($subpluginname . ' does not exist');
+        } else {
+            $userstatuschecker = new $subpluginname();
+            try {
+                $arrayreactivate = $userstatuschecker->get_to_reactivate();
+
+                if (count($arrayreactivate) > 0) {
+                    var_dump($arrayreactivate);
+//                    $content .= $renderer->render_index_page($arrayreactivate, $archivearray,
+//                        $arraytodelete, $arrayneverloggedin, $subplugin);
+                } else {
+                    echo 'no user (to be reactivated by ' . $checker . ')<br>';
+                }
+            } catch (Exception $e) {
+                core\notification::warning($checker . ': ' . $e->getMessage());
+            }
+        }
+        break;
+    case \tool_cleanupusers\archive_filter_form::TO_BE_DELETED:
+        $sql = \tool_cleanupusers\userstatuschecker::get_to_delete_sql($userfilter->get_checker());
+        $archivetable = new \tool_cleanupusers\table\archive_table('tool_cleanupusers_todelete_table',
+            $sqlfilter, $paramfilter, "delete", $sql, $returnurl);
+        $archivetable->define_baseurl($PAGE->url);
+        $archivetable->out(20, false);
+        break;
+    case \tool_cleanupusers\archive_filter_form::ALL_USERS:
+        // only user filter will be applied
+        $archivetable = new \tool_cleanupusers\table\archive_table('tool_cleanupusers_toarchive_table',
+            $sqlfilter, $paramfilter, "reactivate", [], $returnurl);
+        $archivetable->define_baseurl($PAGE->url);
+        $archivetable->out(20, false);
+        break;
+    default:
+        throw new coding_exception('invalid action');
+}
+
 
 echo $content;
 echo $OUTPUT->footer();

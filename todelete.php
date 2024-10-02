@@ -27,6 +27,8 @@ require_once($CFG->libdir . '/adminlib.php');
 require_once($CFG->dirroot . '/user/filters/lib.php');
 
 // Get URL parameters.
+$action  = optional_param('action', null, PARAM_INT);
+$checker = optional_param('checker', null, PARAM_ALPHANUMEXT);
 
 $PAGE->set_context(context_system::instance());
 $context = context_system::instance();
@@ -67,7 +69,7 @@ $checker = '';
 // $sql = \tool_cleanupusers\userstatuschecker::get_to_delete_sql($checker);
 
 // if (count($sql) > 0) {
-    $userfilter = new \tool_cleanupusers\archiveuser_filtering(false); // user_filtering();
+    $userfilter = new \tool_cleanupusers\archiveuser_filtering(false, $action, $checker);
     $userfilter->display();
 /*    $userfilter->display_add();
     $userfilter->display_active();*/
@@ -76,7 +78,7 @@ $checker = '';
     // var_dump($paramfilter);
     $sql = \tool_cleanupusers\userstatuschecker::get_to_delete_sql($userfilter->get_checker());
 
-    $deletetable = new \tool_cleanupusers\table\reactivate_table('tool_cleanupusers_todelete_table',
+    $deletetable = new \tool_cleanupusers\table\archive_table('tool_cleanupusers_todelete_table',
         $sqlfilter, $paramfilter, "delete", $sql);
 
     $deletetable->define_baseurl($PAGE->url);

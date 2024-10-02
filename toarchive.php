@@ -65,7 +65,6 @@ if (!empty($checker)) {
 echo $renderer->get_heading(get_string('toarchive', 'tool_cleanupusers'));
 
 
-
 $userfilter = new \tool_cleanupusers\archiveuser_filtering(false, $action, $checker); // user_filtering();
 $userfilter->display();
 [$sql, $param] = $userfilter->get_full_sql_filter();
@@ -100,21 +99,14 @@ switch ($userfilter->get_action()) {
                 $sql, $param, "suspend", $userstatuschecker->get_name(), $returnurl);
             $archivetable->define_baseurl($PAGE->url);
             $archivetable->out(20, false);
-
-/*
-            if (count($archivearray) == 0) {
-                echo "Currently no users will be suspended by the next cronjob for checker " .
-                    $userstatuschecker->get_displayname() . ".<br>";
-            } else {
-                $archivetable = new \tool_cleanupusers\table\users_table(
-                    'tool_cleanupusers_toarchive_table',
-                    $archivearray, $sql, $param, "suspend", $userstatuschecker->get_name(), $returnurl);
-            }*/
         }
         break;
     case \tool_cleanupusers\not_archive_filter_form::MANUALLY_SUSPENDED:
-        echo 'TODO MANUALLY_SUSPENDED';
-        $sql = 'suspended = 1';
+        if (!empty($sql)) {
+            $sql .= ' AND suspended = 1';
+        } else {
+            $sql = 'suspended = 1';
+        }
         $archivetable = new \tool_cleanupusers\table\users_table(
             'tool_cleanupusers_toarchive_table',
             $sql, $param, "suspend", 'manually suspended', $returnurl);

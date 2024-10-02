@@ -23,9 +23,15 @@
  */
 
 use tool_cleanupusers\archiveduser;
+use tool_cleanupusers\not_archive_filter_form;
+use tool_cleanupusers\archive_filter_form;
 
 defined('MOODLE_INTERNAL') || die;
+
 require_once($CFG->libdir . '/tablelib.php');
+require_once(__DIR__ . '/classes/not_archive_filter_form.php');
+require_once(__DIR__ . '/classes/archive_filter_form.php');
+
 /**
  * Class of the tool_cleanupusers renderer.
  *
@@ -34,6 +40,7 @@ require_once($CFG->libdir . '/tablelib.php');
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class tool_cleanupusers_renderer extends plugin_renderer_base {
+
 
     public function render_subplugin_table() : string {
         global $OUTPUT, $DB, $CFG;
@@ -287,11 +294,16 @@ class tool_cleanupusers_renderer extends plugin_renderer_base {
         // Renders the information for each array in a separate html table.
         $output = '';
         if (!empty($rendertoreactivate)) {
-            $output .= $this->render_table_of_users($rendertoreactivate, [get_string('willbereactivated', 'tool_cleanupusers'),
-                get_string('lastaccess', 'tool_cleanupusers'), get_string('Archived', 'tool_cleanupusers'),
+            $url = new \moodle_url('/admin/tool/cleanupusers/archiveusers.php',
+                ['action' => archive_filter_form::TO_BE_REACTIVATED, 'checker' => $checker]);
+
+            $output .= $this->render_table_of_users($rendertoreactivate, [
+                get_string('willbereactivated', 'tool_cleanupusers'),
+                get_string('lastaccess', 'tool_cleanupusers'),
+                get_string('Archived', 'tool_cleanupusers'),
                 get_string('authmethod', 'tool_cleanupusers'),
                 get_string('Willbe', 'tool_cleanupusers')],
-                $checker);
+                $checker, $url);
         }
 /*        if (!empty($renderneverloggedin)) {
             $output .= $this->render_table_of_users($renderneverloggedin, [get_string('Neverloggedin', 'tool_cleanupusers'),
@@ -299,20 +311,26 @@ class tool_cleanupusers_renderer extends plugin_renderer_base {
                 get_string('Willbe', 'tool_cleanupusers')]);
         }*/
         if (!empty($rendertosuspend)) {
-            $output .= $this->render_table_of_users($rendertosuspend, [get_string('willbesuspended', 'tool_cleanupusers'),
+            $url = new \moodle_url('/admin/tool/cleanupusers/toarchive.php',
+                ['action' => not_archive_filter_form::TO_BE_ARCHIVED, 'checker' => $checker]);
+            $output .= $this->render_table_of_users($rendertosuspend, [
+                get_string('willbesuspended', 'tool_cleanupusers'),
                 get_string('lastaccess', 'tool_cleanupusers'),
                 get_string('Archived', 'tool_cleanupusers'),
                 get_string('authmethod', 'tool_cleanupusers'),
                 get_string('Willbe', 'tool_cleanupusers')],
-                $checker);
+                $checker, $url);
         }
         if (!empty($rendertodelete)) {
-            $output .= $this->render_table_of_users($rendertodelete, [get_string('willbedeleted', 'tool_cleanupusers'),
+            $url = new \moodle_url('/admin/tool/cleanupusers/archiveusers.php',
+                ['action' => archive_filter_form::TO_BE_DELETED, 'checker' => $checker]);
+            $output .= $this->render_table_of_users($rendertodelete, [
+                get_string('willbedeleted', 'tool_cleanupusers'),
                 get_string('lastaccess', 'tool_cleanupusers'),
                 get_string('Archived', 'tool_cleanupusers'),
                 get_string('authmethod', 'tool_cleanupusers'),
                 get_string('Willbe', 'tool_cleanupusers')],
-                $checker);
+                $checker, $url);
         }
 
         return $output;
@@ -523,7 +541,7 @@ class tool_cleanupusers_renderer extends plugin_renderer_base {
      * @param array $tableheadings
      * @return string html-table
      */
-    private function render_table_of_users($users, $tableheadings, $checker) {
+    private function render_table_of_users($users, $tableheadings, $checker, $url) {
         $table = new html_table();
         $table->head = $tableheadings;
         $table->attributes['class'] = 'generaltable admintable cleanupusers';
@@ -536,7 +554,7 @@ class tool_cleanupusers_renderer extends plugin_renderer_base {
 
         if (count($users) > $limit) {
             global $OUTPUT;
-            $url = new \moodle_url('/admin/tool/cleanupusers/toarchive.php', ['checker' => $checker]);
+            // $url = new \moodle_url('/admin/tool/cleanupusers/toarchive.php', ['checker' => $checker]);
             $link = \html_writer::link(
                 $url, '(watch full table)'
             );

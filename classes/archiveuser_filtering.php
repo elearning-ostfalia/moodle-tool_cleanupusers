@@ -35,7 +35,7 @@ class archiveuser_filtering extends \user_filtering
     protected $checkerform;
     protected $archive;
 
-    public function __construct($archive, $action, $checker) {
+    public function __construct($archive, $urlaction, $urlchecker) {
         global $SESSION;
         parent::__construct();
 
@@ -45,13 +45,14 @@ class archiveuser_filtering extends \user_filtering
         } else {
             $this->checkerform = new not_archive_filter_form();
         }
-        if (isset($SESSION->archive) && $SESSION->archive != $archive) {
-            // Invalidate session variables in case of switching form.
-            // debugging('invalidate session');
+        if (isset($urlaction) || (isset($SESSION->archive) && $SESSION->archive != $archive)) {
+            // Invalidate session variables in case of switching form or
+            // in case of a redirect
             unset($SESSION->checker);
             unset($SESSION->action);
         }
         $SESSION->archive = $archive;
+
 
         if ($formdata = $this->checkerform->get_data()) {
             $arraydata = get_object_vars($formdata);
@@ -64,9 +65,9 @@ class archiveuser_filtering extends \user_filtering
                 }
             }
         } else {
-            if (isset($action)) {
+            if (isset($urlaction)) {
                 // set default values from URL
-                $this->checkerform->set_data(['action' => $action, 'checker' => $checker]);
+                $this->checkerform->set_data(['action' => $urlaction, 'subplugin' => $urlchecker]);
             } else {
                 if (isset($SESSION->checker)) {
                     // set default values from session

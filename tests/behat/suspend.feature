@@ -46,6 +46,9 @@ Feature: Cleanup settings
       | deletetime | 200  | userstatus_neverloginchecker |
       | auth_method | manual  | userstatus_neverloginchecker |
 
+ # TODO
+  # Unterscheidung der Checker bei der Filterung
+
   @javascript
   Scenario: Manually reactivate user (preselected by nocoursechecker)
     Given I log in as "admin"

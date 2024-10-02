@@ -63,7 +63,6 @@ $returnurl = new moodle_url('/admin/tool/cleanupusers/reactivate.php',
 
 switch ($userfilter->get_action()) {
     case \tool_cleanupusers\archive_filter_form::TO_BE_REACTIVATED:
-        debugging('REACTIVATED');
         $checker = $userfilter->get_checker();
         $subpluginname = "\\userstatus_" . $checker . "\\" . $checker;
         if (!class_exists($subpluginname)) {
@@ -75,11 +74,23 @@ switch ($userfilter->get_action()) {
 
                 if (count($arrayreactivate) > 0) {
                     var_dump($arrayreactivate);
-//                    $content .= $renderer->render_index_page($arrayreactivate, $archivearray,
-//                        $arraytodelete, $arrayneverloggedin, $subplugin);
+                    // create SQL filter from id list
+                    $idsasstring = '';
+                    foreach ($arrayreactivate as $user) {
+                        $idsasstring .= $user->id . ',';
+                    }
+                    $idsasstring = rtrim($idsasstring, ',');
+                    $where = 'a.id IN (' . $idsasstring . ')';
+
+                    if ($sqlfilter != null && $sqlfilter != '') {
+                        $where .= ' AND ' . $sqlfilter;
+                    }
+                    $sqlfilter = $where;
                 } else {
                     echo 'no user (to be reactivated by ' . $checker . ')<br>';
                 }
+                $archivetable = new \tool_cleanupusers\table\archive_table('tool_cleanupusers_toarchive_table',
+                    $sqlfilter, $paramfilter, "reactivate", [], $returnurl);
             } catch (Exception $e) {
                 core\notification::warning($checker . ': ' . $e->getMessage());
             }
@@ -89,20 +100,19 @@ switch ($userfilter->get_action()) {
         $sql = \tool_cleanupusers\userstatuschecker::get_to_delete_sql($userfilter->get_checker());
         $archivetable = new \tool_cleanupusers\table\archive_table('tool_cleanupusers_todelete_table',
             $sqlfilter, $paramfilter, "delete", $sql, $returnurl);
-        $archivetable->define_baseurl($PAGE->url);
-        $archivetable->out(20, false);
         break;
     case \tool_cleanupusers\archive_filter_form::ALL_USERS:
         // only user filter will be applied
         $archivetable = new \tool_cleanupusers\table\archive_table('tool_cleanupusers_toarchive_table',
             $sqlfilter, $paramfilter, "reactivate", [], $returnurl);
-        $archivetable->define_baseurl($PAGE->url);
-        $archivetable->out(20, false);
+
         break;
     default:
         throw new coding_exception('invalid action');
 }
 
+$archivetable->define_baseurl($PAGE->url);
+$archivetable->out(20, false);
 
 echo $content;
 echo $OUTPUT->footer();

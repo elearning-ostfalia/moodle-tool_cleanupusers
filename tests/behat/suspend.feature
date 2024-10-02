@@ -51,20 +51,25 @@ Feature: Cleanup settings
     Given I log in as "admin"
     # archive all users ready for archive
     And I run the scheduled task "\tool_cleanupusers\task\archive_user_task"
+
+    # make invisible course visble
+    And I go to the courses management page
+    And I should see the "Course categories and courses" management page
+    And I toggle visibility of course "Inactive2" in management listing
+
     And I navigate to "Users > Clean up users > Manage archived users" in site administration
-    And I pause
     And I set the field with xpath "//select[@name='action']" to "users to be reactivated by"
     And I set the field with xpath "//select[@name='subplugin']" to "nocoursechecker"
-    And I should see "user1"
-    And I delete "user1"
-    And I should see "User 'user1' has been deleted."
+    And I should see "user6"
+    And I reactivate "user6"
+    And I should see "User 'user6' has been reactivated."
     And I press "Continue"
     And I should see "Archived users"
-    And I should see "users to be deleted by"
-    And I should see "timechecker"
-    And I should not see "user1"
+    And I should see "users to be reactivated by"
+    And I should see "nocoursechecker"
+    And I should not see "user6"
     And I set the field with xpath "//select[@name='action']" to "all archived users"
-    And I should not see "user1"
+    And I should not see "user6"
 
   @javascript
   Scenario: Manually delete user (preselected by timechecker)

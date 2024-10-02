@@ -85,12 +85,14 @@ switch ($action) {
             );
             try {
                 $deprovisionuser->activate_me();
+                $user = $DB->get_record('user', ['id' => $userid],
+                    '*', MUST_EXIST);
             } catch (\tool_cleanupusers\cleanupusers_exception $e) {
                 // Notice user could not be reactivated.
                 notice(get_string('errormessagenoaction', 'tool_cleanupusers'), $url);
             }
             // User successfully reactivated.
-            notice(get_string('usersreactivated', 'tool_cleanupusers'), $url);
+            notice(get_string('usersreactivated', 'tool_cleanupusers', $user->username), $url);
         } else {
             // Notice user could not be reactivated.
             notice(get_string('errormessagenotactive', 'tool_cleanupusers'), $url);

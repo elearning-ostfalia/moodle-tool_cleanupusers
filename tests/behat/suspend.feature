@@ -118,7 +118,7 @@ Feature: Cleanup settings
     And I should see "user7"
     And I should see "user8"
     When I reactivate "user7"
-    Then I should see "The user has been reactivated"
+    Then I should see "User 'user7' has been reactivated"
     And I press "Continue"
     And I should see "Archived users"
     And I should see "all archived users"

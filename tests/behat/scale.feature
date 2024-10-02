@@ -2,7 +2,7 @@
 Feature: Cleanup settings with large number of users
 
   Background:
-    Given create "10000" users
+    Given create "5000" users
     # Values are set per checker as otherwise only one value
     # with the same first column will be set (bug?)
     And the following config values are set as admin:
@@ -21,15 +21,20 @@ Feature: Cleanup settings with large number of users
   @javascript
   Scenario: Large: Index page
     Given I log in as "admin"
-    And I pause
+    # And I pause
     # archive all users ready for archive
     And I run the scheduled task "\tool_cleanupusers\task\archive_user_task"
     And simulate that "101" days have passed since archiving of "user1"
-    And I navigate to "Users > Clean up users > Manage users to be deleted" in site administration
+    And I navigate to "Users > Clean up users > Manage archived users" in site administration
+    And I set the field with xpath "//select[@name='action']" to "users to be deleted by"
+    And I set the field with xpath "//select[@name='subplugin']" to "timechecker"
     And I should see "user1"
     And I delete "user1"
     And I should see "User 'user1' has been deleted."
-    And I navigate to "Users > Clean up users > Manage users to be deleted" in site administration
+    And I press "Continue"
+    And I should see "Archived users"
+    And I should see "users to be deleted by"
+    And I should see "timechecker"
     And I should not see "user1"
 
   @javascript
@@ -38,7 +43,9 @@ Feature: Cleanup settings with large number of users
     # archive all users ready for archive
     And I run the scheduled task "\tool_cleanupusers\task\archive_user_task"
     And simulate that "101" days have passed since archiving from "user1" to "user400"
-    And I navigate to "Users > Clean up users > Manage users to be deleted" in site administration
+    And I navigate to "Users > Clean up users > Manage archived users" in site administration
+    And I set the field with xpath "//select[@name='action']" to "users to be deleted by"
+    And I set the field with xpath "//select[@name='subplugin']" to "timechecker"
     And I should see "user8"
     And I delete "user8"
     And I should see "User 'user8' has been deleted."

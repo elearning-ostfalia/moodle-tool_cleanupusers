@@ -43,7 +43,7 @@ admin_externalpage_setup('cleanupusers');
 // $PAGE->set_title(get_string('achivedusers', 'tool_cleanupusers'));
 // $PAGE->set_heading(get_string('achivedusers', 'tool_cleanupusers'));
 $PAGE->set_pagelayout('admin');
-$PAGE->set_url(new moodle_url('/admin/tool/cleanupusers/reactivate.php'));
+$PAGE->set_url(new moodle_url('/admin/tool/cleanupusers/archiveusers.php'));
 
 $renderer = $PAGE->get_renderer('tool_cleanupusers');
 
@@ -58,7 +58,7 @@ $userfilter = new \tool_cleanupusers\archiveuser_filtering(true, $action, $check
 $userfilter->display();
 [$sqlfilter, $paramfilter] = $userfilter->get_full_sql_filter();
 
-$returnurl = new moodle_url('/admin/tool/cleanupusers/reactivate.php',
+$returnurl = new moodle_url('/admin/tool/cleanupusers/archiveusers.php',
     ['action' => $userfilter->get_action(), 'checker' => $userfilter->get_checker()]);
 
 switch ($userfilter->get_action()) {

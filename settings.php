@@ -92,7 +92,7 @@ if ($hassiteconfig) {
     $ADMIN->add('tool_cleanupusers', new admin_externalpage(
         'Browse acrhived users',
         get_string('reactivate', 'tool_cleanupusers'),
-        "$CFG->wwwroot/$CFG->admin/tool/cleanupusers/reactivate.php"
+        "$CFG->wwwroot/$CFG->admin/tool/cleanupusers/archiveusers.php"
     ));
 
     // Adds an entry for every sub-plugin with a settings.php.

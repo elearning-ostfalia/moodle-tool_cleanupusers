@@ -87,7 +87,7 @@ switch ($userfilter->get_action()) {
                     }
                     $sqlfilter = $where;
                 } else {
-                    echo 'no user (to be reactivated by ' . $checker . ')<br>';
+                    // echo 'no user (to be reactivated by ' . $checker . ')<br>';
                 }
                 $archivetable = new \tool_cleanupusers\table\archive_table('tool_cleanupusers_toarchive_table',
                     $sqlfilter, $paramfilter, "reactivate", [], $returnurl);

@@ -72,6 +72,15 @@ Feature: Cleanup settings
     And I should not see "user6"
 
   @javascript
+  Scenario: Manually reactivate user (empty filter)
+    Given I log in as "admin"
+
+    And I navigate to "Users > Clean up users > Manage archived users" in site administration
+    And I set the field with xpath "//select[@name='action']" to "users to be reactivated by"
+    And I set the field with xpath "//select[@name='subplugin']" to "timechecker"
+    And I should see "Nothing to display"
+
+  @javascript
   Scenario: Manually delete user (preselected by timechecker)
     Given I log in as "admin"
     # archive all users ready for archive
@@ -112,6 +121,7 @@ Feature: Cleanup settings
     And I should see "all archived users"
     # And I navigate to "Users > Clean up users > Browse archived users" in site administration
     And I should not see "user7"
+
 
   @javascript
   Scenario: Run task for suspend

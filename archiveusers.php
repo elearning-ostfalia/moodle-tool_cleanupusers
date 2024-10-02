@@ -22,10 +22,15 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+use tool_cleanupusers\archive_filter_form;
+use tool_cleanupusers\archiveuser_filtering;
+
 global $CFG, $PAGE, $OUTPUT;
 
 require_once(__DIR__ . '/../../../config.php');
 require_once($CFG->libdir . '/adminlib.php');
+require_once(__DIR__ . '/classes/table/archive_table.php');
+
 require_once($CFG->dirroot . '/user/filters/lib.php');
 
 // Get URL parameters.
@@ -53,7 +58,7 @@ echo $renderer->get_heading(get_string('achivedusers', 'tool_cleanupusers'));
 // core\notification::warning(get_string('warn_reactivate', 'tool_cleanupusers'));
 
 
-$userfilter = new \tool_cleanupusers\archiveuser_filtering(true, $action, $checker);
+$userfilter = new archiveuser_filtering(true, $action, $checker);
 $userfilter->display();
 [$sqlfilter, $paramfilter] = $userfilter->get_full_sql_filter();
 
@@ -61,7 +66,7 @@ $returnurl = new moodle_url('/admin/tool/cleanupusers/archiveusers.php',
     ['action' => $userfilter->get_action(), 'checker' => $userfilter->get_checker()]);
 
 switch ($userfilter->get_action()) {
-    case \tool_cleanupusers\archive_filter_form::TO_BE_REACTIVATED:
+    case archive_filter_form::TO_BE_REACTIVATED:
         $checker = $userfilter->get_checker();
         $subpluginname = "\\userstatus_" . $checker . "\\" . $checker;
         if (!class_exists($subpluginname)) {
@@ -70,25 +75,10 @@ switch ($userfilter->get_action()) {
             $userstatuschecker = new $subpluginname();
             try {
                 $arrayreactivate = $userstatuschecker->get_to_reactivate();
-
-                if (count($arrayreactivate) > 0) {
-                    // var_dump($arrayreactivate);
-                    // create SQL filter from id list
-                    $idsasstring = '';
-                    foreach ($arrayreactivate as $user) {
-                        $idsasstring .= $user->id . ',';
-                    }
-                    $idsasstring = rtrim($idsasstring, ',');
-                    $where = 'a.id IN (' . $idsasstring . ')';
-
-                    if ($sqlfilter != null && $sqlfilter != '') {
-                        $where .= ' AND ' . $sqlfilter;
-                    }
-                    $sqlfilter = $where;
+                if ($sqlfilter != null && $sqlfilter != '') {
+                    $sqlfilter .= ' AND ' . archiveuser_filtering::users_to_sql_filter($arrayreactivate, 'a');
                 } else {
-                    // echo 'no user (to be reactivated by ' . $checker . ')<br>';
-                    // No records found
-                    $sqlfilter = "FALSE";
+                    $sqlfilter = archiveuser_filtering::users_to_sql_filter($arrayreactivate, 'a');
                 }
                 // var_dump($sqlfilter);
                 $archivetable = new \tool_cleanupusers\table\archive_table('tool_cleanupusers_toarchive_table',
@@ -98,12 +88,12 @@ switch ($userfilter->get_action()) {
             }
         }
         break;
-    case \tool_cleanupusers\archive_filter_form::TO_BE_DELETED:
+    case archive_filter_form::TO_BE_DELETED:
         $sql = \tool_cleanupusers\userstatuschecker::get_to_delete_sql($userfilter->get_checker());
         $archivetable = new \tool_cleanupusers\table\archive_table('tool_cleanupusers_todelete_table',
             $sqlfilter, $paramfilter, "delete", $sql, $returnurl);
         break;
-    case \tool_cleanupusers\archive_filter_form::ALL_USERS:
+    case archive_filter_form::ALL_USERS:
         // only user filter will be applied
         $archivetable = new \tool_cleanupusers\table\archive_table('tool_cleanupusers_toarchive_table',
             $sqlfilter, $paramfilter, "reactivate", [], $returnurl);

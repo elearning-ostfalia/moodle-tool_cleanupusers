@@ -43,7 +43,7 @@ class users_table extends \table_sql {
      * @param String $sqlwhere
      * @param array $param
      */
-    public function __construct($uniqueid, $users, $sqlwhere, $param, $intention, $checker, $returnurl) {
+    public function __construct($uniqueid, $sqlwhere, $param, $intention, $checker, $returnurl) {
         parent::__construct($uniqueid);
         $this->checker = $checker;
         $this->returnurl = $returnurl;
@@ -75,7 +75,7 @@ class users_table extends \table_sql {
             get_string('authmethod', 'tool_cleanupusers'),
             ''];
         $this->define_headers($headers);
-
+/*
         $idsasstring = '';
         foreach ($users as $user) {
             $idsasstring .= $user->id . ',';
@@ -84,9 +84,9 @@ class users_table extends \table_sql {
         $where = 'id IN (' . $idsasstring . ')';
         if ($sqlwhere != null && $sqlwhere != '') {
             $where .= ' AND ' . $sqlwhere;
-        }
+        }*/
         $this->set_sql('id, username, lastaccess, auth, ' .
-            implode(', ', fields::get_name_fields()), '{user}', $where, $param);
+            implode(', ', fields::get_name_fields()), '{user}', $sqlwhere, $param);
     }
 
     public function col_lastaccess($user) {

@@ -24,6 +24,12 @@
 
 namespace tool_cleanupusers;
 
+global $CFG;
+require_once($CFG->dirroot . '/user/filters/lib.php');
+
+require_once(__DIR__ . '/not_archive_filter_form.php');
+require_once(__DIR__ . '/archive_filter_form.php');
+
 class archiveuser_filtering extends \user_filtering
 {
     protected $checkerform;
@@ -39,6 +45,14 @@ class archiveuser_filtering extends \user_filtering
         } else {
             $this->checkerform = new not_archive_filter_form();
         }
+        if (isset($SESSION->archive) && $SESSION->archive != $archive) {
+            // Invalidate session variables in case of switching form.
+            // debugging('invalidate session');
+            unset($SESSION->checker);
+            unset($SESSION->action);
+        }
+        $SESSION->archive = $archive;
+
         if ($formdata = $this->checkerform->get_data()) {
             $arraydata = get_object_vars($formdata);
             if ($this->checkerform->is_validated()) {
@@ -81,9 +95,11 @@ class archiveuser_filtering extends \user_filtering
     public function get_action() {
         global $SESSION;
         if (!empty($SESSION->action)) {
+            // debugging("session action");
             return $SESSION->action;
         }
         // Return default action which does not require a plugin to be selected.
+        // debugging("default action");
         return $this->checkerform::DEFAULT_ACTION;
     }
 
@@ -102,5 +118,23 @@ class archiveuser_filtering extends \user_filtering
         return parent::get_sql_filter($extra, $params);
     }
 
+    public static function users_to_sql_filter(array $userset, string $prefix = null) {
+        if (count($userset) == 0) {
+            return "FALSE";
+        }
+
+        // create SQL filter from id list
+        $idsasstring = '';
+        foreach ($userset as $user) {
+            $idsasstring .= $user->id . ',';
+        }
+        $idsasstring = rtrim($idsasstring, ',');
+        if (!empty($prefix)) {
+            return $prefix . '.id IN (' . $idsasstring . ')';
+        } else {
+            return 'id IN (' . $idsasstring . ')';
+
+        }
+    }
 
 }

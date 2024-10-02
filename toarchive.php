@@ -21,9 +21,15 @@
  * @copyright  2018 N Herrmann
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+
+use tool_cleanupusers\archive_filter_form;
+use tool_cleanupusers\archiveuser_filtering;
+
+global $CFG, $PAGE, $OUTPUT;
+
 require_once(__DIR__ . '/../../../config.php');
 require_once($CFG->libdir . '/adminlib.php');
-require_once($CFG->dirroot . '/user/filters/lib.php');
+require_once(__DIR__ . '/classes/table/archive_table.php');
 
 // Get URL parameters.
 $action  = optional_param('action', null, PARAM_INT);
@@ -58,68 +64,7 @@ if (!empty($checker)) {
 }*/
 echo $renderer->get_heading(get_string('toarchive', 'tool_cleanupusers'));
 
-/**
- * @param mixed $userstatuschecker
- * @param mixed $PAGE
- * @return void
- */
-/*
-function output_user_table(mixed $userstatuschecker, mixed $PAGE): void
-{
-// Request arrays from the sub-plugin.
-    $archivearray = $userstatuschecker->get_to_suspend();
 
-    if (empty($archivearray)) {
-        echo "Currently no users will be suspended by the next cronjob for checker " .
-            $userstatuschecker->get_displayname() . ".<br>";
-    } else {
-        // var_dump($archivearray);
-        $userfilter = new \tool_cleanupusers\archiveuser_filtering(); // user_filtering();
-        $userfilter->display();
-
-//        $userfilter = new user_filtering();
-//        $userfilter->display_add();
-//        $userfilter->display_active();
-
-        [$sql, $param] = $userfilter->get_full_sql_filter();
-        $archivetable = new \tool_cleanupusers\table\users_table('tool_cleanupusers_toarchive_table',
-            $archivearray, $sql, $param, "suspend", $userstatuschecker->get_name());
-        $archivetable->define_baseurl($PAGE->url);
-        $archivetable->out(20, false);
-    }
-}
-*/
-
-/*
-if (empty($checker)) {
-    $mform = new \tool_cleanupusers\subplugin_select_form();
-    $checker = null;
-    if ($formdata = $mform->get_data()) {
-        // debugging("get form data");
-        $arraydata = get_object_vars($formdata);
-        if ($mform->is_validated()) {
-            $checker = $arraydata['subplugin'];
-            // debugging($checker);
-        }
-    }
-    $mform->display();
-}
-
-
-
-if (empty($checker)) {
-    $pluginsenabled =  \core_plugin_manager::instance()->get_enabled_plugins("userstatus");
-    foreach ($pluginsenabled as $subplugin => $dir) {
-        $mysubpluginname = "\\userstatus_" . $subplugin . "\\" . $subplugin;
-        output_user_table(new $mysubpluginname(), $PAGE);
-    }
-} else {
-    $mysubpluginname = "\\userstatus_" . $checker . "\\" . $checker;
-    output_user_table(new $mysubpluginname(), $PAGE);
-}
-*/
-
-// $checker = '';
 
 $userfilter = new \tool_cleanupusers\archiveuser_filtering(false, $action, $checker); // user_filtering();
 $userfilter->display();
@@ -128,6 +73,7 @@ $userfilter->display();
 $returnurl = new moodle_url('/admin/tool/cleanupusers/toarchive.php',
     ['action' => $userfilter->get_action(), 'checker' => $userfilter->get_checker()]);
 
+// debugging($userfilter->get_action());
 switch ($userfilter->get_action()) {
     case \tool_cleanupusers\not_archive_filter_form::TO_BE_ARCHIVED:
 // var_dump($sqlfilter);echo '<br>';
@@ -144,6 +90,18 @@ switch ($userfilter->get_action()) {
             // debugging($userstatuschecker->get_displayname());
 
             $archivearray = $userstatuschecker->get_to_suspend();
+            if ($sql != null && $sql != '') {
+                $sql .= ' AND ' . archiveuser_filtering::users_to_sql_filter($archivearray);
+            } else {
+                $sql = archiveuser_filtering::users_to_sql_filter($archivearray);
+            }
+            $archivetable = new \tool_cleanupusers\table\users_table(
+                'tool_cleanupusers_toarchive_table',
+                $sql, $param, "suspend", $userstatuschecker->get_name(), $returnurl);
+            $archivetable->define_baseurl($PAGE->url);
+            $archivetable->out(20, false);
+
+/*
             if (count($archivearray) == 0) {
                 echo "Currently no users will be suspended by the next cronjob for checker " .
                     $userstatuschecker->get_displayname() . ".<br>";
@@ -151,14 +109,18 @@ switch ($userfilter->get_action()) {
                 $archivetable = new \tool_cleanupusers\table\users_table(
                     'tool_cleanupusers_toarchive_table',
                     $archivearray, $sql, $param, "suspend", $userstatuschecker->get_name(), $returnurl);
-
-                $archivetable->define_baseurl($PAGE->url);
-                $archivetable->out(20, false);
-            }
+            }*/
         }
         break;
     case \tool_cleanupusers\not_archive_filter_form::MANUALLY_SUSPENDED:
         echo 'TODO MANUALLY_SUSPENDED';
+        $sql = 'suspended = 1';
+        $archivetable = new \tool_cleanupusers\table\users_table(
+            'tool_cleanupusers_toarchive_table',
+            $sql, $param, "suspend", 'manually suspended', $returnurl);
+
+        $archivetable->define_baseurl($PAGE->url);
+        $archivetable->out(20, false);
         break;
     default:
         throw new coding_exception('invalid action');

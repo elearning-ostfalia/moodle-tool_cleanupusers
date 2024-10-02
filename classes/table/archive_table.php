@@ -23,6 +23,8 @@
 
 namespace tool_cleanupusers\table;
 
+require_once($CFG->libdir . '/tablelib.php');
+
 use core_user\fields;
 
 /**

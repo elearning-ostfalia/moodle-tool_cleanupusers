@@ -132,8 +132,8 @@ Feature: Cleanup settings
 
     # timechecker
     And I navigate to "Users > Clean up users > Manage users to be archived" in site administration
-    And I set the field "Please select a subplugin" to "timechecker"
-    And I pause
+    And I set the field with xpath "//select[@name='action']" to "users to be archived by"
+    And I set the field with xpath "//select[@name='subplugin']" to "timechecker"
     And I should see "user1"
     And I should not see "user2"
     And I should not see "user3"
@@ -143,7 +143,10 @@ Feature: Cleanup settings
     And I should not see "user7"
     And I should not see "user8"
 
-    And I navigate to "Users > Clean up users > Manage users who will be archived by Never Login Checker" in site administration
+    And I navigate to "Users > Clean up users > Manage users to be archived" in site administration
+    And I set the field with xpath "//select[@name='action']" to "users to be archived by"
+    And I set the field with xpath "//select[@name='subplugin']" to "neverloginchecker"
+
     And I should see "user3"
     And I should see "user4"
     And I should not see "user1"
@@ -154,7 +157,9 @@ Feature: Cleanup settings
     And I should not see "user8"
 
     And I navigate to "Users > Clean up users > Manage users to be archived" in site administration
-    And I set the field "Please select a subplugin" to "nocoursechecker"
+    And I set the field with xpath "//select[@name='action']" to "users to be archived by"
+    And I set the field with xpath "//select[@name='subplugin']" to "nocoursechecker"
+
     And I should see "user5"
     And I should see "user6"
     And I should see "user7"
@@ -169,39 +174,47 @@ Feature: Cleanup settings
 
     And I navigate to "Users > Clean up users > General settings" in site administration
 
-    And I navigate to "Users > Clean up users > Manage users who will be archived by Last Login Checker" in site administration
-    And I should see "Currently no users will be suspended by the next cronjob for checker Last Login Checker."
+    And I navigate to "Users > Clean up users > Manage users to be archived" in site administration
+    And I set the field with xpath "//select[@name='action']" to "users to be archived by"
+    And I set the field with xpath "//select[@name='subplugin']" to "timechecker"
+    And I should see "Nothing to display"
 
+    And I navigate to "Users > Clean up users > Manage users to be archived" in site administration
+    And I set the field with xpath "//select[@name='action']" to "users to be archived by"
+    And I set the field with xpath "//select[@name='subplugin']" to "neverloginchecker"
+    And I should see "Nothing to display"
 
-    And I navigate to "Users > Clean up users > Manage users who will be archived by Never Login Checker" in site administration
-    And I should see "Currently no users will be suspended by the next cronjob for checker Never Login Checker."
-
-    And I navigate to "Users > Clean up users > Manage users who will be archived by Not enrolled in active course Checker" in site administration
-    And I should see "Currently no users will be suspended by the next cronjob for checker Not enrolled in active course Checker."
+    And I navigate to "Users > Clean up users > Manage users to be archived" in site administration
+    And I set the field with xpath "//select[@name='action']" to "users to be archived by"
+    And I set the field with xpath "//select[@name='subplugin']" to "nocoursechecker"
+    And I should see "Nothing to display"
 
   @javascript
   Scenario: Manually suspend user for Not enrolled in active course Checker
     Given I log in as "admin"
 
-    And I navigate to "Users > Clean up users > Manage users who will be archived by Not enrolled in active course Checker" in site administration
+    And I navigate to "Users > Clean up users > Manage users to be archived" in site administration
+    And I set the field with xpath "//select[@name='action']" to "users to be archived by"
+    And I set the field with xpath "//select[@name='subplugin']" to "nocoursechecker"
     And I should see "user5"
     When I archive "user5"
     Then I should see "User 'user5' has been archived"
-
-    And I navigate to "Users > Clean up users > Manage users who will be archived by Not enrolled in active course Checker" in site administration
-    And I should not see "user5"
+    When I press "Continue"
+    Then I should not see "user5"
 
   @javascript
   Scenario: Manually suspend user for Never Login Checker
     Given I log in as "admin"
 
-    And I navigate to "Users > Clean up users > Manage users who will be archived by Never Login Checker" in site administration
+    And I navigate to "Users > Clean up users > Manage users to be archived" in site administration
+    And I set the field with xpath "//select[@name='action']" to "users to be archived by"
+    And I set the field with xpath "//select[@name='subplugin']" to "neverloginchecker"
     And I should see "user3"
 
     When I archive "user3"
     Then I should see "User 'user3' has been archived"
 
-    And I navigate to "Users > Clean up users > Manage users who will be archived by Never Login Checker" in site administration
+    When I press "Continue"
     And I should not see "user3"
 
 
@@ -209,11 +222,14 @@ Feature: Cleanup settings
   Scenario: Manually suspend user for Last Login Checker
     Given I log in as "admin"
 
-    And I navigate to "Users > Clean up users > Manage users who will be archived by Last Login Checker" in site administration
+    And I navigate to "Users > Clean up users > Manage users to be archived" in site administration
+    And I set the field with xpath "//select[@name='action']" to "users to be archived by"
+    And I set the field with xpath "//select[@name='subplugin']" to "timechecker"
+
     And I should see "user1"
 
-  When I archive "user1"
-  Then I should see "User 'user1' has been archived"
+    When I archive "user1"
+    Then I should see "User 'user1' has been archived"
 
-    And I navigate to "Users > Clean up users > Manage users who will be archived by Last Login Checker" in site administration
-    And I should see "Currently no users will be suspended by the next cronjob for checker Last Login Checker."
+    When I press "Continue"
+    And I should see "Nothing to display"

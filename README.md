@@ -179,3 +179,4 @@ Aktionen ggf. auch für alle Nutzer aus dem Filter anwenden mit Nachfrage!
 * Es muss auch möglich sein, dass Nutzer, die manuell suspendiert wurden, archiviert und
   später gelöscht werden. Allerdings ist die Frage, mit welchem Checker (welcher Algorithmus soll da greifen)?
 * Handeln von "never logged in" (auch mit Tests)
+neuer Checker: suspendedchcker

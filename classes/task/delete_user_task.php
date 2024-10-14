@@ -73,7 +73,6 @@ class delete_user_task extends scheduled_task {
             // Private function is executed to suspend, delete and activate users.
             $archivearray = [];
             $reactivatearray = $userstatuschecker->get_to_reactivate();
-            // $arraytodelete = $userstatuschecker->get_to_delete();
 
             $suspendresult = [];
 
@@ -81,9 +80,10 @@ class delete_user_task extends scheduled_task {
             $unabletoactivate = $result['failures'];
             $useractivated = $result['countersuccess'];
 
-            // $deleteresult = $this->change_user_deprovisionstatus($arraytodelete, 'delete', $subplugin);
-            // $unabletodelete = $deleteresult['failures'];
-            $userdeleted = []; // $deleteresult['countersuccess'];
+            $arraytodelete = $userstatuschecker->get_to_delete();
+            $deleteresult = $this->change_user_deprovisionstatus($arraytodelete, 'delete', $subplugin);
+            $unabletodelete = $deleteresult['failures'];
+            $userdeleted = $deleteresult['countersuccess'];
 
             // Admin is informed about the cron-job and the amount of users that are affected.
 

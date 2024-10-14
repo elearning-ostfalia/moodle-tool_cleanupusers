@@ -338,7 +338,7 @@ abstract class userstatus_base_test extends \advanced_testcase
 
         $this->assertEqualsUsersArrays($this->checker->get_to_delete(), $user);
 
-        $cronjob = new \tool_cleanupusers\task\archive_user_task();
+        $cronjob = new \tool_cleanupusers\task\delete_user_task();
         $cronjob->execute();
 
         // no records in tool_cleanupusers and tool_cleanupusers_archive
@@ -398,7 +398,7 @@ abstract class userstatus_base_test extends \advanced_testcase
 
         $this->assertEqualsUsersArrays($this->checker->get_to_delete(), $user);
 
-        $cronjob = new \tool_cleanupusers\task\archive_user_task();
+        $cronjob = new \tool_cleanupusers\task\delete_user_task();
         $cronjob->execute();
 
         // no records in tool_cleanupusers and tool_cleanupusers_archive

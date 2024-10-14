@@ -257,6 +257,33 @@ abstract  class userstatuschecker
      *
      * @return array of users who should be deleted.
      */
+    public function get_to_delete() {
+        $sqlarray = self::get_to_delete_sql($this->get_name());
+        if (count($sqlarray) == 0) {
+            return [];
+        }
+
+        global $DB;
+        $sql = 'select * from ' . $sqlarray['from'] . ' where ' . $sqlarray['where'];
+        $users = $DB->get_records_sql($sql);
+
+        $todelete = [];
+        foreach ($users as $key => $user) {
+            if (!is_siteadmin($user) && !isguestuser($user)) {
+                $deleteuser = new archiveduser(
+                    $user->id,
+                    $user->suspended,
+                    $user->lastaccess,
+                    $user->username,
+                    $user->deleted,
+                    $user->auth,
+                    $this->get_name()
+                );
+                $todelete[$key] = $deleteuser;
+            }
+        }
+        return $todelete;
+    }
     /*
     public function get_to_delete() {
         if ($this->get_deletetime() < 0) {

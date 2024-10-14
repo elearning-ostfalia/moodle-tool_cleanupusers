@@ -89,7 +89,7 @@ abstract  class userstatuschecker
     }
 
     public function condition_suspend_sql() : array {
-        return ["" , null];
+        return ["suspended = 0" , null];
     }
 
     public function condition_reactivate_sql($tca, $tc) {
@@ -179,7 +179,6 @@ abstract  class userstatuschecker
         $sql = "SELECT id, suspended, lastaccess, username, deleted, auth
                 FROM {user}
                 WHERE " . $this->get_auth_sql('') . "
-                    AND suspended = 0
                     AND deleted = 0";
         if (!empty($sql_condition)) {
             $sql .= " AND " . $sql_condition;

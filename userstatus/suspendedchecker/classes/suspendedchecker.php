@@ -15,47 +15,45 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Sub-plugin timechecker.
+ * Sub-plugin suspendedchecker.
  *
- * @package   userstatus_timechecker
- * @copyright 2016/17 N. Herrmann
+ * @package   userstatus_suspendedchecker
+ * @copyright 2024 Ostfalia
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-namespace userstatus_neverloginchecker;
+namespace userstatus_suspendedchecker;
 
-use tool_cleanupusers\archiveduser;
-use tool_cleanupusers\userstatusinterface;
 use tool_cleanupusers\userstatuschecker;
 
 /**
- * Class that checks the status of different users depending on the time they did not signed in.
+ * Class that checks the for users who are suspended manually.
  *
- * @package    userstatus_neverloginchecker
+ * @package    userstatus_timechecker
  * @copyright  2016/17 N Herrmann
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class neverloginchecker extends userstatuschecker {
+class suspendedchecker extends userstatuschecker { // implements userstatusinterface {
     /**
-     * This constructor sets timesuspend and timedelete from days to seconds.
+     * constructor
      */
     public function __construct() {
         parent::__construct(self::class);
     }
 
     public function condition_suspend_sql() : array {
-        return [" suspended = 0 and lastaccess = 0 and timecreated < :timelimit" ,
-            [ 'timelimit'  => time() - $this->get_suspendtime_in_sec() ]];
+        return [" suspended = 1" , []];
+    }
+
+    public function condition_reactivate_sql($tca, $tc) : array {
+        return ["false" , []];
     }
 
     /**
-     * need to be handled because the timelimit might have changed in meantime
-     * @param $tca
-     * @param $tc
-     * @return array
+     * As the time since a user is suspended cannot actually determined
+     * there is no suspendtime
+     * @return bool
      */
-    public function condition_reactivate_sql($tca, $tc) : array {
-        return ["({$tca}.lastaccess != 0 or {$tca}.timecreated >= :timelimit)" ,
-            [ 'timelimit'  => time() - $this->get_suspendtime_in_sec() ]];
+    public function needs_suspendtime() : bool {
+        return false;
     }
-
 }

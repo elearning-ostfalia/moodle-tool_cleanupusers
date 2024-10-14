@@ -178,5 +178,8 @@ Aktionen ggf. auch für alle Nutzer aus dem Filter anwenden mit Nachfrage!
   (Ziel: Wenn das Plugin installiert wird, müssen ja alte Nutzerdaten abgearbeitet werden)
 * Es muss auch möglich sein, dass Nutzer, die manuell suspendiert wurden, archiviert und
   später gelöscht werden. Allerdings ist die Frage, mit welchem Checker (welcher Algorithmus soll da greifen)?
+  Es bietet sich an, hierfür einen eigenen Checker 'suspendchecker' zu nehmen.
 * Handeln von "never logged in" (auch mit Tests)
-neuer Checker: suspendedchcker
+* Da für nocoursechecker keine sichere Latenzzeit realisiert werden kann, sollte noch die 
+  Option cron/manuell bei den Suspend-Aktionen ergänzt werden. Der Wert muss dann in die
+  Übersichtstabelle.

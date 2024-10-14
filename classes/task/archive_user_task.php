@@ -28,7 +28,6 @@ namespace tool_cleanupusers\task;
 
 use tool_cleanupusers\cleanupusers_exception;
 // Needed for the default plugin.
-use userstatus_timechecker\timechecker;
 use tool_cleanupusers\archiveduser;
 use tool_cleanupusers\event\deprovisionusercronjob_completed;
 use core\task\scheduled_task;

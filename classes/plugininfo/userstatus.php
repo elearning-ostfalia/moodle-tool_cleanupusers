@@ -48,9 +48,14 @@ class userstatus extends base {
         if ($this->is_standard()) {
             return false;
         }
-        // Timechecker is the standard sub-plugin and can not be uninstalled.
-        if ($this->name == 'timechecker') {
-            return false;
+        // Standard sub-plugin can not be uninstalled.
+        switch ($this->name) {
+            case 'timechecker':
+            case 'suspendedchecker':
+            case 'ldapchecker':
+            case 'neverloginchecker':
+            case 'nocoursechecker':
+                return false;
         }
         // In case the sub-plugin is in use, sub-plugin can not be uninstalled.
         $enabled = self::get_enabled_plugins();

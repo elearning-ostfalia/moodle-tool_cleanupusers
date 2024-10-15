@@ -87,10 +87,10 @@ class archiveduser {
         global $DB;
         // Get the current user.
         $user = \core_user::get_user($this->id);
-        if ($user->suspended == 1) {
+/*        if ($user->suspended == 1) {
             throw new cleanupusers_exception("Failed to suspend " . $user->username .
                 " : user is already suspended");
-        } else if (!($user->username == \core_user::clean_field($user->username, 'username'))) {
+        } else */ if (!($user->username == \core_user::clean_field($user->username, 'username'))) {
             throw new cleanupusers_exception("Failed to suspend " . $user->username .
                 " : username is not cleaned");
         } else {

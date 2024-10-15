@@ -228,6 +228,9 @@ final class tool_cleanupusers_test extends advanced_testcase {
      * @throws cleanupusers_exception
      * @throws dml_exception
      */
+    // Manually suspended users will also be handled with a subplugin!!
+
+    /*
     public function test_exception_archiveme(): void {
         global $DB;
         $data = $this->set_up();
@@ -249,7 +252,7 @@ final class tool_cleanupusers_test extends advanced_testcase {
         $this->assertEmpty($recordtooltable);
 
         $this->resetAfterTest(true);
-    }
+    }*/
 
     /**
      * Tries to delete users which cannot be deleted and therefore throws exception. Users:
@@ -447,7 +450,7 @@ final class tool_cleanupusers_test extends advanced_testcase {
      * @throws dml_exception
      * @throws coding_exception
      */
-    public function test_cronjob(): void {
+    public function test_archive_cronjob(): void {
         global $DB;
         $data = $this->set_up();
         $this->assertNotEmpty($data);
@@ -475,10 +478,10 @@ final class tool_cleanupusers_test extends advanced_testcase {
             'In the last cron-job 1 users were archived',
             $msg
         );  // Useroneyearnotloggedin.
-        $this->assertStringContainsString(
+/*        $this->assertStringContainsString(
             'In the last cron-job 1 users were deleted',
             $msg
-        );  // Usersuspendedbyplugin.
+        );  */ // Usersuspendedbyplugin.
         $this->assertStringContainsString(
             'In the last cron-job 1 users were reactivated',
             $msg
@@ -519,6 +522,129 @@ final class tool_cleanupusers_test extends advanced_testcase {
         $this->assertEquals(0, $recordusertable->deleted);
 
         // User is deleted.
+/*        $recordusertable = $DB->get_record('user', ['id' => $data['usersuspendedbyplugin']->id]);
+        $recordtooltable = $DB->get_record('tool_cleanupusers', ['id' => $data['usersuspendedbyplugin']->id]);
+        $recordtooltable2 = $DB->get_record('tool_cleanupusers_archive', ['id' => $data['usersuspendedbyplugin']->id]);
+        $this->assertEmpty($recordtooltable);
+        $this->assertEmpty($recordtooltable2);
+        $this->assertEquals(1, $recordusertable->suspended);
+        $this->assertEquals(1, $recordusertable->deleted);
+*/
+        // User remains inconsistently suspended.
+        $recordusertable = $DB->get_record('user', ['id' => $data['userinconsistentsuspended']->id]);
+        $recordtooltable = $DB->get_record('tool_cleanupusers', ['id' => $data['userinconsistentsuspended']->id]);
+        $recordtooltable2 = $DB->get_record('tool_cleanupusers_archive', ['id' => $data['userinconsistentsuspended']->id]);
+        $this->assertNotEmpty($recordtooltable2);
+        $this->assertEmpty($recordtooltable);
+        $this->assertEquals(1, $recordusertable->suspended);
+        $this->assertEquals(0, $recordusertable->deleted);
+
+        // User was reactivated.
+        $recordusertable = $DB->get_record('user', ['id' => $data['usersuspendedbypluginandmanually']->id]);
+        $recordtooltable = $DB->get_record('tool_cleanupusers', ['id' => $data['usersuspendedbypluginandmanually']->id]);
+        $recordtooltable2 = $DB->get_record(
+            'tool_cleanupusers_archive',
+            ['id' => $data['usersuspendedbypluginandmanually']->id]
+        );
+        $this->assertEmpty($recordtooltable);
+        $this->assertEmpty($recordtooltable2);
+        $this->assertEquals(1, $recordusertable->suspended);
+        $this->assertEquals(0, $recordusertable->deleted);
+
+        $this->resetAfterTest();
+    }
+
+    /**
+     * Executes and tests the cron-job. The following table illustrates what will happen to the users:
+     * Username                          |   signed in    | suspended manually | suspended by plugin | deleted | action
+     * -----------------------------------------------------------------------------------------------------------------
+     *  user                             | tendaysago    | no                 | no                  | no       | -
+     *  userdeleted                      | oneyearago    | no                 | yes                 | yes      | -
+     *  userneverloggedin                | -             | no                 | no                  | no       | -
+     *  usersuspendedmanually            | -             | yes                | no                  | no       | -
+     *  useroneyearnotloggedin           | oneyearago    | no                 | no                  | no       | suspend
+     *  usersuspendedbyplugin            | oneyearago    | no                 | yes                 | no       | delete
+     *  userinconsistentsuspended        | oneyearago    | no                 | partly              | no       | -
+     *  usersuspendedbypluginandmanually | tendaysago    | yes                | yes                 | no       | activate
+     *  originaluser                     | tendaysago    | no                 | yes                 | no       | activate
+     *  userduplicatedname               | -             | no                 | no                  | no       | -
+     * @throws dml_exception
+     * @throws coding_exception
+     */
+    public function test_delete_cronjob(): void {
+        global $DB;
+        $data = $this->set_up();
+        $this->assertNotEmpty($data);
+        // Set up mail configuration.
+        unset_config('noemailever');
+        $sink = $this->redirectEmails();
+        $cronjob = new task\archive_user_task();
+        $name = $cronjob->get_name();
+        $this->assertEquals(get_string('archive_user_task', 'tool_cleanupusers'), $name);
+
+        $timestamponeyearago = time() - 31622600;
+
+        // Run cron-job with timechecker plugin.
+        // set_config('cleanupusers_subplugin', 'timechecker', 'tool_cleanupusers');
+        set_config('userstatus_plugins_enabled', "timechecker");
+        $cronjob = new task\delete_user_task();
+        $cronjob->execute();
+        // Administrator should have received an email.
+        $messages = $sink->get_messages();
+        $this->assertEquals(1, count($messages));
+
+        $msg = str_replace(["\r\n", "\r", "\n", "<br>", "</br>"], '', $messages[0]->body);
+
+/*        $this->assertStringContainsString(
+            'In the last cron-job 1 users were archived',
+            $msg
+        );*/  // Useroneyearnotloggedin.
+        $this->assertStringContainsString(
+            'In the last cron-job 1 users were deleted',
+            $msg
+        );  // Usersuspendedbyplugin.
+        $this->assertStringContainsString(
+            'In the last cron-job 1 users were reactivated',
+            $msg
+        ); // Usersuspendedbypluginandmanually.
+        $this->assertStringContainsString(
+            'No problems occurred in plugin tool_cleanupusers in the last run.',
+            $msg
+        );
+        // Userdeleted already filtered.
+        // Userinconsistentsuspended not selected by timechecker.
+        // Originaluser not selected by timechecker.
+
+        // Users not changed by the Cronjob.
+        $recordusertable = $DB->get_record('user', ['id' => $data['user']->id]);
+        $this->assert_user_equals($data['user'], $recordusertable);
+
+        $recordusertable = $DB->get_record('user', ['id' => $data['userdeleted']->id]);
+        $this->assert_user_equals($data['userdeleted'], $recordusertable);
+
+        $recordusertable = $DB->get_record('user', ['id' => $data['userneverloggedin']->id]);
+        $this->assert_user_equals($data['userneverloggedin'], $recordusertable);
+
+        $recordusertable = $DB->get_record('user', ['id' => $data['usersuspendedmanually']->id]);
+        $this->assert_user_equals($data['usersuspendedmanually'], $recordusertable);
+
+        // User is suspended.
+/*
+        $recordusertable = $DB->get_record('user', ['id' => $data['useroneyearnotloggedin']->id]);
+        $recordtooltable = $DB->get_record('tool_cleanupusers', ['id' => $data['useroneyearnotloggedin']->id]);
+        $recordtooltable2 = $DB->get_record('tool_cleanupusers_archive', ['id' => $data['useroneyearnotloggedin']->id]);
+        $this->assertNotEmpty($recordtooltable);
+        $this->assert_user_equals($data['useroneyearnotloggedin'], $recordtooltable2);
+        $this->assertEquals(1, $recordusertable->suspended);
+        $this->assertEquals(0, $recordtooltable2->suspended);
+        $this->assertEquals(get_config(
+                'tool_cleanupusers',
+                'suspendusername'
+            ) . $data['useroneyearnotloggedin']->id, $recordusertable->username);
+        $this->assertEquals(0, $recordusertable->deleted);
+*/
+
+        // User is deleted.
         $recordusertable = $DB->get_record('user', ['id' => $data['usersuspendedbyplugin']->id]);
         $recordtooltable = $DB->get_record('tool_cleanupusers', ['id' => $data['usersuspendedbyplugin']->id]);
         $recordtooltable2 = $DB->get_record('tool_cleanupusers_archive', ['id' => $data['usersuspendedbyplugin']->id]);
@@ -550,6 +676,8 @@ final class tool_cleanupusers_test extends advanced_testcase {
 
         $this->resetAfterTest();
     }
+
+
 
     /**
      *

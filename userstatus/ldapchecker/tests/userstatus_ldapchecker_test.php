@@ -52,7 +52,7 @@ class userstatus_ldapchecker_test extends \tool_cleanupusers\userstatus_base_tes
         return new \userstatus_ldapchecker\ldapchecker(true);
     }
 
-    public function typical_scenario_for_reactivation() : \stdClass {
+    public function typical_scenario_for_reactivation() : ?\stdClass {
         $user = $this->create_test_user('username');
         $this->assertEqualsUsersArrays($this->checker->get_to_suspend(), $user);
 

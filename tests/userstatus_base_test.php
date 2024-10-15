@@ -113,7 +113,7 @@ abstract class userstatus_base_test extends \advanced_testcase
         return $plugin;
     }
 
-    abstract public function typical_scenario_for_reactivation() : \stdClass;
+    abstract public function typical_scenario_for_reactivation() : ?\stdClass;
 
     abstract public function typical_scenario_for_suspension() : \stdClass;
 
@@ -127,8 +127,9 @@ abstract class userstatus_base_test extends \advanced_testcase
     // ---------------------------------------------
     public function test_simple_suspend() {
         $user = $this->typical_scenario_for_suspension();
+        $suspened = $user->suspended;
         $this->assertEqualsUsersArrays($this->checker->get_to_suspend(), $user);
-        $this->assertEquals(0, $user->suspended);
+        // $this->assertEquals(0, $user->suspended);
 
         // run cron
         $cronjob = new \tool_cleanupusers\task\archive_user_task();
@@ -156,7 +157,7 @@ abstract class userstatus_base_test extends \advanced_testcase
         $this->assertEquals($user->firstname, $record->firstname);
         $this->assertEquals($user->lastname, $record->lastname);
         $this->assertEquals($user->auth, $record->auth); // not modified
-        $this->assertEquals(0, $record->suspended);
+        $this->assertEquals($suspened, $record->suspended);
         $this->assertEquals($user->lastaccess, $record->lastaccess);
         $this->assertEquals($user->timecreated, $record->timecreated);
     }
@@ -200,11 +201,14 @@ abstract class userstatus_base_test extends \advanced_testcase
      */
     public function test_already_suspended_not_suspend() {
         $user = $this->typical_scenario_for_suspension();
-        global $DB;
-        $user->suspended = 1;
-        $DB->update_record('user', $user);
-        $this->assertEquals(0, count($this->checker->get_to_suspend()));
-        $this->assertEquals(0, count($this->checker->get_to_reactivate()));
+        if (!$user->suspended) {
+            // This scenario cannot be run with suspendedchecker
+            global $DB;
+            $user->suspended = 1;
+            $DB->update_record('user', $user);
+            $this->assertEquals(0, count($this->checker->get_to_suspend()));
+            $this->assertEquals(0, count($this->checker->get_to_reactivate()));
+        }
     }
 
     public function test_already_deleted_not_suspend() {
@@ -215,11 +219,16 @@ abstract class userstatus_base_test extends \advanced_testcase
         $this->assertEquals(0, count($this->checker->get_to_suspend()));
     }
 
+
     // ---------------------------------------------
     // REACTIVATE
     // ---------------------------------------------
     public function test_reactivate() {
         $user = $this->typical_scenario_for_reactivation();
+        if (!$user) {
+            // No such scenario available (suspendedchecker)
+            return;
+        }
         $this->assertEqualsUsersArrays($this->checker->get_to_reactivate(), $user);
 
         // run cron
@@ -255,6 +264,10 @@ abstract class userstatus_base_test extends \advanced_testcase
 
     public function test_reactivate_username_already_exists_no_reactivate() {
         $user = $this->typical_scenario_for_reactivation();
+        if (!$user) {
+            // No such scenario available (suspendedchecker)
+            return;
+        }
         $this->assertEqualsUsersArrays($this->checker->get_to_reactivate(), $user);
 
         $user1 = $this->create_test_user($user->username, ['firstname' => $user->firstname,
@@ -272,6 +285,10 @@ abstract class userstatus_base_test extends \advanced_testcase
      */
     public function test_incomplete_archive_no_reactivate_1() {
         $user = $this->typical_scenario_for_reactivation();
+        if (!$user) {
+            // No such scenario available (suspendedchecker)
+            return;
+        }
         global $DB;
         $DB->delete_records('tool_cleanupusers', ['id' => $user->id]); // NEW for test_invisible_course_make_visisble_reactivate
         $this->assertEquals(0, count($this->checker->get_to_reactivate()));
@@ -279,6 +296,10 @@ abstract class userstatus_base_test extends \advanced_testcase
 
     public function test_incomplete_archive_no_reactivate_2() {
         $user = $this->typical_scenario_for_reactivation();
+        if (!$user) {
+            // No such scenario available (suspendedchecker)
+            return;
+        }
         global $DB;
         $DB->delete_records('tool_cleanupusers_archive', ['id' => $user->id]); // NEW for test_invisible_course_make_visisble_reactivate
         $this->assertEquals(0, count($this->checker->get_to_reactivate()));
@@ -286,6 +307,10 @@ abstract class userstatus_base_test extends \advanced_testcase
 
     public function test_incomplete_archive_no_reactivate_3() {
         $user = $this->typical_scenario_for_reactivation();
+        if (!$user) {
+            // No such scenario available (suspendedchecker)
+            return;
+        }
         global $DB;
         $DB->delete_records('tool_cleanupusers_archive', ['id' => $user->id]); // NEW for test_invisible_course_make_visisble_reactivate
         $DB->delete_records('tool_cleanupusers', ['id' => $user->id]); // NEW for test_invisible_course_make_visisble_reactivate
@@ -526,8 +551,6 @@ abstract class userstatus_base_test extends \advanced_testcase
         $this->assertEquals(0, count($this->checker->get_to_suspend()));
     }*/
 
-
-
     /**
      * Methodes recommended by moodle to assure database and dataroot is reset.
      */
@@ -547,6 +570,5 @@ abstract class userstatus_base_test extends \advanced_testcase
         $this->assertEquals(2, $DB->count_records('user', []));
         $this->assertEquals(0, $DB->count_records('tool_cleanupusers', []));
     }
-
 
 }

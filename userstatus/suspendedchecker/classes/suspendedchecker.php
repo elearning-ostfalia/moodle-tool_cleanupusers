@@ -28,11 +28,11 @@ use tool_cleanupusers\userstatuschecker;
 /**
  * Class that checks the for users who are suspended manually.
  *
- * @package    userstatus_timechecker
- * @copyright  2016/17 N Herrmann
+ * @package    userstatus_suspendedchecker
+ * @copyright  2024 Ostfalia
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class suspendedchecker extends userstatuschecker { // implements userstatusinterface {
+class suspendedchecker extends userstatuschecker {
     /**
      * constructor
      */
@@ -44,8 +44,28 @@ class suspendedchecker extends userstatuschecker { // implements userstatusinter
         return [" suspended = 1" , []];
     }
 
+    /**
+     * Users cannot be reactivated by external circumstances
+     * @param $tca
+     * @param $tc
+     * @return array
+     */
     public function condition_reactivate_sql($tca, $tc) : array {
         return ["false" , []];
+    }
+
+    /**
+     * SQL condition should result in an empty set.
+     * @param $user
+     * @return bool
+     */
+    public function shall_reactivate($user) : bool {
+        throw new \coding_exception('unreachable code reached');
+        // return false;
+    }
+
+    public function get_to_reactivate() {
+        return [];
     }
 
     /**

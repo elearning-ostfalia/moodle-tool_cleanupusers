@@ -66,7 +66,7 @@ final class userstatus_nocoursechecker_test extends \tool_cleanupusers\userstatu
      * @throws dml_exception
      * @throws moodle_exception
      */
-    public function typical_scenario_for_reactivation() : \stdClass {
+    public function typical_scenario_for_reactivation() : ?\stdClass {
         $invisible_course = $this->generator->create_course(['startdate' => YESTERDAY, 'visible' => false]);
         $user = $this->create_user_and_enrol('username', $invisible_course);
 

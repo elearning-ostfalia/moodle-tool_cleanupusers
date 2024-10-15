@@ -59,7 +59,7 @@ class userstatus_neverloginchecker_test extends \tool_cleanupusers\userstatus_ba
         return new \userstatus_neverloginchecker\neverloginchecker();
     }
 
-    public function typical_scenario_for_reactivation() : \stdClass {
+    public function typical_scenario_for_reactivation() : ?\stdClass {
         $user = $this->create_test_user('username', ['timecreated' => ELEVENDAYSAGO]);
         $this->assertEqualsUsersArrays($this->checker->get_to_suspend(), $user);
 

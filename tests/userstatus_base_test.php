@@ -135,6 +135,9 @@ abstract class userstatus_base_test extends \advanced_testcase
         $cronjob = new \tool_cleanupusers\task\archive_user_task();
         $cronjob->execute();
 
+        // check if all users have been suspended
+        $this->assertEquals(0, count($this->checker->get_to_suspend()));
+
         // check if user won't be activated now.
         $this->assertEquals(0, count($this->checker->get_to_reactivate()));
 

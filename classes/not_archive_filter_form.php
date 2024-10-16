@@ -109,30 +109,24 @@ class not_archive_filter_form extends moodleform {
      * @return bool|array array in case the sub-plugin is not valid, otherwise true.
      */
     public function validation($data, $files) {
+        // debugging('validation');
+
         // var_dump($data);
 /*        switch ($data['action']) {
             case self::MANUALLY_SUSPENDED:
                 return true;
             case self::TO_BE_ARCHIVED:*/
-                $plugins = core_plugin_manager::instance()->get_enabled_plugins("userstatus");
-                $issubplugin = false;
+                $plugins = \tool_cleanupusers\plugininfo\userstatus::get_enabled_plugins();
                 if (key_exists('subplugin', $data)) {
                     $plugin = $data['subplugin'];
-
                 } else {
                     global $SESSION;
                     $plugin = $SESSION->checker;
                 }
-                foreach ($plugins as $key => $value) {
-                    if ($key == $plugin) {
-                        $issubplugin = true;
-                        break;
-                    }
-                }
-                if ($issubplugin == false) {
+                $issubplugin = array_key_exists($plugin, $plugins);
+                if (!$issubplugin) {
                     return ['subplugin' => get_string('errormessagesubplugin', 'tool_cleanupusers')];
                 }
-
                 return $issubplugin;
 /*            default:
                 break;

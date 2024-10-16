@@ -75,6 +75,8 @@ class archiveuser_filtering extends \user_filtering
             if (isset($urlaction)) {
                 // set default values from URL
                 $this->checkerform->set_data(['action' => $urlaction, 'subplugin' => $urlchecker]);
+                $SESSION->checker = $urlchecker;
+                $SESSION->action = $urlaction;
             } else {
                 if (isset($SESSION->checker)) {
                     // set default values from session

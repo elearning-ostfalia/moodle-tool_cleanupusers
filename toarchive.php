@@ -22,7 +22,6 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-use tool_cleanupusers\archive_filter_form;
 use tool_cleanupusers\archiveuser_filtering;
 
 global $CFG, $PAGE, $OUTPUT;
@@ -34,7 +33,6 @@ require_once(__DIR__ . '/classes/table/archive_table.php');
 // Get URL parameters.
 $action  = optional_param('action', null, PARAM_INT);
 $checker = optional_param('checker', null, PARAM_ALPHANUMEXT);
-
 
 $PAGE->set_context(context_system::instance());
 // Check permissions.
@@ -79,8 +77,7 @@ switch ($userfilter->get_action()) {
 // var_dump($paramfilter);
         $checker = $userfilter->get_checker();
         // Update page URL
-        $PAGE->set_url(new moodle_url('/admin/tool/cleanupusers/toarchive.php'),
-            ['action' => $userfilter->get_action(), 'checker' => $checker]);
+        $PAGE->set_url($returnurl);
 
         $subpluginname = "\\userstatus_" . $checker . "\\" . $checker;
         if (!class_exists($subpluginname)) {

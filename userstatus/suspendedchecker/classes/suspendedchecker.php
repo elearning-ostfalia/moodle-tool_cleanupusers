@@ -40,6 +40,12 @@ class suspendedchecker extends userstatuschecker {
         parent::__construct(self::class);
     }
 
+    /**
+     * check that suspended flag is set and
+     * the user is not already archived. If he or she is archived then the
+     * suspended flag will also be set!
+     * @return array
+     */
     public function condition_suspend_sql() : array {
         return [" suspended = 1 AND id not in (select id from {tool_cleanupusers})", []];
     }

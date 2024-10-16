@@ -114,15 +114,9 @@ class archive_filter_form extends moodleform {
                 return true;
             case self::TO_BE_REACTIVATED:
             case self::TO_BE_DELETED:
-                $plugins = core_plugin_manager::instance()->get_enabled_plugins("userstatus");
-                $issubplugin = false;
-                foreach ($plugins as $key => $value) {
-                    if ($key == $data['subplugin']) {
-                        $issubplugin = true;
-                        break;
-                    }
-                }
-                if ($issubplugin == false) {
+                $plugins = \tool_cleanupusers\plugininfo\userstatus::get_enabled_plugins();
+                $issubplugin = array_key_exists($data['subplugin'], $plugins);
+                if (!$issubplugin) {
                     return ['subplugin' => get_string('errormessagesubplugin', 'tool_cleanupusers')];
                 }
                 return $issubplugin;

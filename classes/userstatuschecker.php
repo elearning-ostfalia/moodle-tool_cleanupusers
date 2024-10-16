@@ -179,13 +179,12 @@ abstract  class userstatuschecker
         $sql = "SELECT id, suspended, lastaccess, username, deleted, auth
                 FROM {user}
                 WHERE " . $this->get_auth_sql('') . "
-                    AND deleted = 0";
+                    AND deleted = 0 
+                    AND id not in (select id from {tool_cleanupusers})";
         if (!empty($sql_condition)) {
             $sql .= " AND " . $sql_condition;
         }
         $users = $DB->get_records_sql($sql, $param_condition);
-
-        // $users1 = $DB->get_records('user');
 
         $tosuspend = [];
         foreach ($users as $key => $user) {

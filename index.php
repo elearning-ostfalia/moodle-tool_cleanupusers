@@ -21,6 +21,9 @@
  * @copyright  2016 N Herrmann
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+
+use tool_cleanupusers\plugininfo\userstatus;
+
 require_once(__DIR__ . '/../../../config.php');
 require_once($CFG->libdir . '/adminlib.php');
 
@@ -52,12 +55,7 @@ $content = '';
 
 ////////////////////////////////////////////////////////////////////////////////
 // process actions
-
-
-// $enabled =  core_plugin_manager::instance()->get_enabled_plugins("userstatus");
-$class = \core_plugin_manager::resolve_plugininfo_class('userstatus');
-$enabled = $class::get_enabled_plugins();
-
+$enabled = userstatus::get_enabled_plugins();
 if (!empty($action) && confirm_sesskey()) {
     switch ($action) {
         case 'disable':
@@ -103,9 +101,13 @@ if (!empty($action) && confirm_sesskey()) {
         default:
             break;
     }
+    // unset($enabled);
+    // reload
+    $enabled = userstatus::get_enabled_plugins();
+    // var_dump($enabled);
 }
 
-unset($enabled);
+
 // $enabled =  core_plugin_manager::instance()->get_enabled_plugins("userstatus");
 // var_dump($enabled);
 
@@ -116,13 +118,14 @@ $content .= $renderer->render_subplugin_table();
 
 $content .= $OUTPUT->heading(get_string('pendingactions', 'tool_cleanupusers'), 2, 'main');
 
-$pluginsenabled =  core_plugin_manager::instance()->get_enabled_plugins("userstatus");
-if (!$pluginsenabled) {
+//$pluginsenabled =  core_plugin_manager::instance()->get_enabled_plugins("userstatus");
+// var_dump($pluginsenabled);
+if (!$enabled) {
     core\notification::warning("Note: no userstatus plugin enabled");
 } else {
     // Request arrays from the sub-plugin.
     // var_dump($pluginsenabled);
-    foreach ($pluginsenabled as $subplugin => $dir) {
+    foreach ($enabled as $subplugin => $dir) {
         // var_dump($subplugin); echo '<br>';
         // var_dump($dir); echo '<br>';
         // $class::enable_plugin($auth, false);

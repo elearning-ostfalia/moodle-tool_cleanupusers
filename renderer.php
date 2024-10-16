@@ -25,6 +25,7 @@
 use tool_cleanupusers\archiveduser;
 use tool_cleanupusers\not_archive_filter_form;
 use tool_cleanupusers\archive_filter_form;
+use tool_cleanupusers\plugininfo\userstatus;
 
 defined('MOODLE_INTERNAL') || die;
 
@@ -56,10 +57,7 @@ class tool_cleanupusers_renderer extends plugin_renderer_base {
         $txt->deleteifneverloggedin = get_string('deleteifneverloggedin', 'tool_cleanupusers');
 
         $authsavailable = core_plugin_manager::instance()->get_plugins_of_type('userstatus');
-        // var_dump($authsavailable);
-        // $class = \core_plugin_manager::resolve_plugininfo_class('userstatus');
-        // $authsenabled = $class::get_enabled_plugins();
-        $authsenabled = core_plugin_manager::instance()->get_enabled_plugins("userstatus");
+        $authsenabled = userstatus::get_enabled_plugins();
         if (!$authsenabled) {
             $authsenabled = [];
         }
@@ -73,7 +71,6 @@ class tool_cleanupusers_renderer extends plugin_renderer_base {
         foreach ($authsenabled as $auth) {
             $displayauths[$auth] = $auth;
         }
-
         foreach ($authsavailable as $auth => $dir) {
             if (array_key_exists($auth, $displayauths)) {
                 continue; //already in the list

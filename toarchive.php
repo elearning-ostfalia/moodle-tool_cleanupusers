@@ -78,6 +78,10 @@ switch ($userfilter->get_action()) {
 // var_dump($sqlfilter);echo '<br>';
 // var_dump($paramfilter);
         $checker = $userfilter->get_checker();
+        // Update page URL
+        $PAGE->set_url(new moodle_url('/admin/tool/cleanupusers/toarchive.php'),
+            ['action' => $userfilter->get_action(), 'checker' => $checker]);
+
         $subpluginname = "\\userstatus_" . $checker . "\\" . $checker;
         if (!class_exists($subpluginname)) {
             core\notification::warning($subpluginname . ' does not exist');
@@ -101,6 +105,7 @@ switch ($userfilter->get_action()) {
             $archivetable->out(20, false);
         }
         break;
+/*
     case \tool_cleanupusers\not_archive_filter_form::MANUALLY_SUSPENDED:
         if (!empty($sql)) {
             $sql .= ' AND suspended = 1';
@@ -113,7 +118,7 @@ switch ($userfilter->get_action()) {
 
         $archivetable->define_baseurl($PAGE->url);
         $archivetable->out(20, false);
-        break;
+        break;*/
     default:
         throw new coding_exception('invalid action');
 

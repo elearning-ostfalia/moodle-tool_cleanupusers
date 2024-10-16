@@ -41,7 +41,7 @@ class suspendedchecker extends userstatuschecker {
     }
 
     public function condition_suspend_sql() : array {
-        return [" suspended = 1" , []];
+        return [" suspended = 1 AND id not in (select id from {tool_cleanupusers})", []];
     }
 
     /**

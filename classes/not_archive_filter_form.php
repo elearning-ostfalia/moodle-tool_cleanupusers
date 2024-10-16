@@ -24,6 +24,8 @@
 namespace tool_cleanupusers;
 defined('MOODLE_INTERNAL') || die();
 
+use tool_cleanupusers\plugininfo\userstatus;
+
 require_once("$CFG->libdir/formslib.php");
 use moodleform;
 use core_plugin_manager;
@@ -38,28 +40,31 @@ use core_plugin_manager;
 
 class not_archive_filter_form extends moodleform {
     
-    const MANUALLY_SUSPENDED = 1;
+    // const MANUALLY_SUSPENDED = 1;
     const TO_BE_ARCHIVED = 2;
 
-    const DEFAULT_ACTION = self::MANUALLY_SUSPENDED; // does not require plugin!
+    const DEFAULT_ACTION = self::TO_BE_ARCHIVED; // does not require plugin!
 
     public function __construct()
     {
         parent::__construct();
     }
 
+    public function get_default_checker() {
+        $plugins = userstatus::get_enabled_plugins();
+        return reset($plugins);
+    }
     /**
      * Defines the sub-plugin select form.
      */
     public function definition() {
         $mform = $this->_form;
         // Gets all enabled plugins of type userstatus.
-        $plugins = core_plugin_manager::instance()->get_enabled_plugins("userstatus");
-        if (count($plugins) == 0) {
-            \core\notification::warning(get_string('errormessagenoplugin', 'tool_cleanupusers'));
-        }
+        // $plugins = core_plugin_manager::instance()->get_enabled_plugins("userstatus");
+        $plugins = userstatus::get_enabled_plugins();
+
         $actions = [];
-        $actions[self::MANUALLY_SUSPENDED] = 'users manually suspended';
+        // $actions[self::MANUALLY_SUSPENDED] = 'users manually suspended';
         $actions[self::TO_BE_ARCHIVED] = 'users to be archived by';
 
         $selectline = [];
@@ -70,13 +75,17 @@ class not_archive_filter_form extends moodleform {
         // $mform->hideIf('subplugin', 'action', 'eq', self::MANUALLY_SUSPENDED);
 
         $mform->setDefault('action', self::DEFAULT_ACTION);
-        $mform->setDefault('subplugin', '0');
+        if (count($plugins) == 0) {
+            \core\notification::warning(get_string('errormessagenoplugin', 'tool_cleanupusers'));
+        } else {
+            $mform->setDefault('subplugin', $this->get_default_checker());
+        }
 
         // Add invisible submit button
         $context = [
             'pluginid' => 'id_subplugin',
             'actionid' => 'id_action',
-            'hidevalue' => self::MANUALLY_SUSPENDED
+            'hidevalue' => 2000, // No hide value self::MANUALLY_SUSPENDED
         ];
         global $OUTPUT;
         $mform->addElement('html', $OUTPUT->render_from_template('tool_cleanupusers/filterform', $context));
@@ -96,8 +105,8 @@ class not_archive_filter_form extends moodleform {
     public function validation($data, $files) {
         // var_dump($data);
         switch ($data['action']) {
-            case self::MANUALLY_SUSPENDED:
-                return true;
+//            case self::MANUALLY_SUSPENDED:
+//                return true;
             case self::TO_BE_ARCHIVED:
                 $plugins = core_plugin_manager::instance()->get_enabled_plugins("userstatus");
                 $issubplugin = false;

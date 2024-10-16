@@ -45,12 +45,19 @@ class archiveuser_filtering extends \user_filtering
         } else {
             $this->checkerform = new not_archive_filter_form();
         }
+
+        if (!isset($urlaction)) {
+            // no action => delete old session variables
+            unset($SESSION->checker);
+            unset($SESSION->action);
+        }
+        /*
         if (isset($urlaction) || (isset($SESSION->archive) && $SESSION->archive != $archive)) {
             // Invalidate session variables in case of switching form or
             // in case of a redirect
             unset($SESSION->checker);
             unset($SESSION->action);
-        }
+        }*/
         $SESSION->archive = $archive;
 
 
@@ -87,21 +94,20 @@ class archiveuser_filtering extends \user_filtering
 
     public function get_checker() {
         global $SESSION;
-        if (!empty($SESSION->checker)) {
-            return $SESSION->checker;
+        if (empty($SESSION->checker)) {
+            $SESSION->checker = $this->checkerform->get_default_checker();
         }
-        return null;
+        return $SESSION->checker;
     }
 
     public function get_action() {
         global $SESSION;
-        if (!empty($SESSION->action)) {
-            // debugging("session action");
-            return $SESSION->action;
+        if (empty($SESSION->action)) {
+            // Return default action which does not require a plugin to be selected.
+            // debugging("default action");
+            $SESSION->action = $this->checkerform::DEFAULT_ACTION;
         }
-        // Return default action which does not require a plugin to be selected.
-        // debugging("default action");
-        return $this->checkerform::DEFAULT_ACTION;
+        return $SESSION->action;
     }
 
     public function get_full_sql_filter($withchecker = false) {

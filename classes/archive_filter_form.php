@@ -24,6 +24,8 @@
 namespace tool_cleanupusers;
 defined('MOODLE_INTERNAL') || die();
 
+use tool_cleanupusers\plugininfo\userstatus;
+
 require_once("$CFG->libdir/formslib.php");
 use moodleform;
 use core_plugin_manager;
@@ -49,16 +51,18 @@ class archive_filter_form extends moodleform {
         parent::__construct();
     }
 
+    public function get_default_checker() {
+        $plugins = userstatus::get_enabled_plugins();
+        return reset($plugins);
+    }
+
     /**
      * Defines the sub-plugin select form.
      */
     public function definition() {
         $mform = $this->_form;
         // Gets all enabled plugins of type userstatus.
-        $plugins = core_plugin_manager::instance()->get_enabled_plugins("userstatus");
-        if (count($plugins) == 0) {
-            \core\notification::warning(get_string('errormessagenoplugin', 'tool_cleanupusers'));
-        }
+        $plugins = userstatus::get_enabled_plugins();
         $actions = [];
         $actions[self::TO_BE_REACTIVATED] = 'users to be reactivated by';
         $actions[self::TO_BE_DELETED] = 'users to be deleted by';
@@ -72,7 +76,11 @@ class archive_filter_form extends moodleform {
         // $mform->hideIf('subplugin', 'action', 'eq', self::ALL_USERS);
 
         $mform->setDefault('action', self::DEFAULT_ACTION);
-        $mform->setDefault('subplugin', '0');
+        if (count($plugins) == 0) {
+            \core\notification::warning(get_string('errormessagenoplugin', 'tool_cleanupusers'));
+        } else {
+            $mform->setDefault('subplugin', $this->get_default_checker());
+        }
 
         // Add invisible submit button
         $context = [

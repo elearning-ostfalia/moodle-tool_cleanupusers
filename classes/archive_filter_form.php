@@ -25,8 +25,11 @@ namespace tool_cleanupusers;
 defined('MOODLE_INTERNAL') || die();
 
 use tool_cleanupusers\plugininfo\userstatus;
+use tool_cleanupusers\tools;
 
 require_once("$CFG->libdir/formslib.php");
+require_once(__DIR__ . "/tools.php");
+
 use moodleform;
 use core_plugin_manager;
 
@@ -62,7 +65,9 @@ class archive_filter_form extends moodleform {
     public function definition() {
         $mform = $this->_form;
         // Gets all enabled plugins of type userstatus.
-        $plugins = userstatus::get_enabled_plugins();
+        // $plugins = userstatus::get_enabled_plugins();
+        $plugins = tools::get_enabled_checkers_with_displayname();
+
         $actions = [];
         $actions[self::TO_BE_REACTIVATED] = 'users to be reactivated by';
         $actions[self::TO_BE_DELETED] = 'users to be deleted by';

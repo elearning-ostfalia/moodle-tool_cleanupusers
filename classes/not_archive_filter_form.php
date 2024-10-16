@@ -25,8 +25,11 @@ namespace tool_cleanupusers;
 defined('MOODLE_INTERNAL') || die();
 
 use tool_cleanupusers\plugininfo\userstatus;
+use tool_cleanupusers\tools;
 
 require_once("$CFG->libdir/formslib.php");
+require_once(__DIR__ . "/tools.php");
+
 use moodleform;
 use core_plugin_manager;
 
@@ -61,16 +64,19 @@ class not_archive_filter_form extends moodleform {
         $mform = $this->_form;
         // Gets all enabled plugins of type userstatus.
         // $plugins = core_plugin_manager::instance()->get_enabled_plugins("userstatus");
-        $plugins = userstatus::get_enabled_plugins();
+        // $plugins = userstatus::get_enabled_plugins();
+        $plugins = \tool_cleanupusers\tools::get_enabled_checkers_with_displayname();
 
         $actions = [];
         // $actions[self::MANUALLY_SUSPENDED] = 'users manually suspended';
         $actions[self::TO_BE_ARCHIVED] = 'users to be archived by';
 
         $selectline = [];
-        $selectline[] = &$mform->createElement('select', 'action', '', $actions);
+        //$selectline[] = &$mform->createElement('select', 'action', '', $actions);
+        $selectline[] = &$mform->createElement('html', 'Show users to be archived by &nbsp;');
         $selectline[] = &$mform->createElement('select', 'subplugin', '', $plugins);
-        $mform->addGroup($selectline, 'selectline', 'Show', array(' '), false);
+        // $mform->addGroup($selectline, 'selectline', 'Show', array(' '), false);
+        $mform->addGroup($selectline, 'selectline', '', array(' '), false);
 
         // $mform->hideIf('subplugin', 'action', 'eq', self::MANUALLY_SUSPENDED);
 
@@ -104,10 +110,10 @@ class not_archive_filter_form extends moodleform {
      */
     public function validation($data, $files) {
         // var_dump($data);
-        switch ($data['action']) {
-//            case self::MANUALLY_SUSPENDED:
-//                return true;
-            case self::TO_BE_ARCHIVED:
+/*        switch ($data['action']) {
+            case self::MANUALLY_SUSPENDED:
+                return true;
+            case self::TO_BE_ARCHIVED:*/
                 $plugins = core_plugin_manager::instance()->get_enabled_plugins("userstatus");
                 $issubplugin = false;
                 if (key_exists('subplugin', $data)) {
@@ -128,9 +134,9 @@ class not_archive_filter_form extends moodleform {
                 }
 
                 return $issubplugin;
-            default:
+/*            default:
                 break;
         }
-        return ['action' => get_string('errormessageaction', 'tool_cleanupusers')];
+        return ['action' => get_string('errormessageaction', 'tool_cleanupusers')];*/
     }
 }

@@ -46,20 +46,20 @@ class archiveuser_filtering extends \user_filtering
             $this->checkerform = new not_archive_filter_form();
         }
 
-        if (!isset($urlaction)) {
+/*        if (!isset($urlaction)) {
             // no action => delete old session variables
             unset($SESSION->checker);
             unset($SESSION->action);
-        }
-        /*
-        if (isset($urlaction) || (isset($SESSION->archive) && $SESSION->archive != $archive)) {
+        }*/
+
+        // if (isset($urlaction) || (isset($SESSION->archive) && $SESSION->archive != $archive)) {
+        if (isset($SESSION->archive) && $SESSION->archive != $archive) {
             // Invalidate session variables in case of switching form or
             // in case of a redirect
             unset($SESSION->checker);
             unset($SESSION->action);
-        }*/
+        }
         $SESSION->archive = $archive;
-
 
         if ($formdata = $this->checkerform->get_data()) {
             $arraydata = get_object_vars($formdata);
@@ -74,6 +74,7 @@ class archiveuser_filtering extends \user_filtering
         } else {
             if (isset($urlaction)) {
                 // set default values from URL
+                // debugging("set_data " . $urlaction . ' ' . $urlchecker);
                 $this->checkerform->set_data(['action' => $urlaction, 'subplugin' => $urlchecker]);
                 $SESSION->checker = $urlchecker;
                 $SESSION->action = $urlaction;
@@ -81,7 +82,11 @@ class archiveuser_filtering extends \user_filtering
                 if (isset($SESSION->checker)) {
                     // set default values from session
                     $default_values = [];
-                    $default_values['checker'] = $SESSION->checker;
+                    $default_values['subplugin'] = $SESSION->checker;
+                    // $default_values['checker'] = $SESSION->checker;
+                    if (isset($SESSION->action)) {
+                        $default_values['action'] = $SESSION->action;
+                    }
                     $this->checkerform->set_data($default_values);
                 }
             }

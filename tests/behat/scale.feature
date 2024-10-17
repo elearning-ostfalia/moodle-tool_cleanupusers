@@ -42,7 +42,7 @@ Feature: Cleanup settings with large number of users
     And I should not see "user1"
 
   @javascript
-  Scenario: Large: manually delete user8 (apply user filter)
+  Scenario: Large: manually delete with user filter
     Given I log in as "admin"
     # archive all users ready for archive
     And I run the scheduled task "\tool_cleanupusers\task\archive_user_task"
@@ -50,13 +50,12 @@ Feature: Cleanup settings with large number of users
     And I navigate to "Users > Clean up users > Manage archived users" in site administration
     And I set the field with xpath "//select[@name='action']" to "users to be deleted by"
     And I set the field with xpath "//select[@name='subplugin']" to "nocoursechecker"
-    And I set the field with xpath "//input[@name='realname']" to "user8"
-    And I pause
+    And I press "Show more..."
+    And I set the field with xpath "//input[@name='username']" to "user8"
     And I press "Add filter"
-    And I pause
-    And I should see "users to be deleted by"
-    And I should see "No active course checker"
     And I should see "user8"
+    And I should see "users to be deleted by"
+    And I should see "No active course Checker"
     And I delete "user8"
     And I should see "User 'user8' has been deleted."
     And I press "Continue"
@@ -64,5 +63,4 @@ Feature: Cleanup settings with large number of users
     And I should see "Archived users"
     And I should see "users to be deleted by"
     And I should see "No active course Checker"
-    And I should not see "user8"
-    And I should see "user2"
+    And I should see "Nothing to display"

@@ -69,7 +69,7 @@ Feature: Cleanup settings
     And I press "Continue"
     And I should see "Archived users"
     And I should see "users to be reactivated by"
-    And I should see "nocoursechecker"
+    And I should see "No active course Checker"
     And I should not see "user6"
     And I set the field with xpath "//select[@name='action']" to "all archived users"
     And I should not see "user6"
@@ -98,7 +98,7 @@ Feature: Cleanup settings
     And I press "Continue"
     And I should see "Archived users"
     And I should see "users to be deleted by"
-    And I should see "timechecker"
+    And I should see "Last Login Checker"
     And I should not see "user1"
     And I set the field with xpath "//select[@name='action']" to "all archived users"
     And I should not see "user1"
@@ -132,7 +132,7 @@ Feature: Cleanup settings
 
     # timechecker
     And I navigate to "Users > Clean up users > Manage users to be archived" in site administration
-    And I set the field with xpath "//select[@name='action']" to "users to be archived by"
+    #And I set the field with xpath "//select[@name='action']" to "users to be archived by"
     And I set the field with xpath "//select[@name='subplugin']" to "timechecker"
     And I should see "user1"
     And I should not see "user2"
@@ -144,7 +144,7 @@ Feature: Cleanup settings
     And I should not see "user8"
 
     And I navigate to "Users > Clean up users > Manage users to be archived" in site administration
-    And I set the field with xpath "//select[@name='action']" to "users to be archived by"
+    #And I set the field with xpath "//select[@name='action']" to "users to be archived by"
     And I set the field with xpath "//select[@name='subplugin']" to "neverloginchecker"
 
     And I should see "user3"
@@ -157,7 +157,7 @@ Feature: Cleanup settings
     And I should not see "user8"
 
     And I navigate to "Users > Clean up users > Manage users to be archived" in site administration
-    And I set the field with xpath "//select[@name='action']" to "users to be archived by"
+    #And I set the field with xpath "//select[@name='action']" to "users to be archived by"
     And I set the field with xpath "//select[@name='subplugin']" to "nocoursechecker"
 
     And I should see "user5"
@@ -175,17 +175,17 @@ Feature: Cleanup settings
     And I navigate to "Users > Clean up users > General settings" in site administration
 
     And I navigate to "Users > Clean up users > Manage users to be archived" in site administration
-    And I set the field with xpath "//select[@name='action']" to "users to be archived by"
+    #And I set the field with xpath "//select[@name='action']" to "users to be archived by"
     And I set the field with xpath "//select[@name='subplugin']" to "timechecker"
     And I should see "Nothing to display"
 
     And I navigate to "Users > Clean up users > Manage users to be archived" in site administration
-    And I set the field with xpath "//select[@name='action']" to "users to be archived by"
+    #And I set the field with xpath "//select[@name='action']" to "users to be archived by"
     And I set the field with xpath "//select[@name='subplugin']" to "neverloginchecker"
     And I should see "Nothing to display"
 
     And I navigate to "Users > Clean up users > Manage users to be archived" in site administration
-    And I set the field with xpath "//select[@name='action']" to "users to be archived by"
+    #And I set the field with xpath "//select[@name='action']" to "users to be archived by"
     And I set the field with xpath "//select[@name='subplugin']" to "nocoursechecker"
     And I should see "Nothing to display"
 
@@ -194,7 +194,7 @@ Feature: Cleanup settings
     Given I log in as "admin"
 
     And I navigate to "Users > Clean up users > Manage users to be archived" in site administration
-    And I set the field with xpath "//select[@name='action']" to "users to be archived by"
+    #And I set the field with xpath "//select[@name='action']" to "users to be archived by"
     And I set the field with xpath "//select[@name='subplugin']" to "nocoursechecker"
     And I should see "user5"
     When I archive "user5"
@@ -207,7 +207,7 @@ Feature: Cleanup settings
     Given I log in as "admin"
 
     And I navigate to "Users > Clean up users > Manage users to be archived" in site administration
-    And I set the field with xpath "//select[@name='action']" to "users to be archived by"
+    # And I set the field with xpath "//select[@name='action']" to "users to be archived by"
     And I set the field with xpath "//select[@name='subplugin']" to "neverloginchecker"
     And I should see "user3"
 
@@ -223,7 +223,7 @@ Feature: Cleanup settings
     Given I log in as "admin"
 
     And I navigate to "Users > Clean up users > Manage users to be archived" in site administration
-    And I set the field with xpath "//select[@name='action']" to "users to be archived by"
+    #And I set the field with xpath "//select[@name='action']" to "users to be archived by"
     And I set the field with xpath "//select[@name='subplugin']" to "timechecker"
 
     And I should see "user1"

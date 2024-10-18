@@ -81,7 +81,7 @@ if (!empty($action) && confirm_sesskey()) {
             $enabled = array_flip($enabled);
             $enabled[$current] = $enabled[$current + 1];
             $enabled[$current + 1] = $userstatus;
-            set_config('userstatus_plugins_enabled', implode(',', $enabled));
+            set_config(CONFIG_ENABLED, implode(',', $enabled));
             break;
 
         case 'up':
@@ -96,7 +96,7 @@ if (!empty($action) && confirm_sesskey()) {
             $enabled = array_flip($enabled);
             $enabled[$current] = $enabled[$current - 1];
             $enabled[$current - 1] = $userstatus;
-            set_config('userstatus_plugins_enabled', implode(',', $enabled));
+            set_config(CONFIG_ENABLED, implode(',', $enabled));
             break;
         default:
             break;

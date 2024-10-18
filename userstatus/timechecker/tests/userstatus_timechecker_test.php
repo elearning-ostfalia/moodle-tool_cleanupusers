@@ -48,10 +48,10 @@ final class userstatus_timechecker_test extends \tool_cleanupusers\userstatus_ba
         $this->resetAfterTest(true);
 
         // set enabled plugin for running task
-        set_config('userstatus_plugins_enabled', "timechecker");
-        set_config('auth_method', AUTH_METHOD, 'userstatus_timechecker');
-        set_config('suspendtime', 10, 'userstatus_timechecker');
-        set_config('deletetime', 365, 'userstatus_timechecker');
+        set_config(CONFIG_ENABLED, "timechecker");
+        set_config(CONFIG_AUTH_METHOD, AUTH_METHOD, 'userstatus_timechecker');
+        set_config(CONFIG_SUSPENDTIME, 10, 'userstatus_timechecker');
+        set_config(CONFIG_DELETETIME, 365, 'userstatus_timechecker');
 
         $this->checker = new \userstatus_timechecker\timechecker();
     }
@@ -71,7 +71,7 @@ final class userstatus_timechecker_test extends \tool_cleanupusers\userstatus_ba
         // set configuration values for timechecker
         set_config('auth_method', 'shibboleth', 'userstatus_timechecker');
         set_config('suspendtime', 10, 'userstatus_timechecker');
-        set_config('deletetime', 365, 'userstatus_timechecker');
+        set_config(CONFIG_DELETETIME, 365, 'userstatus_timechecker');
         return $data;
     }*/
 
@@ -89,7 +89,7 @@ final class userstatus_timechecker_test extends \tool_cleanupusers\userstatus_ba
         $cronjob->execute();
 
         // change suspend time to 12 days
-        set_config('suspendtime', 12, 'userstatus_timechecker');
+        set_config(CONFIG_SUSPENDTIME, 12, 'userstatus_timechecker');
         // create new checker instance in order to read changes values
         $this->checker = new \userstatus_timechecker\timechecker();
         return $user;
@@ -126,7 +126,7 @@ final class userstatus_timechecker_test extends \tool_cleanupusers\userstatus_ba
         $this->assertEquals(0, count($this->checker->get_to_suspend()));
 
         // change suspend time to 8 days
-        set_config('suspendtime', 8, 'userstatus_timechecker');
+        set_config(CONFIG_SUSPENDTIME, 8, 'userstatus_timechecker');
         $this->checker = new \userstatus_timechecker\timechecker();
 
         $this->assertEqualsUsersArrays($this->checker->get_to_suspend(), $user);

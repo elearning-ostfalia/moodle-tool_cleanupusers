@@ -40,9 +40,9 @@ class userstatus_ldapchecker_test extends \tool_cleanupusers\userstatus_base_tes
 
     protected function setup() : void {
         // set enabled plugin for running task
-        set_config('userstatus_plugins_enabled', "ldapchecker");
-        set_config('auth_method', AUTH_METHOD, 'userstatus_ldapchecker');
-        set_config('deletetime', 365, 'userstatus_ldapchecker');
+        set_config(CONFIG_ENABLED, "ldapchecker");
+        set_config(CONFIG_AUTH_METHOD, AUTH_METHOD, 'userstatus_ldapchecker');
+        set_config(CONFIG_DELETETIME, 365, 'userstatus_ldapchecker');
         $this->generator = advanced_testcase::getDataGenerator();
         $this->checker = $this->create_checker();
         $this->resetAfterTest(true);

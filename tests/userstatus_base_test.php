@@ -34,6 +34,8 @@ define('TOMORROW',      (time() + 86400));
 
 define('AUTH_METHOD', 'shibboleth');
 
+require_once(__DIR__ . '/../classes/userstatuschecker.php');
+
 abstract class userstatus_base_test extends \advanced_testcase
 {
     protected $generator = null;
@@ -166,7 +168,7 @@ abstract class userstatus_base_test extends \advanced_testcase
     }
 
     public function test_config_auth_plus_suspend() {
-        set_config('auth_method', 'email,' . AUTH_METHOD, $this->get_plugin_name());
+        set_config(CONFIG_AUTH_METHOD, 'email,' . AUTH_METHOD, $this->get_plugin_name());
         // Create new checker instance so that configuration will be "reread".
         $this->checker = $this->create_checker();
         $user = $this->typical_scenario_for_suspension();
@@ -174,7 +176,7 @@ abstract class userstatus_base_test extends \advanced_testcase
     }
 
     public function test_config_no_auth_suspend_1() {
-        set_config('auth_method', '', $this->get_plugin_name());
+        set_config(CONFIG_AUTH_METHOD, '', $this->get_plugin_name());
         // Create new checker instance so that configuration will be "reread".
         $this->checker = $this->create_checker();
         $user = $this->typical_scenario_for_suspension();
@@ -183,14 +185,14 @@ abstract class userstatus_base_test extends \advanced_testcase
 
     public function test_config_no_auth_method_2()
     {
-        unset_config('auth_method', $this->get_plugin_name());
+        unset_config(CONFIG_AUTH_METHOD, $this->get_plugin_name());
         $this->checker = $this->create_checker();
         $user = $this->typical_scenario_for_suspension();
         $this->assertEqualsUsersArrays($this->checker->get_to_suspend(), $user);
     }
 
     public function test_config_other_auth_no_suspend() {
-        set_config('auth_method', 'email', $this->get_plugin_name());
+        set_config(CONFIG_AUTH_METHOD, 'email', $this->get_plugin_name());
         // Create new checker instance so that configuration will be "reread".
         $this->checker = $this->create_checker();
         $user = $this->typical_scenario_for_suspension();
@@ -342,7 +344,7 @@ abstract class userstatus_base_test extends \advanced_testcase
         sleep(1); // ensure time condition is met
         $this->assertEquals(0, count($this->checker->get_to_delete()));
 
-        set_config('deletetime', 0, $this->get_plugin_name());
+        set_config(CONFIG_DELETETIME, 0, $this->get_plugin_name());
         $this->checker = $this->create_checker();
 
         $this->assertEqualsUsersArrays($this->checker->get_to_delete(), $user);
@@ -368,6 +370,8 @@ abstract class userstatus_base_test extends \advanced_testcase
 
         $cronjob = new \tool_cleanupusers\task\delete_user_task();
         $cronjob->execute();
+
+        $this->assertEquals(0, count($this->checker->get_to_delete()));
 
         // no records in tool_cleanupusers and tool_cleanupusers_archive
         $record = $DB->get_record('tool_cleanupusers', ['id' => $user->id]);
@@ -399,6 +403,55 @@ abstract class userstatus_base_test extends \advanced_testcase
         $this->assertStringNotContainsStringIgnoringCase($user->email, $record->firstname);
         $this->assertStringNotContainsStringIgnoringCase($user->email, $record->lastname);
         $this->assertStringNotContainsStringIgnoringCase($user->email, $record->email);
+    }
+
+    /**
+     * user is suspended and could be deleted at once if he or she never logged in.
+     * But user has logged in
+     *
+     * @return void
+     * @throws \coding_exception
+     */
+    public function test_not_logged_in_configured_but_logged_in_no_delete() {
+        set_config(CONFIG_NEVER_LOGGED_IN, '1', $this->get_plugin_name());
+
+        $user = $this->typical_scenario_for_suspension();
+        global $DB;
+        $user->lastaccess = time();
+        $DB->update_record('user', $user);
+
+        if ($this->checker->get_to_suspend() != null) {
+            // This test can only be run if lastaccess is not part of
+            // condition
+            $this->assertEqualsUsersArrays($this->checker->get_to_suspend(), $user);
+            // run cron
+            $cronjob = new \tool_cleanupusers\task\archive_user_task();
+            $cronjob->execute();
+
+            $this->assertEquals(0, count($this->checker->get_to_delete()));
+        }
+    }
+
+    /**
+     * user is suspended and could be deleted at once if he or she never logged in.
+     * And user has not logged not => expect to be deleted
+     *
+     * @return void
+     * @throws \coding_exception
+     */
+    public function test_not_logged_in_configured_and_not_logged_in_delete() {
+        set_config(CONFIG_NEVER_LOGGED_IN, '1', $this->get_plugin_name());
+
+        $user = $this->typical_scenario_for_suspension();
+        if ($this->checker->get_to_suspend() != null and $user->lastaccess == 0) {
+            // This test can only be run if lastaccess is not part of suspend condition
+            $this->assertEqualsUsersArrays($this->checker->get_to_suspend(), $user);
+            // run cron
+            $cronjob = new \tool_cleanupusers\task\archive_user_task();
+            $cronjob->execute();
+
+            $this->assertEqualsUsersArrays($this->checker->get_to_delete(), $user);
+        }
     }
 
     public function test_duplicate_username_delete() {

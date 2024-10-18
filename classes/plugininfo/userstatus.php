@@ -149,8 +149,8 @@ class userstatus extends base {
 
         if ($haschanged) {
             $new = implode(',', array_flip($plugins));
-            add_to_config_log('userstatus_plugins_enabled', !$enabled, $enabled, $pluginname);
-            set_config('userstatus_plugins_enabled', $new);
+            add_to_config_log(CONFIG_ENABLED, !$enabled, $enabled, $pluginname);
+            set_config(CONFIG_ENABLED, $new);
             // Reset caches.
             \core_plugin_manager::reset_caches();
             // Resets all userstatus_plugins_enabled caches.

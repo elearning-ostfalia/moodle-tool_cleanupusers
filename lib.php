@@ -57,7 +57,7 @@ function tool_cleanupusers_inplace_editable($itemtype, $plugin, $newvalue1) {
             }
         }
 
-        set_config('auth_method', $newvaluetext, 'userstatus_' . $plugin);
+        set_config(CONFIG_AUTH_METHOD, $newvaluetext, 'userstatus_' . $plugin);
 
         $templ = new \core\output\inplace_editable(
             'tool_cleanupusers',
@@ -85,7 +85,7 @@ function tool_cleanupusers_inplace_editable($itemtype, $plugin, $newvalue1) {
         // Clean input and update configuration.
         $newvalue1 = clean_param($newvalue1, PARAM_INT);
 
-        set_config('deletetime', $newvalue1, 'userstatus_' . $plugin);
+        set_config(CONFIG_DELETETIME, $newvalue1, 'userstatus_' . $plugin);
 
         $mysubpluginname = "\\userstatus_" . $plugin . "\\" . $plugin;
         $userstatuschecker = new $mysubpluginname();
@@ -114,7 +114,7 @@ function tool_cleanupusers_inplace_editable($itemtype, $plugin, $newvalue1) {
         // Clean input and update configuration.
         $newvalue1 = clean_param($newvalue1, PARAM_INT);
 
-        set_config('suspendtime', $newvalue1, 'userstatus_' . $plugin);
+        set_config(CONFIG_SUSPENDTIME, $newvalue1, 'userstatus_' . $plugin);
 
         $templ = new \core\output\inplace_editable(
             'tool_cleanupusers',
@@ -145,7 +145,7 @@ function tool_cleanupusers_inplace_editable($itemtype, $plugin, $newvalue1) {
         $keylist[0] = get_string('suspend', 'tool_cleanupusers');
         $keylist[1] = get_string('delete', 'tool_cleanupusers');
 
-        set_config('deleteifneverloggedin', $newvalue1, 'userstatus_' . $plugin);
+        set_config(CONFIG_NEVER_LOGGED_IN, $newvalue1, 'userstatus_' . $plugin);
 
         $templ = new \core\output\inplace_editable(
             'tool_cleanupusers',

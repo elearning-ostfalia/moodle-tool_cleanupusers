@@ -24,10 +24,17 @@
 
 namespace tool_cleanupusers;
 
+define('CONFIG_NEVER_LOGGED_IN', 'deleteifneverloggedin');
+define('CONFIG_ENABLED', 'userstatus_plugins_enabled');
+define('CONFIG_AUTH_METHOD', 'auth_method');
+define('CONFIG_DELETETIME', 'deletetime');
+define('CONFIG_SUSPENDTIME', 'suspendtime');
+
+
 /**
  * base class for all subplugin classes
  */
-abstract  class userstatuschecker
+abstract class userstatuschecker
 {
     protected $baseconfig;
 
@@ -88,10 +95,19 @@ abstract  class userstatuschecker
         return true;
     }
 
+    /**
+     * part of SQL where clause to perform the check for suspendion
+     * @return array
+     */
     public function condition_suspend_sql() : array {
         return ["suspended = 0" , null];
     }
 
+    /**
+     * @param $tca string: alias for archive table in SQL from clause
+     * @param $tc string: alias for main cleanup table in SQL from clause
+     * @return array
+     */
     public function condition_reactivate_sql($tca, $tc) {
         return ['', null];
     }
@@ -352,9 +368,9 @@ abstract  class userstatuschecker
      *
      * @return array of users who should be deleted.
      */
-    public static function get_to_delete_sql($checker = null) : array {
+    public static function get_to_delete_sql($checker) : array {
         // Get list with enabled subplugins.
-        if (empty($checker)) {
+        /* if (empty($checker)) {
             $pluginsenabled =  \core_plugin_manager::instance()->get_enabled_plugins("userstatus");
             if (count($pluginsenabled) == 0) {
                 \core\notification::warning("No userstatus plugin enabled");
@@ -381,13 +397,30 @@ abstract  class userstatuschecker
                 and tc.timestamp < '. time() - $subplugin->get_deletetime_in_sec().')';
             }
         }
-
         if (count($checkers) == 0) {
             \core\notification::warning("No valid and active userstatus plugin enabled for deletion");
             return [];
         }
-        // var_dump($checkers);
         $condition = implode(' OR ', $checkers);
+        */
+
+        $subplugin = "\\userstatus_" . $checker . "\\" . $checker;
+        if (!class_exists($subplugin)) {
+            // plugin might have been uninstalled?
+            throw new coding_exception('invalid subpligin ' . $checker);
+        }
+        $subplugin = new $subplugin();
+        if ($subplugin->get_deletetime() >= 0) {
+            $condition = '(tc.checker=\'' . $checker . '\' 
+                        and tc.timestamp < '. time() - $subplugin->get_deletetime_in_sec().')';
+        }
+
+        // var_dump($checkers);
+        if ($subplugin->delete_if_never_logged_in_on_suspendtime()) {
+            // If the user shall be deleted immediately if he or she has never
+            // logged in and is suspended then delete him (or her)
+            $condition = '(' . $condition . ' OR  tca.lastaccess = 0)';
+        }
 
         // Full join means that only users will be handled who are already
         // suspended with the cleanupusers plugin
@@ -402,7 +435,9 @@ abstract  class userstatuschecker
             'from' => '{tool_cleanupusers_archive} tca  
                 JOIN {tool_cleanupusers} tc ON tc.id = tca.id',
                 // JOIN {user} u ON u.id = tca.id // avoid join accross user table because otherwise
-                // the user filter does not work (ambiguous attributes)
+                // the user filter does not work (ambiguous attributes).
+                // This can be done as the user is suspended and userdata (deleted or suspended)
+                // is not expected to be changed in this state.
             // where
             'where' => $condition
 //            'where' => 'u.suspended = 1 AND u.deleted = 0 AND (' . $condition . ')'

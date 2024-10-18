@@ -50,9 +50,9 @@ final class userstatus_nocoursechecker_test extends \tool_cleanupusers\userstatu
         $this->generator = advanced_testcase::getDataGenerator();
         $this->resetAfterTest(true);
         // set enabled plugin for running task
-        set_config('userstatus_plugins_enabled', "nocoursechecker");
-        set_config('auth_method', AUTH_METHOD, 'userstatus_nocoursechecker');
-        set_config('deletetime', 365, 'userstatus_nocoursechecker');
+        set_config(CONFIG_ENABLED, "nocoursechecker");
+        set_config(CONFIG_AUTH_METHOD, AUTH_METHOD, 'userstatus_nocoursechecker');
+        set_config(CONFIG_DELETETIME, 365, 'userstatus_nocoursechecker');
         $this->checker = new \userstatus_nocoursechecker\nocoursechecker();
     }
 

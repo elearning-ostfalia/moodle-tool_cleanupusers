@@ -46,10 +46,10 @@ class userstatus_neverloginchecker_test extends \tool_cleanupusers\userstatus_ba
 
     protected function setup() : void {
         // set enabled plugin for running task
-        set_config('userstatus_plugins_enabled', "neverloginchecker");
-        set_config('auth_method', AUTH_METHOD, 'userstatus_neverloginchecker');
-        set_config('suspendtime', 10, 'userstatus_neverloginchecker');
-        set_config('deletetime', 365, 'userstatus_neverloginchecker');
+        set_config(CONFIG_ENABLED, "neverloginchecker");
+        set_config(CONFIG_AUTH_METHOD, AUTH_METHOD, 'userstatus_neverloginchecker');
+        set_config(CONFIG_SUSPENDTIME, 10, 'userstatus_neverloginchecker');
+        set_config(CONFIG_DELETETIME, 365, 'userstatus_neverloginchecker');
         $this->generator = advanced_testcase::getDataGenerator();
         $this->checker = new \userstatus_neverloginchecker\neverloginchecker();
         $this->resetAfterTest(true);
@@ -68,7 +68,7 @@ class userstatus_neverloginchecker_test extends \tool_cleanupusers\userstatus_ba
         $cronjob->execute();
 
         // change suspend time to 12 days
-        set_config('suspendtime', 12, 'userstatus_neverloginchecker');
+        set_config(CONFIG_SUSPENDTIME, 12, 'userstatus_neverloginchecker');
         // create new checker instance in order to read changes values
         $this->checker = new \userstatus_neverloginchecker\neverloginchecker();
         return $user;
@@ -107,7 +107,7 @@ class userstatus_neverloginchecker_test extends \tool_cleanupusers\userstatus_ba
         $this->assertEquals(0, count($this->checker->get_to_suspend()));
 
         // change suspend time to 8 days
-        set_config('suspendtime', 8, 'userstatus_neverloginchecker');
+        set_config(CONFIG_SUSPENDTIME, 8, 'userstatus_neverloginchecker');
         $this->checker = new \userstatus_neverloginchecker\neverloginchecker();
 
         $this->assertEqualsUsersArrays($this->checker->get_to_suspend(), $user);
@@ -116,7 +116,7 @@ class userstatus_neverloginchecker_test extends \tool_cleanupusers\userstatus_ba
         $cronjob->execute();
 
         // change suspend time to 12 days
-        set_config('suspendtime', 12, 'userstatus_neverloginchecker');
+        set_config(CONFIG_SUSPENDTIME, 12, 'userstatus_neverloginchecker');
         $this->checker = new \userstatus_neverloginchecker\neverloginchecker();
 
         $this->assertEquals(0, count($this->checker->get_to_suspend()));

@@ -52,15 +52,15 @@ final class tool_cleanupusers_test extends advanced_testcase {
         $this->resetAfterTest(true);
         // set_config('cleanupusers_subplugin', 'timechecker', 'tool_cleanupusers');
         // set enabled plugins
-        set_config('userstatus_plugins_enabled', "neverloginchecker,timechecker");
+        set_config(CONFIG_ENABLED, "neverloginchecker,timechecker");
         // set configuration values for neverloginchecker
-        set_config('auth_method', 'manual', 'userstatus_neverloginchecker');
-        set_config('suspendtime', 400, 'userstatus_neverloginchecker');
-        set_config('deletetime', 730, 'userstatus_neverloginchecker');
+        set_config(CONFIG_AUTH_METHOD, 'manual', 'userstatus_neverloginchecker');
+        set_config(CONFIG_SUSPENDTIME, 400, 'userstatus_neverloginchecker');
+        set_config(CONFIG_DELETETIME, 730, 'userstatus_neverloginchecker');
         // set configuration values for timechecker
-        set_config('auth_method', 'manual', 'userstatus_timechecker');
-        set_config('suspendtime', 90, 'userstatus_timechecker');
-        set_config('deletetime', 365, 'userstatus_timechecker');
+        set_config(CONFIG_AUTH_METHOD, 'manual', 'userstatus_timechecker');
+        set_config(CONFIG_SUSPENDTIME, 90, 'userstatus_timechecker');
+        set_config(CONFIG_DELETETIME, 365, 'userstatus_timechecker');
 
         return $data;
     }
@@ -465,7 +465,7 @@ final class tool_cleanupusers_test extends advanced_testcase {
 
         // Run cron-job with timechecker plugin.
         // set_config('cleanupusers_subplugin', 'timechecker', 'tool_cleanupusers');
-        set_config('userstatus_plugins_enabled', "timechecker");
+        set_config(CONFIG_ENABLED, "timechecker");
         $cronjob = new task\archive_user_task();
         $cronjob->execute();
         // Administrator should have received an email.
@@ -586,7 +586,7 @@ final class tool_cleanupusers_test extends advanced_testcase {
 
         // Run cron-job with timechecker plugin.
         // set_config('cleanupusers_subplugin', 'timechecker', 'tool_cleanupusers');
-        set_config('userstatus_plugins_enabled', "timechecker");
+        set_config(CONFIG_ENABLED, "timechecker");
         $cronjob = new task\delete_user_task();
         $cronjob->execute();
         // Administrator should have received an email.

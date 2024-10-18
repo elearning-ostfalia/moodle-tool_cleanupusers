@@ -48,9 +48,9 @@ final class userstatus_suspendedchecker_test extends \tool_cleanupusers\userstat
         $this->resetAfterTest(true);
 
         // set enabled plugin for running task
-        set_config('userstatus_plugins_enabled', "suspendedchecker");
-        set_config('auth_method', AUTH_METHOD, 'userstatus_suspendedchecker');
-        set_config('deletetime', 365, 'userstatus_suspendedchecker');
+        set_config(CONFIG_ENABLED, "suspendedchecker");
+        set_config(CONFIG_AUTH_METHOD, AUTH_METHOD, 'userstatus_suspendedchecker');
+        set_config(CONFIG_DELETETIME, 365, 'userstatus_suspendedchecker');
 
         $this->checker = new suspendedchecker();
     }

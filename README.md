@@ -184,3 +184,4 @@ Aktionen ggf. auch für alle Nutzer aus dem Filter anwenden mit Nachfrage!
   Liste der zu löschenden Nutzer auf (obwohl kein Kurs zugeordnet)
 * Überschriften ändern sich auf archiveusers.php nicht, wenn die Selektion geändert wird 
   => passiert da überhaupt etwas?
+* no course checker: inaktive Einschreibungen berücksichtigen (Test!)

@@ -104,12 +104,8 @@ if (!empty($action) && confirm_sesskey()) {
     // unset($enabled);
     // reload
     $enabled = userstatus::get_enabled_plugins();
-    // var_dump($enabled);
 }
 
-
-// $enabled =  core_plugin_manager::instance()->get_enabled_plugins("userstatus");
-// var_dump($enabled);
 
 ////////////////////////////////////////////////////////////////////////////////
 // process actions rnd
@@ -118,17 +114,11 @@ $content .= $renderer->render_subplugin_table();
 
 $content .= $OUTPUT->heading(get_string('pendingactions', 'tool_cleanupusers'), 2, 'main');
 
-//$pluginsenabled =  core_plugin_manager::instance()->get_enabled_plugins("userstatus");
-// var_dump($pluginsenabled);
-if (!$enabled) {
+if (!$enabled or count($enabled) == 0) {
     core\notification::warning("Note: no userstatus plugin enabled");
 } else {
     // Request arrays from the sub-plugin.
-    // var_dump($pluginsenabled);
     foreach ($enabled as $subplugin => $dir) {
-        // var_dump($subplugin); echo '<br>';
-        // var_dump($dir); echo '<br>';
-        // $class::enable_plugin($auth, false);
         if (empty($subplugin)) {
             continue;
         }
@@ -143,13 +133,12 @@ if (!$enabled) {
 
         try {
             $archivearray = $userstatuschecker->get_to_suspend();
-            $arraytodelete = []; // $userstatuschecker->get_to_delete();
+            $arraytodelete = $userstatuschecker->get_to_delete();
             $arrayneverloggedin = [];
-//            $arrayneverloggedin = $userstatuschecker->get_never_logged_in();
             $arrayreactivate = $userstatuschecker->get_to_reactivate();
 
             if (count($archivearray) > 0 || count($arraytodelete) > 0 || count($arrayreactivate)) {
-                $content .= $OUTPUT->heading($userstatuschecker->get_displayname(), 3, 'main');
+                $content .= $OUTPUT->heading($userstatuschecker->get_displayname(), 4, 'main');
                 $content .= $renderer->render_index_page($arrayreactivate, $archivearray,
                     $arraytodelete, $arrayneverloggedin, $subplugin);
             }

@@ -65,7 +65,6 @@ class archive_filter_form extends moodleform {
     public function definition() {
         $mform = $this->_form;
         // Gets all enabled plugins of type userstatus.
-        // $plugins = userstatus::get_enabled_plugins();
         $plugins = tools::get_enabled_checkers_with_displayname();
 
         $actions = [];
@@ -77,8 +76,6 @@ class archive_filter_form extends moodleform {
         $selectline[] = &$mform->createElement('select', 'action', '', $actions);
         $selectline[] = &$mform->createElement('select', 'subplugin', '', $plugins);
         $mform->addGroup($selectline, 'selectline', 'Show', array(' '), false);
-
-        // $mform->hideIf('subplugin', 'action', 'eq', self::ALL_USERS);
 
         $mform->setDefault('action', self::DEFAULT_ACTION);
         if (count($plugins) == 0) {

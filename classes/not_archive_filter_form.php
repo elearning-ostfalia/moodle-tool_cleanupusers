@@ -24,6 +24,7 @@
 namespace tool_cleanupusers;
 defined('MOODLE_INTERNAL') || die();
 
+use moodle_url;
 use tool_cleanupusers\plugininfo\userstatus;
 use tool_cleanupusers\tools;
 
@@ -48,14 +49,27 @@ class not_archive_filter_form extends moodleform {
 
     const DEFAULT_ACTION = self::TO_BE_ARCHIVED; // does not require plugin!
 
-    public function __construct()
-    {
+    private $checker;
+
+    public function __construct($checker = '') {
+        if (empty($checker)) {
+            $this->checker = $this->get_default_checker();
+        } else {
+            $this->checker = $checker;
+        }
         parent::__construct();
     }
 
     public function get_default_checker() {
-        $plugins = userstatus::get_enabled_plugins();
-        return reset($plugins);
+        if (!empty($SESSION->checker)) {
+            return $SESSION->checker;
+        } else {
+            $plugins = userstatus::get_enabled_plugins();
+            return reset($plugins);
+        }
+
+        // $plugins = userstatus::get_enabled_plugins();
+        // return reset($plugins);
     }
     /**
      * Defines the sub-plugin select form.
@@ -63,15 +77,30 @@ class not_archive_filter_form extends moodleform {
     public function definition() {
         $mform = $this->_form;
         // Gets all enabled plugins of type userstatus.
-        // $plugins = core_plugin_manager::instance()->get_enabled_plugins("userstatus");
-        // $plugins = userstatus::get_enabled_plugins();
         $plugins = \tool_cleanupusers\tools::get_enabled_checkers_with_displayname();
 
         $actions = [];
         // $actions[self::MANUALLY_SUSPENDED] = 'users manually suspended';
         $actions[self::TO_BE_ARCHIVED] = 'users to be archived by';
 
-        $selectline = [];
+        $pluginslinks = [];
+        foreach ($plugins as $plugin => $name) {
+            global $PAGE;
+            $url = new moodle_url($PAGE->url, ['action' => self::TO_BE_ARCHIVED, 'checker' => $plugin]);
+            $pluginslinks[$url->out(false)] = $name;
+        }
+        $selectmenu = new \core\output\select_menu('checkertype', $pluginslinks, $this->checker);
+        $selectmenu->set_label(get_string('users-to-be-archived', 'tool_cleanupusers') . ' \''.
+            $plugins[$this->checker] . '\'');
+        global $OUTPUT;
+        $options = \html_writer::tag(
+            'h3',
+            $OUTPUT->render_from_template('core/tertiary_navigation_selector',
+                $selectmenu->export_for_template($OUTPUT))
+        );
+        $mform->addElement('html', $options);
+
+/*        $selectline = [];
         //$selectline[] = &$mform->createElement('select', 'action', '', $actions);
         $selectline[] = &$mform->createElement('html', 'Show users to be archived by &nbsp;');
         $selectline[] = &$mform->createElement('select', 'subplugin', '', $plugins);
@@ -95,6 +124,7 @@ class not_archive_filter_form extends moodleform {
         ];
         global $OUTPUT;
         $mform->addElement('html', $OUTPUT->render_from_template('tool_cleanupusers/filterform', $context));
+*/
         //        }
         // $mform->addElement('submit', 'reset', 'Submit');
 

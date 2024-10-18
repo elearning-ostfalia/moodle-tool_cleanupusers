@@ -60,7 +60,7 @@ if (!empty($checker)) {
 } else {
     echo $renderer->get_heading(get_string('toarchive', 'tool_cleanupusers'));
 }*/
-echo $renderer->get_heading(get_string('toarchive', 'tool_cleanupusers'));
+// echo $renderer->get_heading(get_string('toarchive', 'tool_cleanupusers'));
 
 
 $userfilter = new \tool_cleanupusers\archiveuser_filtering(false, $action, $checker); // user_filtering();
@@ -86,7 +86,7 @@ switch ($userfilter->get_action()) {
             // var_dump($checker);
             $userstatuschecker = new $subpluginname();
             $PAGE->set_title(get_string('toarchiveby', 'tool_cleanupusers', $userstatuschecker->get_displayname()));
-            echo $renderer->get_heading(get_string('toarchiveby', 'tool_cleanupusers', $userstatuschecker->get_displayname()));
+            // echo $renderer->get_heading(get_string('toarchiveby', 'tool_cleanupusers', $userstatuschecker->get_displayname()));
             // debugging($userstatuschecker->get_displayname());
 
             $archivearray = $userstatuschecker->get_to_suspend();

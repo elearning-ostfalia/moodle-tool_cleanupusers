@@ -101,4 +101,5 @@ $string['pendingactions'] = 'Pending actions';
 $string['timestamp'] = 'Archive timestamp';
 $string['warn_reactivate'] = 'Please note that reactivated users will probably be archived again the next time cron is run.<br>
 To prevent this, you can disable the corresponding checker or change the user\'s authentication method (or stop the task).';
+$string['users-to-be-archived'] = 'Users to be archived by';
 

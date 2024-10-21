@@ -118,11 +118,10 @@ class archive_filter_form extends moodleform {
             $pluginslinks[$url->out(false)] = $name;
         }
 
-
         $actions = [];
-        $actions[self::TO_BE_REACTIVATED] = 'Users to be reactivated';
-        $actions[self::TO_BE_DELETED] = 'Users to be deleted';
-        $actions[self::ALL_USERS] = 'All archived users';
+        $actions[self::TO_BE_REACTIVATED] = get_string('users-to-be-reactivated', 'tool_cleanupusers');
+        $actions[self::TO_BE_DELETED] = get_string('users-to-be-deleted', 'tool_cleanupusers');
+        $actions[self::ALL_USERS] = get_string('all-archived-users', 'tool_cleanupusers');
         $actionlinks = [];
         foreach ($actions as $action => $name) {
             global $PAGE;
@@ -136,7 +135,7 @@ class archive_filter_form extends moodleform {
         $selectmenu1->set_label($actions[$this->get_default_action()]);
         global $OUTPUT;
         $actionsselector = \html_writer::tag(
-            'h3',
+            'h2',
             $OUTPUT->render_from_template('core/tertiary_navigation_selector',
                 $selectmenu1->export_for_template($OUTPUT))
         );
@@ -148,7 +147,7 @@ class archive_filter_form extends moodleform {
             $selectmenu2->set_label( 'by \''. $plugins[$this->get_default_checker()] . '\'');
             global $OUTPUT;
             $options = \html_writer::tag(
-                'h3',
+                'h2',
                 $OUTPUT->render_from_template('core/tertiary_navigation_selector', // select_menu',
                     $selectmenu2->export_for_template($OUTPUT))
             );

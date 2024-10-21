@@ -37,12 +37,12 @@
     width: 6em;*/
 }
 
- h3 .dropdown.select-menu{
+h3 .dropdown.select-menu{
     /* show title in one line with separator */
     /* display: inline; */
 }
 
 /* show title in one line with separator */
-h3, h3>nav, h3>nav>div {
+cleanup-user-form h2, cleanup-user-form h2>nav, cleanup-user-form h2>nav>div {
     display: inline;
 }

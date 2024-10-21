@@ -59,8 +59,10 @@ echo $OUTPUT->header();
 
 
 $userfilter = new archiveuser_filtering(true, $action, $checker);
+echo '<cleanup-user-form>';
 $userfilter->display();
 [$sqlfilter, $paramfilter] = $userfilter->get_full_sql_filter();
+echo '</cleanup-user-form>';
 
 $returnurl = new moodle_url('/admin/tool/cleanupusers/archiveusers.php',
     ['action' => $userfilter->get_action(), 'checker' => $userfilter->get_checker()]);
@@ -94,7 +96,6 @@ switch ($userfilter->get_action()) {
         break;
     case archive_filter_form::TO_BE_DELETED:
         $checker = $userfilter->get_checker();
-        // Update page URL
         // Update page URL
         $PAGE->set_url(new moodle_url('/admin/tool/cleanupusers/archiveusers.php'),
             ['action' => $userfilter->get_action(), 'checker' => $checker]);

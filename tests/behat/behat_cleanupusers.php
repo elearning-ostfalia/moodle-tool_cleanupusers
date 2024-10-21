@@ -149,4 +149,47 @@ class behat_cleanupusers extends behat_base {
             ]);
         }
     }
+
+    /**
+     * select checker on archiving page
+     *
+     * @Then /^I select "(?P<checker_string>(?:[^"]|\\")*)" checker on archiving page$/
+     * @return void
+     */
+    public function select_archiving_checker($checker) {
+        $xpath = "//div[label[contains(., 'Users to be archived')]]/div";
+        $this->execute("behat_general::i_click_on", [$xpath, 'xpath_element']);
+
+        $xpath = "//*[contains(text(), '{$checker}')]";
+        $this->execute("behat_general::i_click_on", [$xpath, 'xpath_element']);
+    }
+
+    /**
+     * navigate to reactivation page
+     *
+     * @Then /^I navigate to "(?P<checker_string>(?:[^"]|\\")*)" archive page/
+     * @return void
+     */
+    public function navigate_to_new_archive_page($title) {
+        $xpath = "//div[label[contains(., 'Users to be reactivated') or contains(., 'All archived users') or contains(., 'Users to be deleted')]]/div";
+        $this->execute("behat_general::i_click_on", [$xpath, 'xpath_element']);
+
+        $xpath = "//*[contains(text(), '{$title}')]";
+        $this->execute("behat_general::i_click_on", [$xpath, 'xpath_element']);
+    }
+
+    /**
+     * select checker on archive page
+     *
+     * @Then /^I select "(?P<checker_string>(?:[^"]|\\")*)" checker on archive page$/
+     * @return void
+     */
+    public function select_archive_checker($checker) {
+        $xpath = "//div[label[starts-with(., 'by ')]]/div";
+        $this->execute("behat_general::i_click_on", [$xpath, 'xpath_element']);
+
+        $xpath = "//*[contains(text(), '{$checker}')]";
+                $this->execute("behat_general::i_click_on", [$xpath, 'xpath_element']);
+    }
+
 }

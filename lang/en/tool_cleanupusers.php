@@ -106,5 +106,9 @@ $string['users-to-be-archived'] = 'Users to be archived';
 $string['users-to-be-deleted'] = 'Users to be deleted';
 $string['users-to-be-reactivated'] = 'Users to be reactivated';
 $string['all-archived-users'] = 'All archived users';
+$string['confirm-delete'] = 'Do you really want to delete user \'<b>{$a->firstname} {$a->lastname}</b>\' and related data.<br>
+All user data will be finally and completely deleted and cannot be restored later!';
+$string['confirm-delete-title'] = 'Completely delete user';
+
 
 

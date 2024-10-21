@@ -6,7 +6,7 @@ Feature: Cleanup settings with large number of users
     # * no user has ever logged in => archived by neverloginchecker
     # * no user is enrolled in course => archived by nocoursechecker
     # => nocoursechecker comes first => all users will be suspeneded by nocoursechecker
-    Given create "50" users
+    Given create "5000" users
     # Values are set per checker as otherwise only one value
     # with the same first column will be set (bug?)
     And the following config values are set as admin:
@@ -30,14 +30,13 @@ Feature: Cleanup settings with large number of users
     And I run the scheduled task "\tool_cleanupusers\task\archive_user_task"
     And simulate that "101" days have passed since archiving of "user1"
     And I navigate to "Users > Clean up users > Manage archived users" in site administration
-    And I set the field with xpath "//select[@name='action']" to "users to be deleted by"
-    And I set the field with xpath "//select[@name='subplugin']" to "nocoursechecker"
+    And I navigate to "Users to be deleted" archive page
+    And I select "No active course Checker" checker on archive page
     And I should see "user1"
     And I delete "user1"
     And I should see "User 'user1' has been deleted."
     And I press "Continue"
-    And I should see "Archived users"
-    And I should see "users to be deleted by"
+    And I should see "Users to be deleted"
     And I should see "No active course Checker"
     And I should not see "user1"
 
@@ -48,19 +47,18 @@ Feature: Cleanup settings with large number of users
     And I run the scheduled task "\tool_cleanupusers\task\archive_user_task"
     And simulate that "101" days have passed since archiving from "user1" to "user400"
     And I navigate to "Users > Clean up users > Manage archived users" in site administration
-    And I set the field with xpath "//select[@name='action']" to "users to be deleted by"
-    And I set the field with xpath "//select[@name='subplugin']" to "nocoursechecker"
+    And I navigate to "Users to be deleted" archive page
+    And I select "No active course Checker" checker on archive page
     And I press "Show more..."
     And I set the field with xpath "//input[@name='username']" to "user8"
     And I press "Add filter"
     And I should see "user8"
-    And I should see "users to be deleted by"
+    And I should see "Users to be deleted"
     And I should see "No active course Checker"
     And I delete "user8"
     And I should see "User 'user8' has been deleted."
     And I press "Continue"
     # check correct redirect
-    And I should see "Archived users"
-    And I should see "users to be deleted by"
+    And I should see "Users to be deleted"
     And I should see "No active course Checker"
     And I should see "Nothing to display"

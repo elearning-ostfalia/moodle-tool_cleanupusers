@@ -29,10 +29,11 @@ require_login();
 global $CFG, $DB, $PAGE, $USER;
 require_once($CFG->dirroot . '/user/lib.php');
 
-$userid         = required_param('userid', PARAM_INT);
+$userid     = required_param('userid', PARAM_INT);
 // One of: suspend, reactivate or delete.
-$action         = required_param('action', PARAM_TEXT);
-$returnurl      = required_param('returnurl', PARAM_URL);
+$action     = required_param('action', PARAM_TEXT);
+$returnurl  = required_param('returnurl', PARAM_URL);
+$confirm    = optional_param('confirm', false, PARAM_BOOL);
 
 
 $PAGE->set_url('/admin/tool/cleanupusers/handleuser.php');
@@ -40,6 +41,7 @@ $PAGE->set_context(context_system::instance());
 
 $user = $DB->get_record('user', ['id' => $userid]);
 require_capability('moodle/user:update', $PAGE->context);
+require_admin();
 
 $url = $returnurl; // new moodle_url('/admin/tool/cleanupusers/index.php');
 
@@ -100,30 +102,63 @@ switch ($action) {
         break;
     // User should be deleted.
     case 'delete':
-        if (!is_siteadmin($user) && $user->deleted != 1 && $USER->id != $userid) {
-            $archiveuser = $DB->get_record('tool_cleanupusers_archive', ['id' => $userid],
-                '*', MUST_EXIST);
-            $deprovisionuser = new \tool_cleanupusers\archiveduser(
-                $userid,
-                $user->suspended,
-                $user->lastaccess,
-                $user->username,
-                $user->deleted,
-                $user->auth,
-                ''
-            );
-            try {
-                $deprovisionuser->delete_me();
-            } catch (\tool_cleanupusers\cleanupusers_exception $e) {
-                $url = new moodle_url('/admin/tool/cleanupusers/index.php');
+        if ($confirm && confirm_sesskey()) {
+            if (!is_siteadmin($user) && $user->deleted != 1 && $USER->id != $userid) {
+                // debugging('delete ');
+                // exit();
+                $archiveuser = $DB->get_record('tool_cleanupusers_archive', ['id' => $userid],
+                    '*', MUST_EXIST);
+                $deprovisionuser = new \tool_cleanupusers\archiveduser(
+                    $userid,
+                    $user->suspended,
+                    $user->lastaccess,
+                    $user->username,
+                    $user->deleted,
+                    $user->auth,
+                    ''
+                );
+                try {
+                    $deprovisionuser->delete_me();
+                } catch (\tool_cleanupusers\cleanupusers_exception $e) {
+                    $url = new moodle_url('/admin/tool/cleanupusers/index.php');
+                    // Notice user could not be deleted.
+                    notice(get_string('errormessagenoaction', 'tool_cleanupusers'), $url);
+                }
+                notice(get_string('usersdeleted', 'tool_cleanupusers', $archiveuser->username), $url);
+            } else {
                 // Notice user could not be deleted.
                 notice(get_string('errormessagenoaction', 'tool_cleanupusers'), $url);
             }
-            notice(get_string('usersdeleted', 'tool_cleanupusers', $archiveuser->username), $url);
         } else {
-            // Notice user could not be deleted.
-            notice(get_string('errormessagenoaction', 'tool_cleanupusers'), $url);
+            $yesurl = new moodle_url($PAGE->url, [
+                'confirm'=>1, 'sesskey'=>sesskey(), 'userid' => $userid, 'action' => $action, 'returnurl' => $returnurl
+            ]);
+            $archiveuser = $DB->get_record('tool_cleanupusers_archive', ['id' => $userid],
+                '*', MUST_EXIST);
+            $message = get_string('confirm-delete', 'tool_cleanupusers',
+                $archiveuser);
+
+            $title = get_string('confirm-delete-title', 'tool_cleanupusers');
+            $PAGE->set_title($title);
+            $PAGE->navbar->add($title);
+// $PAGE->navbar->add($fullname);
+
+            global $OUTPUT;
+            echo $OUTPUT->header();
+// echo $OUTPUT->heading($fullname);
+            $displayoptions = ['confirmtitle' => $title];
+            $confirmbutton = new single_button(
+                $yesurl,
+                get_string('delete'),
+                'post',
+                single_button::BUTTON_DANGER
+            );
+            $cancelbutton = new single_button(new moodle_url($returnurl), get_string('cancel'));
+
+            echo $OUTPUT->confirm($message, $confirmbutton, $cancelbutton, $displayoptions);
+//            echo $OUTPUT->confirm($message, $yesurl, $returnurl, $displayoptions);
         }
+
         break;
     // Action is not valid.
     default:

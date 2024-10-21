@@ -120,8 +120,8 @@ class archive_filter_form extends moodleform {
 
 
         $actions = [];
-        $actions[self::TO_BE_REACTIVATED] = 'Users to be reactivated by';
-        $actions[self::TO_BE_DELETED] = 'Users to be deleted by';
+        $actions[self::TO_BE_REACTIVATED] = 'Users to be reactivated';
+        $actions[self::TO_BE_DELETED] = 'Users to be deleted';
         $actions[self::ALL_USERS] = 'All archived users';
         $actionlinks = [];
         foreach ($actions as $action => $name) {
@@ -131,7 +131,8 @@ class archive_filter_form extends moodleform {
             $actionlinks[$url->out(false)] = $name;
         }
 
-        $selectmenu1 = new \core\output\select_menu('actiontype', $actionlinks, $this->get_default_action());
+        $selectmenu1 = new \core\output\select_menu('actiontype', $actionlinks,
+            $this->get_default_action());
         $selectmenu1->set_label($actions[$this->get_default_action()]);
         global $OUTPUT;
         $actionsselector = \html_writer::tag(
@@ -141,17 +142,18 @@ class archive_filter_form extends moodleform {
         );
         $mform->addElement('html', $actionsselector);
 
-        $selectmenu2 = new \core\output\select_menu('checkertype', $pluginslinks, $this->get_default_checker());
-        $selectmenu2->set_label(' \''. $plugins[$this->get_default_checker()] . '\'');
-        global $OUTPUT;
-        $options = \html_writer::tag(
-            'h3',
-            /*$OUTPUT->render_from_template('core/tertiary_navigation_selector',
-                $selectmenu1->export_for_template($OUTPUT)) . ' ' .*/
-            $OUTPUT->render_from_template('core/tertiary_navigation_selector',
-                $selectmenu2->export_for_template($OUTPUT))
-        );
-        $mform->addElement('html', $options);
+        if ($this->get_default_action() != self::ALL_USERS) {
+            $selectmenu2 = new \core\output\select_menu('checkertype', $pluginslinks,
+                $this->get_default_checker());
+            $selectmenu2->set_label( 'by \''. $plugins[$this->get_default_checker()] . '\'');
+            global $OUTPUT;
+            $options = \html_writer::tag(
+                'h3',
+                $OUTPUT->render_from_template('core/tertiary_navigation_selector', // select_menu',
+                    $selectmenu2->export_for_template($OUTPUT))
+            );
+            $mform->addElement('html', $options);
+        }
 
 /*
         $selectline = [];

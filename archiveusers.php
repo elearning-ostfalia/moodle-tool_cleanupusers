@@ -53,7 +53,7 @@ $renderer = $PAGE->get_renderer('tool_cleanupusers');
 
 $content = '';
 echo $OUTPUT->header();
-echo $renderer->get_heading(get_string('achivedusers', 'tool_cleanupusers'));
+// echo $renderer->get_heading(get_string('achivedusers', 'tool_cleanupusers'));
 
 // core\notification::warning(get_string('warn_reactivate', 'tool_cleanupusers'));
 

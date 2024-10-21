@@ -26,6 +26,7 @@ defined('MOODLE_INTERNAL') || die();
 
 use tool_cleanupusers\plugininfo\userstatus;
 use tool_cleanupusers\tools;
+use moodle_url;
 
 require_once("$CFG->libdir/formslib.php");
 require_once(__DIR__ . "/tools.php");
@@ -49,14 +50,56 @@ class archive_filter_form extends moodleform {
 
     const DEFAULT_ACTION = self::ALL_USERS; // does not require plugin!
 
-    public function __construct()
+    private $checker;
+    private $action;
+
+    public function __construct($action = '', $checker = '')
     {
+        if (empty($checker)) {
+            $this->checker = $this->get_default_checker();
+        } else {
+            $this->checker = $checker;
+        }
+        if (empty($action)) {
+            $this->action = $this->get_default_action();
+        } else {
+            $this->action = $action;
+        }
         parent::__construct();
     }
 
     public function get_default_checker() {
-        $plugins = userstatus::get_enabled_plugins();
-        return reset($plugins);
+        // debugging("get_default_checker");
+        if (isset($this->checker)) {
+            // debugging("$this->checker " . $this->checker);
+            return $this->checker;
+        }
+        global $SESSION;
+        if (!empty($SESSION->checker)) {
+            // debugging("$SESSION->checker " . $SESSION->checker);
+            return $SESSION->checker;
+        } else {
+            $plugins = userstatus::get_enabled_plugins();
+            // debugging("userstatus::get_enabled_plugins " . reset($plugins));
+            return reset($plugins);
+        }
+
+        // $plugins = userstatus::get_enabled_plugins();
+        // return reset($plugins);
+    }
+
+    public function get_default_action() {
+        if (isset($this->action)) {
+            // debugging("$this->checker " . $this->checker);
+            return $this->action;
+        }
+        global $SESSION;
+        if (!empty($SESSION->action)) {
+            // debugging("$SESSION->checker " . $SESSION->checker);
+            return $SESSION->action;
+        } else {
+            return self::DEFAULT_ACTION;
+        }
     }
 
     /**
@@ -67,11 +110,50 @@ class archive_filter_form extends moodleform {
         // Gets all enabled plugins of type userstatus.
         $plugins = tools::get_enabled_checkers_with_displayname();
 
-        $actions = [];
-        $actions[self::TO_BE_REACTIVATED] = 'users to be reactivated by';
-        $actions[self::TO_BE_DELETED] = 'users to be deleted by';
-        $actions[self::ALL_USERS] = 'all archived users';
+        $pluginslinks = [];
+        foreach ($plugins as $plugin => $name) {
+            global $PAGE;
+            $url = new moodle_url($PAGE->url, ['action' => $this->get_default_action(),
+                'checker' => $plugin]);
+            $pluginslinks[$url->out(false)] = $name;
+        }
 
+
+        $actions = [];
+        $actions[self::TO_BE_REACTIVATED] = 'Users to be reactivated by';
+        $actions[self::TO_BE_DELETED] = 'Users to be deleted by';
+        $actions[self::ALL_USERS] = 'All archived users';
+        $actionlinks = [];
+        foreach ($actions as $action => $name) {
+            global $PAGE;
+            $url = new moodle_url($PAGE->url, ['action' => $action,
+                'checker' => $this->get_default_checker()]);
+            $actionlinks[$url->out(false)] = $name;
+        }
+
+        $selectmenu1 = new \core\output\select_menu('actiontype', $actionlinks, $this->get_default_action());
+        $selectmenu1->set_label($actions[$this->get_default_action()]);
+        global $OUTPUT;
+        $actionsselector = \html_writer::tag(
+            'h3',
+            $OUTPUT->render_from_template('core/tertiary_navigation_selector',
+                $selectmenu1->export_for_template($OUTPUT))
+        );
+        $mform->addElement('html', $actionsselector);
+
+        $selectmenu2 = new \core\output\select_menu('checkertype', $pluginslinks, $this->get_default_checker());
+        $selectmenu2->set_label(' \''. $plugins[$this->get_default_checker()] . '\'');
+        global $OUTPUT;
+        $options = \html_writer::tag(
+            'h3',
+            /*$OUTPUT->render_from_template('core/tertiary_navigation_selector',
+                $selectmenu1->export_for_template($OUTPUT)) . ' ' .*/
+            $OUTPUT->render_from_template('core/tertiary_navigation_selector',
+                $selectmenu2->export_for_template($OUTPUT))
+        );
+        $mform->addElement('html', $options);
+
+/*
         $selectline = [];
         $selectline[] = &$mform->createElement('select', 'action', '', $actions);
         $selectline[] = &$mform->createElement('select', 'subplugin', '', $plugins);
@@ -92,6 +174,7 @@ class archive_filter_form extends moodleform {
         ];
         global $OUTPUT;
         $mform->addElement('html', $OUTPUT->render_from_template('tool_cleanupusers/filterform', $context));
+*/
         //        }
         // $mform->addElement('submit', 'reset', 'Submit');
 

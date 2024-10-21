@@ -89,9 +89,10 @@ class not_archive_filter_form extends moodleform {
         // Gets all enabled plugins of type userstatus.
         $plugins = \tool_cleanupusers\tools::get_enabled_checkers_with_displayname();
 
-        $actions = [];
-        // $actions[self::MANUALLY_SUSPENDED] = 'users manually suspended';
+        /* $actions = [];
+        $actions[self::MANUALLY_SUSPENDED] = 'users manually suspended';
         $actions[self::TO_BE_ARCHIVED] = 'users to be archived by';
+        */
 
         $pluginslinks = [];
         foreach ($plugins as $plugin => $name) {

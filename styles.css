@@ -36,3 +36,13 @@
     max-width: 10em;
     width: 6em;*/
 }
+
+ h3 .dropdown.select-menu{
+    /* show title in one line with separator */
+    /* display: inline; */
+}
+
+h3, h3>nav, h3>nav>div {
+    /* show title in one line with separator */
+    display: inline;
+}

@@ -98,6 +98,9 @@ Feature: Cleanup settings
     And I delete "user1"
 
     And I pause
+    And I click on "Cancel" "button" in the "Completely delete user" "dialogue"
+    And I pause
+
     And I should see "Completely delete user"
     And I should see "Do you really want to delete"
     And I should see "Teacher Miller1"

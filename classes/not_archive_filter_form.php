@@ -61,20 +61,30 @@ class not_archive_filter_form extends moodleform {
     }
 
     public function get_default_checker() {
+        // debugging("get_default_checker");
+        if (isset($this->checker)) {
+            // debugging("$this->checker " . $this->checker);
+            return $this->checker;
+        }
+        global $SESSION;
         if (!empty($SESSION->checker)) {
+            // debugging("$SESSION->checker " . $SESSION->checker);
             return $SESSION->checker;
         } else {
             $plugins = userstatus::get_enabled_plugins();
+            // debugging("userstatus::get_enabled_plugins " . reset($plugins));
             return reset($plugins);
         }
 
         // $plugins = userstatus::get_enabled_plugins();
         // return reset($plugins);
     }
+
     /**
      * Defines the sub-plugin select form.
      */
     public function definition() {
+        // debugging("definition: " . $this->get_default_checker() . ' ' . $this->checker);
         $mform = $this->_form;
         // Gets all enabled plugins of type userstatus.
         $plugins = \tool_cleanupusers\tools::get_enabled_checkers_with_displayname();
@@ -89,9 +99,9 @@ class not_archive_filter_form extends moodleform {
             $url = new moodle_url($PAGE->url, ['action' => self::TO_BE_ARCHIVED, 'checker' => $plugin]);
             $pluginslinks[$url->out(false)] = $name;
         }
-        $selectmenu = new \core\output\select_menu('checkertype', $pluginslinks, $this->checker);
+        $selectmenu = new \core\output\select_menu('checkertype', $pluginslinks, $this->get_default_checker());
         $selectmenu->set_label(get_string('users-to-be-archived', 'tool_cleanupusers') . ' \''.
-            $plugins[$this->checker] . '\'');
+            $plugins[$this->get_default_checker()] . '\'');
         global $OUTPUT;
         $options = \html_writer::tag(
             'h3',

@@ -40,6 +40,22 @@ class archiveuser_filtering extends \user_filtering
         parent::__construct();
 
         $this->archive = $archive;
+        // if (isset($urlaction) || (isset($SESSION->archive) && $SESSION->archive != $archive)) {
+        if (isset($SESSION->archive) && $SESSION->archive != $archive) {
+            // Invalidate session variables in case of switching form or
+            // in case of a redirect
+            unset($SESSION->checker);
+            unset($SESSION->action);
+        }
+        $SESSION->archive = $archive;
+
+        if (isset($urlaction)) {
+            // set default values from URL
+
+            $SESSION->checker = $urlchecker;
+            $SESSION->action = $urlaction;
+        }
+
         if ($archive) {
             $this->checkerform = new archive_filter_form();
         } else {
@@ -52,14 +68,6 @@ class archiveuser_filtering extends \user_filtering
             unset($SESSION->action);
         }*/
 
-        // if (isset($urlaction) || (isset($SESSION->archive) && $SESSION->archive != $archive)) {
-        if (isset($SESSION->archive) && $SESSION->archive != $archive) {
-            // Invalidate session variables in case of switching form or
-            // in case of a redirect
-            unset($SESSION->checker);
-            unset($SESSION->action);
-        }
-        $SESSION->archive = $archive;
 
         if ($formdata = $this->checkerform->get_data()) {
             $arraydata = get_object_vars($formdata);
@@ -87,6 +95,8 @@ class archiveuser_filtering extends \user_filtering
                     if (isset($SESSION->action)) {
                         $default_values['action'] = $SESSION->action;
                     }
+                    // debugging("setdata from SESSION");
+                    // var_dump($default_values);
                     $this->checkerform->set_data($default_values);
                 }
             }

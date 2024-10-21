@@ -62,20 +62,30 @@ if (!empty($checker)) {
 }*/
 // echo $renderer->get_heading(get_string('toarchive', 'tool_cleanupusers'));
 
+/* debugging('vorher');
+debugging($action);
+debugging($checker);*/
+
 
 $userfilter = new \tool_cleanupusers\archiveuser_filtering(false, $action, $checker); // user_filtering();
 $userfilter->display();
 [$sql, $param] = $userfilter->get_full_sql_filter();
+$checker = $userfilter->get_checker();
+$action = $userfilter->get_action();
 
 $returnurl = new moodle_url('/admin/tool/cleanupusers/toarchive.php',
-    ['action' => $userfilter->get_action(), 'checker' => $userfilter->get_checker()]);
+    ['action' => $action, 'checker' => $checker]);
+
+/*debugging('nachher');
+debugging($action);
+debugging($checker);*/
 
 // debugging($userfilter->get_action());
-switch ($userfilter->get_action()) {
+switch ($action) {
     case \tool_cleanupusers\not_archive_filter_form::TO_BE_ARCHIVED:
 // var_dump($sqlfilter);echo '<br>';
 // var_dump($paramfilter);
-        $checker = $userfilter->get_checker();
+
         // Update page URL
         $PAGE->set_url($returnurl);
 

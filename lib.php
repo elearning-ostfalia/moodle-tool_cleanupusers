@@ -17,6 +17,7 @@
 defined('MOODLE_INTERNAL') || die;
 
 require_once($CFG->libdir . '/classes/output/inplace_editable.php');
+require_once(__DIR__ . '/classes/userstatuschecker.php');
 
 use core_external\external_api;
 

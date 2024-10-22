@@ -191,3 +191,25 @@ Feature: Cleanup settings
       | Last Login Checker       | user1   |
       | Never Login Checker      | user3   |
       | No active course Checker | user5   |
+
+  @javascript
+  Scenario Outline: Run suspend task (all checkers, short)
+    Given I log in as "admin"
+
+    And I navigate to "Users > Clean up users > Users to be archived" in site administration
+    And I select "<checker>" checker on archiving page
+    And I should see "<userid>"
+
+    # run task and check that all tables are empty
+    And I run the scheduled task "\tool_cleanupusers\task\archive_user_task"
+
+    And I navigate to "Users > Clean up users > Users to be archived" in site administration
+    And I select "<checker>" checker on archiving page
+    And I should see "Nothing to display"
+
+    Examples:
+      | checker                  | userid  |
+      | Suspended Checker        | user9   |
+      | Last Login Checker       | user1   |
+      | Never Login Checker      | user3   |
+      | No active course Checker | user5   |

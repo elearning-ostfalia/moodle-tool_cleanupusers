@@ -34,8 +34,6 @@ $tasks = [
         'dayofweek' => '*',
         'faildelay' => 0,
     ],
-    // DO not start by default!
-    /*
     [
         'classname' => 'tool_cleanupusers\task\delete_user_task',
         'blocking' => 0,
@@ -45,5 +43,6 @@ $tasks = [
         'month' => '*',
         'dayofweek' => '*',
         'faildelay' => 0,
-    ],*/
+        'disabled' => 1 // DO not start by default!
+    ]
 ];

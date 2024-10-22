@@ -49,7 +49,7 @@ switch ($action) {
     // User should be suspended.
     case 'suspend':
         // Sideadmins, the current $USER and user who are already suspended can not be handeled.
-        if (!is_siteadmin($user) && $user->suspended != 1 && $USER->id != $userid) {
+        if (!is_siteadmin($user) && $user->deleted != 1 && $USER->id != $userid) {
             $checker        = required_param('checker', PARAM_TEXT);
             $deprovisionuser = new \tool_cleanupusers\archiveduser(
                 $userid,

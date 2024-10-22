@@ -3,15 +3,16 @@ Feature: Cleanup settings
 
   Background:
     Given the following "users" exist:
-      | username | firstname | lastname  | relativedatesmode | timecreated    | lastaccess |
-      | user1    | Teacher   | Miller1   | 1                 | ## -320 days## | ## -11 days ## |
-      | user2    | Teaching  | Miller2   | 1                 | ## -32 days##  | ## -9 days## |
-      | user3    | Student   | Miller3   | 1                 | ## -15 days##  | 0  |
-      | user4    | Student   | Miller4   | 1                 | ## -14 days##  | 0  |
-      | user5    | Student   | Miller5   | 1                 | ## -12 days##  | 0  |
-      | user6    | Student   | Miller6   | 1                 | ## -12 days##  | 0  |
-      | user7    | Student   | Miller7   | 1                 | ## -12 days##  | 0  |
-      | user8    | Student   | Miller8   | 1                 | ## -12 days##  | 0  |
+      | username | firstname | lastname  | relativedatesmode | timecreated    | lastaccess | suspended |
+      | user1    | Teacher   | Miller1   | 1                 | ## -320 days## | ## -11 days ## | 0     |
+      | user2    | Teaching  | Miller2   | 1                 | ## -32 days##  | ## -9 days## | 0       |
+      | user3    | Student   | Miller3   | 1                 | ## -15 days##  | 0  | 0                 |
+      | user4    | Student   | Miller4   | 1                 | ## -14 days##  | 0  | 0                 |
+      | user5    | Student   | Miller5   | 1                 | ## -12 days##  | 0  | 0                 |
+      | user6    | Student   | Miller6   | 1                 | ## -12 days##  | 0  | 0                 |
+      | user7    | Student   | Miller7   | 1                 | ## -12 days##  | 0  | 0                 |
+      | user8    | Student   | Miller8   | 1                 | ## -12 days##  | 0  | 0                 |
+      | user9    | Student   | Miller9   | 1                 | ## -12 days##  | ## -9 days##  | 1      |
     And the following "courses" exist:
       | fullname  | shortname  | category  | relativedatesmode  | startdate      | enddate     | visible |
       | Active1   | CA1         | 0         | 1                  | ##-32 days##  |             | 1       |
@@ -33,7 +34,7 @@ Feature: Cleanup settings
     # Values are set per checker as otherwise only one value
     # with the same first column will be set (bug?)
     And the following config values are set as admin:
-      | userstatus_plugins_enabled | timechecker,nocoursechecker,neverloginchecker,suspendchecker  | |
+      | userstatus_plugins_enabled | timechecker,nocoursechecker,neverloginchecker,suspendedchecker  | |
       | auth_method | manual  | userstatus_nocoursechecker |
 #      | suspendtime | 20  | userstatus_nocoursechecker |
       | deletetime | 15  | userstatus_nocoursechecker |
@@ -45,6 +46,10 @@ Feature: Cleanup settings
       | suspendtime | 14  | userstatus_neverloginchecker |
       | deletetime | 200  | userstatus_neverloginchecker |
       | auth_method | manual  | userstatus_neverloginchecker |
+    And the following config values are set as admin:
+      | auth_method | manual  | userstatus_suspendedchecker |
+      | suspendtime | 0  | userstatus_suspendedchecker |
+      | deletetime | 100  | userstatus_suspendedchecker |
 
  # TODO
   # Unterscheidung der Checker bei der Filterung

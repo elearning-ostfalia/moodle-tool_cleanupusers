@@ -2,7 +2,10 @@
 
 The **clean up users plugin** enables the automatic and manual suspension and deletion of users.
 
-The plugin is written at University of Münster by [Jan Dageförde](https://github.com/Dagefoerde), [Tobias Reischmann](https://github.com/tobiasreischmann) and [Nina Herrmann](https://github.com/NinaHerrmann). Since the end of 2023 it is further developed and maintained by Technical University of Darmstadt. 
+The plugin is written at University of Münster 
+by [Jan Dageförde](https://github.com/Dagefoerde), [Tobias Reischmann](https://github.com/tobiasreischmann) and [Nina Herrmann](https://github.com/NinaHerrmann). 
+Since the end of 2023 it is further developed and maintained by Technical University of Darmstadt. 
+This code is a refactored version by Ostfalia. 
 
 ## Motivation
 Hitherto users could be suspended and deleted manually in the `Site administration ► Users ► Accounts ► Browse list of users` menu.
@@ -15,8 +18,8 @@ Therefore, the plugin aims to automatically suspend and delete users to custom r
 This plugin should go into `admin/tool/cleanupusers`. 
 No supplementary settings are required in the **clean up users plugin**. 
 The sub-plugin can be selected in `Site administration ► Users ► Clean up users ► General settings`.   
-By default, the **timechecker sub-plugin** is used. 
-However, it is likely that the sub-plugin requires additional settings, therefore, please read the information for the [sub-plugins](#sub-plugins) before using the plugin. 
+By default no sub-plugin is activated so no users will be suspended or deleted. 
+.....
 
 ## Manual Handling
 
@@ -40,7 +43,8 @@ Moodle provides the following functionality when suspending a user:
 - mark the user in the `user` table as suspended.
     - Consequently, the user cannot sign in anymore.
     
-The plugin aims to make users that are suspended **anonymous**. Therefore, the following additional functionalities are provided:  
+The plugin aims to make users that are suspended **anonymous**. 
+Therefore, the following additional functionalities are provided:  
 - save necessary data in a shadow table to reactivate users when necessary (the table is called: `tool_cleanupusers_archive`),
 - hide all other references in the `user` table e.g. `username`, ` firstname`.
     - The `username` is set to *anonym* with the `userid` appended  
@@ -86,56 +90,42 @@ To check the technical implementation, look at `/lib/moodlelib.php`.
 ## Sub-plugins
 
 The plugin requires at least one sub-plugin of the type `cleanupusers_userstatus` that returns users to be handled by the cronjob. 
-You can write their own sub-plugin which specifies the conditions to delete, archive, and 
-reactivate users. An interface with the minimum functionality to be implemented is included in the directory `cleanupusers/classes`, consisting of four functions:
- - `get_to_suspend()`
- 
-    Returns an array of all users who are supposed to be suspended by the next cronjob.
+You can write your own sub-plugin which at least implements the SQL conditions to suspend and reactivate 
+users.
      
- - `get_to_delete()`
- 
-    Returns an array of all users who are supposed to be deleted by the next cronjob.
-   
- - `get_never_logged_in()`
- 
-    Returns an array of all users who never logged in.
-    
- - `get_to_reactivate()`
- 
-     Returns an array of all users who should be reactivated by the next cronjob.
-     
-The arrays that are returned must provide at 
-least the following information for each user that should be handled: 
-  * `userid`: integer not exceeding 10 integers
-  * `username`: varchar not exceeding 100 characters
-  * `lastaccess`: Unix timestamp (10 integers)
-  * `suspended`: integer 1 = suspended, 0 = not
-  * `deleted`: integer 1 = deleted, 0 = not
-  
-As the default, the timechecker sub-plugin is installed and enabled and cannot be uninstalled.
-Moreover, sub-plugins that are currently in use cannot be uninstalled.
 If you implement your own subplugin it should be placed in `admin/tool/cleanupusers/userstatus`.
 
 ### Timechecker
 The timechecker plugin suspends and deletes users depending on the last access of the user to the platform. 
 The site administrator can define custom time spans, as a default 90 days have to pass without a user logging in, until the 
 user is suspended and 365 days until the user is deleted.
-Currently, users that are manually suspended and did not log in for the defined time are also deleted.
 
-### Additional sub-plugins: ldapchecker
+### Suspendedchcker
+
+Users who are manually suspended are handled by this plugin.
+
+### Neverloginchecker
+
+Users have never logged in are handled by this plugin.
+
+### No active course checker
+
+Users who are not actively enrolled in an active course are handled by this plugin.
+
+### ldapchecker
+
 A sub-plugin developed by TU Darmstadt; uses data from an external server connected with LDAP to mark users.
 Server can be chosen and configured in settings.
-Available at https://github.com/eLearning-TUDarmstadt/moodle-cleanupusers_ldapchecker
+Copied from https://github.com/eLearning-TUDarmstadt/moodle-cleanupusers_ldapchecker
 
 
 # User interface
 
-## Manage users to be archived
+## Users to be archived
 
  Filter
 
 * To be archived by [checker]
-* Manually suspended
 
  Actions
 
@@ -143,7 +133,7 @@ Available at https://github.com/eLearning-TUDarmstadt/moodle-cleanupusers_ldapch
    
 Aktionen ggf. auch für alle Nutzer aus dem Filter anwenden mit Nachfrage!
 
-## Manage archived users
+## Archived users
 
 Filter
 
@@ -163,9 +153,9 @@ Aktionen ggf. auch für alle Nutzer aus dem Filter anwenden mit Nachfrage!
 
 ## Vorschau, über anstehende Aktionen (index)
 
-   * reactivated => Link zu "Manage archived users" mit passendem Filter
-   * suspended => Link zu "Manage users to be archived" mit passendem Filter
-   * deleted => Link zu "Manage users to be archived" mit passendem Filter
+   * reactivated => Link zu "Archived users" mit passendem Filter
+   * suspended => Link zu "Users to be archived" mit passendem Filter
+   * deleted => Link zu "Users to be archived" mit passendem Filter
 
 # TODO:
 

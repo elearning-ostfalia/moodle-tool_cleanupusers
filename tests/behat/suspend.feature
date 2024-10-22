@@ -33,7 +33,7 @@ Feature: Cleanup settings
     # Values are set per checker as otherwise only one value
     # with the same first column will be set (bug?)
     And the following config values are set as admin:
-      | userstatus_plugins_enabled | timechecker,nocoursechecker,neverloginchecker  | |
+      | userstatus_plugins_enabled | timechecker,nocoursechecker,neverloginchecker,suspendchecker  | |
       | auth_method | manual  | userstatus_nocoursechecker |
 #      | suspendtime | 20  | userstatus_nocoursechecker |
       | deletetime | 15  | userstatus_nocoursechecker |
@@ -60,7 +60,7 @@ Feature: Cleanup settings
     And I should see the "Course categories and courses" management page
     And I toggle visibility of course "Inactive2" in management listing
 
-    And I navigate to "Users > Clean up users > Manage archived users" in site administration
+    And I navigate to "Users > Clean up users > Archived users" in site administration
     And I navigate to "Users to be reactivated" archive page
     And I select "No active course Checker" checker on archive page
 
@@ -78,7 +78,7 @@ Feature: Cleanup settings
   Scenario: Manually reactivate user (empty filter)
     Given I log in as "admin"
 
-    And I navigate to "Users > Clean up users > Manage archived users" in site administration
+    And I navigate to "Users > Clean up users > Archived users" in site administration
     And I navigate to "Users to be reactivated" archive page
     And I select "Last Login Checker" checker on archive page
     And I should see "Nothing to display"
@@ -89,47 +89,39 @@ Feature: Cleanup settings
     # archive all users ready for archive
     And I run the scheduled task "\tool_cleanupusers\task\archive_user_task"
     And simulate that "101" days have passed since archiving of "user1"
-    And I navigate to "Users > Clean up users > Manage archived users" in site administration
+    And I navigate to "Users > Clean up users > Archived users" in site administration
     And I navigate to "Users to be deleted" archive page
     And I select "Last Login Checker" checker on archive page
-
     And I should see "user1"
 
-    And I delete "user1"
-
-    And I pause
-    And I click on "Cancel" "button" in the "Completely delete user" "dialogue"
-    And I pause
-
-    And I should see "Completely delete user"
+    When I delete "user1"
+    Then "Completely delete user" "dialogue" should exist
     And I should see "Do you really want to delete"
     And I should see "Teacher Miller1"
-    And I press "Cancel"
 
-    And I pause
-    And I should see "user1"
-    And I delete "user1"
-    And I pause
-    And I should see "Completely delete user"
-    And I should see "Do you really want to delete"
+    When I click on "Cancel" "button" in the "Completely delete user" "dialogue"
+    Then I should see "user1"
+
+    When I delete "user1"
+    Then "Completely delete user" "dialogue" should exist
     And I should see "Teacher Miller1"
-    And I press "Delete"
-    And I pause
 
+    When I press "Delete"
+    Then I should see "User 'user1' has been deleted."
 
-    And I should see "User 'user1' has been deleted."
-    And I press "Continue"
-    And I should see "Users to be deleted"
+    When I press "Continue"
+    Then I should see "Users to be deleted"
     And I should see "Last Login Checker"
     And I should not see "user1"
-    And I navigate to "All archived users" archive page
-    And I should not see "user1"
+
+    When I navigate to "All archived users" archive page
+    Then I should not see "user1"
 
   @javascript
   Scenario: Manually reactivate user (all archived users filter)
     Given I log in as "admin"
     And I run the scheduled task "\tool_cleanupusers\task\archive_user_task"
-    And I navigate to "Users > Clean up users > Manage archived users" in site administration
+    And I navigate to "Users > Clean up users > Archived users" in site administration
     And I should see "All archived users"
     And I should see "user1"
     And I should see "user3"
@@ -151,7 +143,7 @@ Feature: Cleanup settings
     Given I log in as "admin"
 
     # timechecker
-    And I navigate to "Users > Clean up users > Manage users to be archived" in site administration
+    And I navigate to "Users > Clean up users > Users to be archived" in site administration
     And I select "Last Login Checker" checker on archiving page
     And I should see "user1"
     And I should not see "user2"
@@ -162,7 +154,7 @@ Feature: Cleanup settings
     And I should not see "user7"
     And I should not see "user8"
 
-    And I navigate to "Users > Clean up users > Manage users to be archived" in site administration
+    And I navigate to "Users > Clean up users > Users to be archived" in site administration
     And I select "Never Login Checker" checker on archiving page
 
     And I should see "user3"
@@ -174,7 +166,7 @@ Feature: Cleanup settings
     And I should not see "user7"
     And I should not see "user8"
 
-    And I navigate to "Users > Clean up users > Manage users to be archived" in site administration
+    And I navigate to "Users > Clean up users > Users to be archived" in site administration
     And I select "No active course Checker" checker on archiving page
 
     And I should see "user5"
@@ -189,17 +181,17 @@ Feature: Cleanup settings
     # run task and check that all tables are empty
     And I run the scheduled task "\tool_cleanupusers\task\archive_user_task"
 
-    And I navigate to "Users > Clean up users > General settings" in site administration
+    # And I navigate to "Users > Clean up users > Pending cleanup actions" in site administration
 
-    And I navigate to "Users > Clean up users > Manage users to be archived" in site administration
+    And I navigate to "Users > Clean up users > Users to be archived" in site administration
     And I select "Last Login Checker" checker on archiving page
     And I should see "Nothing to display"
 
-    And I navigate to "Users > Clean up users > Manage users to be archived" in site administration
+    And I navigate to "Users > Clean up users > Users to be archived" in site administration
     And I select "Never Login Checker" checker on archiving page
     And I should see "Nothing to display"
 
-    And I navigate to "Users > Clean up users > Manage users to be archived" in site administration
+    And I navigate to "Users > Clean up users > Users to be archived" in site administration
     And I select "No active course Checker" checker on archiving page
 
     And I should see "Nothing to display"
@@ -208,7 +200,7 @@ Feature: Cleanup settings
   Scenario: Manually suspend user for Not enrolled in active course Checker
     Given I log in as "admin"
 
-    And I navigate to "Users > Clean up users > Manage users to be archived" in site administration
+    And I navigate to "Users > Clean up users > Users to be archived" in site administration
     And I select "No active course Checker" checker on archiving page
     And I should see "user5"
     When I archive "user5"
@@ -220,7 +212,7 @@ Feature: Cleanup settings
   Scenario: Manually suspend user for Never Login Checker
     Given I log in as "admin"
 
-    And I navigate to "Users > Clean up users > Manage users to be archived" in site administration
+    And I navigate to "Users > Clean up users > Users to be archived" in site administration
     And I select "Never Login Checker" checker on archiving page
     And I should see "user3"
 
@@ -235,7 +227,7 @@ Feature: Cleanup settings
   Scenario: Manually suspend user for Last Login Checker
     Given I log in as "admin"
 
-    And I navigate to "Users > Clean up users > Manage users to be archived" in site administration
+    And I navigate to "Users > Clean up users > Users to be archived" in site administration
 
     And I select "Last Login Checker" checker on archiving page
 

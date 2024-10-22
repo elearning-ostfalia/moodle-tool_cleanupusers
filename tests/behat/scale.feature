@@ -29,7 +29,7 @@ Feature: Cleanup settings with large number of users
     # archive all users ready for archive
     And I run the scheduled task "\tool_cleanupusers\task\archive_user_task"
     And simulate that "101" days have passed since archiving of "user1"
-    And I navigate to "Users > Clean up users > Manage archived users" in site administration
+    And I navigate to "Users > Clean up users > Archived users" in site administration
     And I navigate to "Users to be deleted" archive page
     And I select "No active course Checker" checker on archive page
     And I should see "user1"
@@ -46,7 +46,7 @@ Feature: Cleanup settings with large number of users
     # archive all users ready for archive
     And I run the scheduled task "\tool_cleanupusers\task\archive_user_task"
     And simulate that "101" days have passed since archiving from "user1" to "user400"
-    And I navigate to "Users > Clean up users > Manage archived users" in site administration
+    And I navigate to "Users > Clean up users > Archived users" in site administration
     And I navigate to "Users to be deleted" archive page
     And I select "No active course Checker" checker on archive page
     And I press "Show more..."

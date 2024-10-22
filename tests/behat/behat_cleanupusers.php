@@ -103,7 +103,6 @@ class behat_cleanupusers extends behat_base {
         global $DB;
         $record = $DB->get_record('user', ['username' => $username], 'id', MUST_EXIST);
         $this->execute('behat_general::i_click_on', ['.imggroup-' . $record->id, 'css']);
-
     }
 
     /**
@@ -118,55 +117,23 @@ class behat_cleanupusers extends behat_base {
         $record = $DB->get_record('tool_cleanupusers_archive', ['username' => $username], 'id',
             MUST_EXIST);
 
-        $session = $this->getSession();
-        $webDriver = $session->getDriver()->getWebDriver();
-
+        $this->execute('behat_general::i_click_on', ['.imggroup-' . $record->id, 'css']);
+/*
         $elementclass = "imggroup-" . $record->id;
         $element = './/*[contains(@class,\''. $elementclass .'\')]';
         echo $element .PHP_EOL;
 
-        echo 'click on menu item' . PHP_EOL;
+        echo 'click on item' . PHP_EOL;
         $js = "document.evaluate(\"".$element."\", document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue.click()";
         try {
             $output = $this->getSession()->getDriver()->evaluateScript($js);
-            // $webDriver->executeAsyncScript($js);
         } catch (Exception $e) {
-            // Document was unloaded??
             echo 'Exception caught: ' . $e->getMessage();
         }
 
-        // Switch to window if it exists
-        try {
-            $this->getSession()->switchToWindow(null);
-        } catch(Exception $e) {
-            echo 'Exception caught: ' . $e->getMessage();
-        }
-
-/*        sleep(2000);
-
-        echo 'switch to alert' . PHP_EOL;
-        $alert = $webDriver->switchTo()->alert();
-
-        echo 'get state' . PHP_EOL;
-        $state = $webDriver->executeAsyncScript('return document.readyState');
-        echo 'state async ' . $state . PHP_EOL;
-  */
-
-/*
-        $this->execute('behat_general::i_click_on', ['.imggroup-' . $record->id, 'css']);
-
-        // Confirms the delete.
         if ($this->running_javascript()) {
-            $title = get_string('confirm-delete-title', 'tool_cleanupusers');
-
-            $this->execute('behat_general::i_click_on_in_the', [
-                get_string('delete'),
-                'button',
-                $title,
-                'dialogue',
-            ]);
-        }
-*/
+            $this->getSession()->wait(1000);
+        }*/
     }
 
     /**

@@ -156,7 +156,7 @@ switch ($action) {
             $cancelbutton = new single_button(new moodle_url($returnurl), get_string('cancel'));
 
             echo $OUTPUT->confirm($message, $confirmbutton, $cancelbutton, $displayoptions);
-            return;
+            echo $OUTPUT->footer(); // do not forget (behat tests will hang otherwise)
         }
 
         break;

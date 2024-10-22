@@ -15,9 +15,9 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Sub-plugin timechecker.
+ * Sub-plugin never login checker.
  *
- * @package   userstatus_timechecker
+ * @package   userstatus_neverloginchecker
  * @copyright 2016/17 N. Herrmann
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */

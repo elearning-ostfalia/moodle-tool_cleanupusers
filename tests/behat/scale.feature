@@ -6,17 +6,17 @@ Feature: Cleanup settings with large number of users
     # * no user has ever logged in => archived by neverloginchecker
     # * no user is enrolled in course => archived by nocoursechecker
     # => nocoursechecker comes first => all users will be suspeneded by nocoursechecker
-    Given create "5000" users
+    Given create "500" users
     # Values are set per checker as otherwise only one value
     # with the same first column will be set (bug?)
     And the following config values are set as admin:
-      | userstatus_plugins_enabled | timechecker,nocoursechecker,neverloginchecker  | |
+      | userstatus_plugins_enabled | lastloginchecker,nocoursechecker,neverloginchecker  | |
       | auth_method | manual  | userstatus_nocoursechecker |
       | deletetime | 15  | userstatus_nocoursechecker |
     And the following config values are set as admin:
-      | auth_method | manual  | userstatus_timechecker |
-      | suspendtime | 10  | userstatus_timechecker |
-      | deletetime | 100  | userstatus_timechecker |
+      | auth_method | manual  | userstatus_lastloginchecker |
+      | suspendtime | 10  | userstatus_lastloginchecker |
+      | deletetime | 100  | userstatus_lastloginchecker |
     And the following config values are set as admin:
       | suspendtime | 14  | userstatus_neverloginchecker |
       | deletetime | 200  | userstatus_neverloginchecker |
@@ -34,7 +34,8 @@ Feature: Cleanup settings with large number of users
     And I select "No active course Checker" checker on archive page
     And I should see "user1"
     And I delete "user1"
-    And I should see "User 'user1' has been deleted."
+    When I press "Delete"
+    Then I should see "User 'user1' has been deleted."
     And I press "Continue"
     And I should see "Users to be deleted"
     And I should see "No active course Checker"
@@ -51,12 +52,14 @@ Feature: Cleanup settings with large number of users
     And I select "No active course Checker" checker on archive page
     And I press "Show more..."
     And I set the field with xpath "//input[@name='username']" to "user8"
+    And I set the field with xpath "//select[@name='username_op']" to "is equal to"
     And I press "Add filter"
     And I should see "user8"
     And I should see "Users to be deleted"
     And I should see "No active course Checker"
     And I delete "user8"
-    And I should see "User 'user8' has been deleted."
+    When I press "Delete"
+    Then I should see "User 'user8' has been deleted."
     And I press "Continue"
     # check correct redirect
     And I should see "Users to be deleted"

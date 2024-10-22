@@ -50,17 +50,17 @@ final class tool_cleanupusers_test extends advanced_testcase {
         $generator = $this->getDataGenerator()->get_plugin_generator('tool_cleanupusers');
         $data = $generator->test_create_preparation();
         $this->resetAfterTest(true);
-        // set_config('cleanupusers_subplugin', 'timechecker', 'tool_cleanupusers');
+        // set_config('cleanupusers_subplugin', 'lastloginchecker', 'tool_cleanupusers');
         // set enabled plugins
-        set_config(CONFIG_ENABLED, "neverloginchecker,timechecker");
+        set_config(CONFIG_ENABLED, "neverloginchecker,lastloginchecker");
         // set configuration values for neverloginchecker
         set_config(CONFIG_AUTH_METHOD, 'manual', 'userstatus_neverloginchecker');
         set_config(CONFIG_SUSPENDTIME, 400, 'userstatus_neverloginchecker');
         set_config(CONFIG_DELETETIME, 730, 'userstatus_neverloginchecker');
-        // set configuration values for timechecker
-        set_config(CONFIG_AUTH_METHOD, 'manual', 'userstatus_timechecker');
-        set_config(CONFIG_SUSPENDTIME, 90, 'userstatus_timechecker');
-        set_config(CONFIG_DELETETIME, 365, 'userstatus_timechecker');
+        // set configuration values for lastloginchecker
+        set_config(CONFIG_AUTH_METHOD, 'manual', 'userstatus_lastloginchecker');
+        set_config(CONFIG_SUSPENDTIME, 90, 'userstatus_lastloginchecker');
+        set_config(CONFIG_DELETETIME, 365, 'userstatus_lastloginchecker');
 
         return $data;
     }
@@ -421,7 +421,7 @@ final class tool_cleanupusers_test extends advanced_testcase {
 
         // Validation with existing sub-plugin returns true.
         $subpluginform = new subplugin_select_form();
-        $validationdata = ["subplugin" => 'timechecker'];
+        $validationdata = ["subplugin" => 'lastloginchecker'];
         $return = $subpluginform->validation($validationdata, null);
         $this->assertEquals(true, $return);
 
@@ -463,9 +463,9 @@ final class tool_cleanupusers_test extends advanced_testcase {
 
         $timestamponeyearago = time() - 31622600;
 
-        // Run cron-job with timechecker plugin.
-        // set_config('cleanupusers_subplugin', 'timechecker', 'tool_cleanupusers');
-        set_config(CONFIG_ENABLED, "timechecker");
+        // Run cron-job with lastloginchecker plugin.
+        // set_config('cleanupusers_subplugin', 'lastloginchecker', 'tool_cleanupusers');
+        set_config(CONFIG_ENABLED, "lastloginchecker");
         $cronjob = new task\archive_user_task();
         $cronjob->execute();
         // Administrator should have received an email.
@@ -491,8 +491,8 @@ final class tool_cleanupusers_test extends advanced_testcase {
             $msg
         );
         // Userdeleted already filtered.
-        // Userinconsistentsuspended not selected by timechecker.
-        // Originaluser not selected by timechecker.
+        // Userinconsistentsuspended not selected by lastloginchecker.
+        // Originaluser not selected by lastloginchecker.
 
         // Users not changed by the Cronjob.
         $recordusertable = $DB->get_record('user', ['id' => $data['user']->id]);
@@ -584,9 +584,9 @@ final class tool_cleanupusers_test extends advanced_testcase {
 
         $timestamponeyearago = time() - 31622600;
 
-        // Run cron-job with timechecker plugin.
-        // set_config('cleanupusers_subplugin', 'timechecker', 'tool_cleanupusers');
-        set_config(CONFIG_ENABLED, "timechecker");
+        // Run cron-job with lastloginchecker plugin.
+        // set_config('cleanupusers_subplugin', 'lastloginchecker', 'tool_cleanupusers');
+        set_config(CONFIG_ENABLED, "lastloginchecker");
         $cronjob = new task\delete_user_task();
         $cronjob->execute();
         // Administrator should have received an email.
@@ -612,8 +612,8 @@ final class tool_cleanupusers_test extends advanced_testcase {
             $msg
         );
         // Userdeleted already filtered.
-        // Userinconsistentsuspended not selected by timechecker.
-        // Originaluser not selected by timechecker.
+        // Userinconsistentsuspended not selected by lastloginchecker.
+        // Originaluser not selected by lastloginchecker.
 
         // Users not changed by the Cronjob.
         $recordusertable = $DB->get_record('user', ['id' => $data['user']->id]);
@@ -713,7 +713,7 @@ final class tool_cleanupusers_test extends advanced_testcase {
         $timestamp = time();
 
         $eventsink = $this->redirectEvents();
-        // set_config('cleanupusers_subplugin', 'timechecker', 'tool_cleanupusers');
+        // set_config('cleanupusers_subplugin', 'lastloginchecker', 'tool_cleanupusers');
         $cronjob = new task\archive_user_task();
         $cronjob->execute();
         $sink = $this->redirectEmails();

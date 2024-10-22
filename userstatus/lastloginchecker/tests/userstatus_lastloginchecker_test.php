@@ -15,45 +15,45 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * The class contains a test script for the moodle userstatus_timechecker
+ * The class contains a test script for the moodle userstatus_lastloginchecker
  *
- * @package    userstatus_timechecker
+ * @package    userstatus_lastloginchecker
  * @copyright  2016/17 N Herrmann
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace userstatus_timechecker;
+namespace userstatus_lastloginchecker;
 
 require_once(__DIR__.'/../../../tests/userstatus_base_test.php');
 
 use advanced_testcase;
 
 /**
- * The class contains a test script for the moodle userstatus_timechecker
+ * The class contains a test script for the moodle userstatus_lastloginchecker
  *
- * @package    userstatus_timechecker
+ * @package    userstatus_lastloginchecker
  * @group      tool_cleanupusers
  * @group      tool_cleanupusers_timechecker
  * @copyright  2016/17 N Herrmann
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  *
- * @covers \userstatus_timechecker\timechecker::get_to_suspend()
- * @covers \userstatus_timechecker\timechecker::get_to_reactivate()
+ * @covers \userstatus_lastloginchecker\lastloginchecker::get_to_suspend()
+ * @covers \userstatus_lastloginchecker\lastloginchecker::get_to_reactivate()
  *
  */
-final class userstatus_timechecker_test extends \tool_cleanupusers\userstatus_base_test {
+final class userstatus_lastloginchecker_test extends \tool_cleanupusers\userstatus_base_test {
 
     protected function setup() : void {
         $this->generator = advanced_testcase::getDataGenerator();
         $this->resetAfterTest(true);
 
         // set enabled plugin for running task
-        set_config(CONFIG_ENABLED, "timechecker");
-        set_config(CONFIG_AUTH_METHOD, AUTH_METHOD, 'userstatus_timechecker');
-        set_config(CONFIG_SUSPENDTIME, 10, 'userstatus_timechecker');
-        set_config(CONFIG_DELETETIME, 365, 'userstatus_timechecker');
+        set_config(CONFIG_ENABLED, "lastloginchecker");
+        set_config(CONFIG_AUTH_METHOD, AUTH_METHOD, 'userstatus_lastloginchecker');
+        set_config(CONFIG_SUSPENDTIME, 10, 'userstatus_lastloginchecker');
+        set_config(CONFIG_DELETETIME, 365, 'userstatus_lastloginchecker');
 
-        $this->checker = new \userstatus_timechecker\timechecker();
+        $this->checker = new \userstatus_lastloginchecker\lastloginchecker();
     }
 
     /**
@@ -64,19 +64,19 @@ final class userstatus_timechecker_test extends \tool_cleanupusers\userstatus_ba
     protected function set_up() {
         // Recommended in Moodle docs to always include CFG.
         global $CFG;
-        $generator = $this->getDataGenerator()->get_plugin_generator('userstatus_timechecker');
+        $generator = $this->getDataGenerator()->get_plugin_generator('userstatus_lastloginchecker');
         $data = $generator->test_create_preparation();
         $this->resetAfterTest(true);
-        set_config('userstatus_plugins_enabled', "neverloginchecker,timechecker");
-        // set configuration values for timechecker
-        set_config('auth_method', 'shibboleth', 'userstatus_timechecker');
-        set_config('suspendtime', 10, 'userstatus_timechecker');
-        set_config(CONFIG_DELETETIME, 365, 'userstatus_timechecker');
+        set_config('userstatus_plugins_enabled', "neverloginchecker,lastloginchecker");
+        // set configuration values for lastloginchecker
+        set_config('auth_method', 'shibboleth', 'userstatus_lastloginchecker');
+        set_config('suspendtime', 10, 'userstatus_lastloginchecker');
+        set_config(CONFIG_DELETETIME, 365, 'userstatus_lastloginchecker');
         return $data;
     }*/
 
     protected function create_checker() {
-        return new \userstatus_timechecker\timechecker();
+        return new \userstatus_lastloginchecker\lastloginchecker();
     }
 
     public function typical_scenario_for_reactivation() : ?\stdClass {
@@ -89,9 +89,9 @@ final class userstatus_timechecker_test extends \tool_cleanupusers\userstatus_ba
         $cronjob->execute();
 
         // change suspend time to 12 days
-        set_config(CONFIG_SUSPENDTIME, 12, 'userstatus_timechecker');
+        set_config(CONFIG_SUSPENDTIME, 12, 'userstatus_lastloginchecker');
         // create new checker instance in order to read changes values
-        $this->checker = new \userstatus_timechecker\timechecker();
+        $this->checker = new \userstatus_lastloginchecker\lastloginchecker();
         return $user;
     }
 
@@ -126,8 +126,8 @@ final class userstatus_timechecker_test extends \tool_cleanupusers\userstatus_ba
         $this->assertEquals(0, count($this->checker->get_to_suspend()));
 
         // change suspend time to 8 days
-        set_config(CONFIG_SUSPENDTIME, 8, 'userstatus_timechecker');
-        $this->checker = new \userstatus_timechecker\timechecker();
+        set_config(CONFIG_SUSPENDTIME, 8, 'userstatus_lastloginchecker');
+        $this->checker = new \userstatus_lastloginchecker\lastloginchecker();
 
         $this->assertEqualsUsersArrays($this->checker->get_to_suspend(), $user);
     }

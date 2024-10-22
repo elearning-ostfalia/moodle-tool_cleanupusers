@@ -35,14 +35,14 @@ Feature: Cleanup settings
     # Values are set per checker as otherwise only one value
     # with the same first column will be set (bug?)
     And the following config values are set as admin:
-      | userstatus_plugins_enabled | timechecker,nocoursechecker,neverloginchecker,suspendedchecker  | |
+      | userstatus_plugins_enabled | lastloginchecker,nocoursechecker,neverloginchecker,suspendedchecker  | |
       | auth_method | manual  | userstatus_nocoursechecker |
 #      | suspendtime | 20  | userstatus_nocoursechecker |
       | deletetime | 15  | userstatus_nocoursechecker |
     And the following config values are set as admin:
-      | auth_method | manual  | userstatus_timechecker |
-      | suspendtime | 10  | userstatus_timechecker |
-      | deletetime | 100  | userstatus_timechecker |
+      | auth_method | manual  | userstatus_lastloginchecker |
+      | suspendtime | 10  | userstatus_lastloginchecker |
+      | deletetime | 100  | userstatus_lastloginchecker |
     And the following config values are set as admin:
       | suspendtime | 14  | userstatus_neverloginchecker |
       | deletetime | 200  | userstatus_neverloginchecker |
@@ -59,7 +59,7 @@ Feature: Cleanup settings
   Scenario: Run task for suspend
     Given I log in as "admin"
 
-    # timechecker
+    # lastloginchecker
     And I navigate to "Users > Clean up users > Users to be archived" in site administration
     And I select "Last Login Checker" checker on archiving page
     And I should see "user1"

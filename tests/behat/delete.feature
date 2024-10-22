@@ -34,14 +34,14 @@ Feature: Cleanup settings
     # Values are set per checker as otherwise only one value
     # with the same first column will be set (bug?)
     And the following config values are set as admin:
-      | userstatus_plugins_enabled | timechecker,nocoursechecker,neverloginchecker,suspendedchecker  | |
+      | userstatus_plugins_enabled | lastloginchecker,nocoursechecker,neverloginchecker,suspendedchecker  | |
       | auth_method | manual  | userstatus_nocoursechecker |
 #      | suspendtime | 20  | userstatus_nocoursechecker |
       | deletetime | 15  | userstatus_nocoursechecker |
     And the following config values are set as admin:
-      | auth_method | manual  | userstatus_timechecker |
-      | suspendtime | 10  | userstatus_timechecker |
-      | deletetime | 100  | userstatus_timechecker |
+      | auth_method | manual  | userstatus_lastloginchecker |
+      | suspendtime | 10  | userstatus_lastloginchecker |
+      | deletetime | 100  | userstatus_lastloginchecker |
     And the following config values are set as admin:
       | suspendtime | 14  | userstatus_neverloginchecker |
       | deletetime | 200  | userstatus_neverloginchecker |
@@ -55,7 +55,7 @@ Feature: Cleanup settings
   # Unterscheidung der Checker bei der Filterung
 
   @javascript
-  Scenario: Manually delete user (preselected by timechecker)
+  Scenario: Manually delete user (preselected by lastloginchecker)
     Given I log in as "admin"
     # archive all users ready for archive
     And I run the scheduled task "\tool_cleanupusers\task\archive_user_task"

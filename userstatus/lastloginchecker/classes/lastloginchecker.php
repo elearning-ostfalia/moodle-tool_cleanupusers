@@ -15,24 +15,24 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Sub-plugin timechecker.
+ * Sub-plugin lastloginchecker.
  *
- * @package   userstatus_timechecker
+ * @package   userstatus_lastloginchecker
  * @copyright 2016/17 N. Herrmann
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-namespace userstatus_timechecker;
+namespace userstatus_lastloginchecker;
 
 use tool_cleanupusers\userstatuschecker;
 
 /**
  * Class that checks the status of different users depending on the time they did not signed in.
  *
- * @package    userstatus_timechecker
+ * @package    userstatus_lastloginchecker
  * @copyright  2016/17 N Herrmann
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class timechecker extends userstatuschecker { // implements userstatusinterface {
+class lastloginchecker extends userstatuschecker {
     /**
      * constructor
      */
@@ -50,47 +50,6 @@ class timechecker extends userstatuschecker { // implements userstatusinterface 
             [ 'timelimit'  => time() - $this->get_suspendtime_in_sec() ]];
     }
 
-    /**
-     * All users who are not suspended and not deleted are selected. If a user did not sign in for the hitherto
-     * determined suspendtime he/she will be returned.
-     * The array includes merely the necessary information which comprises the userid, lastaccess, suspended, deleted
-     * and the username.
-     *
-     * @return array of users to suspend
-     */
-    /*
-    public function get_to_suspend() {
-        global $DB;
-
-        $users = $DB->get_records_sql(
-            "SELECT id, suspended, lastaccess, username, deleted
-                FROM {user}
-                WHERE " . $this->get_auth_sql('') . "
-                        suspended = 0
-                    AND deleted = 0
-                    AND lastaccess != 0
-                    AND lastaccess < :timelimit",
-            [
-                'timelimit'  => time() - $this->timesuspend,
-            ]
-        );
-
-        $tosuspend = [];
-        foreach ($users as $key => $user) {
-            if (!is_siteadmin($user)) {
-                $suspenduser = new archiveduser(
-                    $user->id,
-                    $user->suspended,
-                    $user->lastaccess,
-                    $user->username,
-                    $user->deleted
-                );
-                $tosuspend[$key] = $suspenduser;
-            }
-        }
-        return $tosuspend;
-    }
-    */
 
     /**
      * All users who never logged in will be returned in the array.

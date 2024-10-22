@@ -56,7 +56,7 @@ class tool_cleanupusers_generator extends testing_data_generator {
 
         $mytimestamp = time();
 
-        // Timestamps are created to set the last access so we can test later the cronjob with the timechecker plugin.
+        // Timestamps are created to set the last access so we can test later the cronjob with the lastloginchecker plugin.
         $tendaysago = $mytimestamp - 864000;
         $timestamponeyearago = $mytimestamp - 31622600;
 
@@ -79,7 +79,7 @@ class tool_cleanupusers_generator extends testing_data_generator {
         $usersuspendedbypluginandmanually->realusername = 'somerealusername';
         $DB->insert_record_raw('tool_cleanupusers', [
             'id' => $usersuspendedbypluginandmanually->id, 'archived' => 1,
-            'timestamp' => $tendaysago, 'checker' => 'timechecker'], true, false, true);
+            'timestamp' => $tendaysago, 'checker' => 'lastloginchecker'], true, false, true);
         $DB->insert_record_raw('tool_cleanupusers_archive', ['id' => $usersuspendedbypluginandmanually->id,
             'username' => 'somerealusername', 'suspended' => $usersuspendedbypluginandmanually->suspended,
             'lastaccess' => $tendaysago, 'auth' => 'manual'], true, false, true);
@@ -97,7 +97,7 @@ class tool_cleanupusers_generator extends testing_data_generator {
         $DB->insert_record_raw('tool_cleanupusers', [
             'id' => $usersuspendedbyplugin->id,
             'archived' => true,
-            'checker' => 'timechecker',
+            'checker' => 'lastloginchecker',
             'timestamp' => $timestamponeyearago], true, false, true);
         $DB->insert_record_raw(
             'tool_cleanupusers_archive',
@@ -138,7 +138,7 @@ class tool_cleanupusers_generator extends testing_data_generator {
             true
         );
         $DB->insert_record_raw('tool_cleanupusers', ['id' => $originaluser->id, 'archived' => true,
-            'timestamp' => $tendaysago, 'checker' => 'timechecker'], true, false, true);
+            'timestamp' => $tendaysago, 'checker' => 'lastloginchecker'], true, false, true);
 
         $data['user'] = $user;  // Logged in recently, no action.
         $data['userdeleted'] = $userdeleted;    // Already deleted, filtered by cronjob.
@@ -146,7 +146,7 @@ class tool_cleanupusers_generator extends testing_data_generator {
         $data['userneverloggedin'] = $userneverloggedin;    // Never logged in, no action.
         $data['userduplicatedname'] = $userduplicatedname;  // Never logged in, no action.
         $data['useroneyearnotloggedin'] = $useroneyearnotloggedin;  // Suspend.
-        $data['usersuspendedmanually'] = $usersuspendedmanually;    // Not marked by timechecker?, no action.
+        $data['usersuspendedmanually'] = $usersuspendedmanually;    // Not marked by lastloginchecker?, no action.
         $data['usersuspendedbyplugin'] = $usersuspendedbyplugin;    // Delete.
         $data['userinconsistentsuspended'] = $userinconsistentsuspended;    // Cannot suspend, suspended = 1 already.
         $data['usersuspendedbypluginandmanually'] = $usersuspendedbypluginandmanually;  // Reactivate.

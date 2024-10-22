@@ -133,7 +133,20 @@ function xmldb_tool_cleanupusers_upgrade($oldversion) {
 
         // Cleanupusers savepoint reached.
         upgrade_plugin_savepoint(true, 2024090900, 'tool', 'cleanupusers');
+    }
 
+    if ($oldversion < 2024102200) {
+        $subpluginold = 'timechecker';
+        $subpluginnew = 'lastloginchecker';
+
+        global $DB;
+        if (!$DB->execute("UPDATE {tool_cleanupusers} SET checker = :subpluginnew where checker = :subpluginold ",
+            ['subpluginnew' => $subpluginnew, 'subpluginold' => $subpluginold])) {
+            echo 'Failed to update timechecker name in database table {tool_cleanupusers} <br>' . PHP_EOL;
+        }
+
+        // Cleanupusers savepoint reached.
+        upgrade_plugin_savepoint(true, 2024102200, 'tool', 'cleanupusers');
     }
 
     return true;

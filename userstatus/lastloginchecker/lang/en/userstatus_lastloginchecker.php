@@ -13,20 +13,15 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
-
 /**
- * Version details
- * @package userstatus_timechecker
+ * This file contains language strings used in the lastloginchecker sub-plugin.
+ *
+ * @package userstatus_lastloginchecker
  * @copyright 2016 N Herrmann
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-defined('MOODLE_INTERNAL') || die();
+$string['pluginname'] = 'Last Login Checker';
+$string['condition'] = 'User has not logged in for a long time';
+$string['suspendtime'] = 'Number of days without log in until a user is suspended';
 
-$plugin->version   = 2024090401;     // The current plugin version (Date: YYYYMMDDXX).
-$plugin->requires  = 2016052300;     // Requires 31 Moodle version.
-$plugin->component = 'userstatus_timechecker'; // Full name of the plugin (used for diagnostics).
-$plugin->release = 'v1.0-r0';
-$plugin->maturity = MATURITY_STABLE;
-$plugin->dependencies = [
-    'tool_cleanupusers' => ANY_VERSION];

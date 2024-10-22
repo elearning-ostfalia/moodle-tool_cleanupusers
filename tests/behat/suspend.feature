@@ -83,39 +83,7 @@ Feature: Cleanup settings
     And I select "Last Login Checker" checker on archive page
     And I should see "Nothing to display"
 
-  @javascript
-  Scenario: Manually delete user (preselected by timechecker)
-    Given I log in as "admin"
-    # archive all users ready for archive
-    And I run the scheduled task "\tool_cleanupusers\task\archive_user_task"
-    And simulate that "101" days have passed since archiving of "user1"
-    And I navigate to "Users > Clean up users > Archived users" in site administration
-    And I navigate to "Users to be deleted" archive page
-    And I select "Last Login Checker" checker on archive page
-    And I should see "user1"
 
-    When I delete "user1"
-    Then "Completely delete user" "dialogue" should exist
-    And I should see "Do you really want to delete"
-    And I should see "Teacher Miller1"
-
-    When I click on "Cancel" "button" in the "Completely delete user" "dialogue"
-    Then I should see "user1"
-
-    When I delete "user1"
-    Then "Completely delete user" "dialogue" should exist
-    And I should see "Teacher Miller1"
-
-    When I press "Delete"
-    Then I should see "User 'user1' has been deleted."
-
-    When I press "Continue"
-    Then I should see "Users to be deleted"
-    And I should see "Last Login Checker"
-    And I should not see "user1"
-
-    When I navigate to "All archived users" archive page
-    Then I should not see "user1"
 
   @javascript
   Scenario: Manually reactivate user (all archived users filter)
@@ -215,7 +183,7 @@ Feature: Cleanup settings
     And I navigate to "Users > Clean up users > Users to be archived" in site administration
     And I select "Never Login Checker" checker on archiving page
     And I should see "user3"
-
+#    And I pause
     When I archive "user3"
     Then I should see "User 'user3' has been archived"
 

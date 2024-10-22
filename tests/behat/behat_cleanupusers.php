@@ -102,6 +102,10 @@ class behat_cleanupusers extends behat_base {
     public function I_archive($username) {
         global $DB;
         $record = $DB->get_record('user', ['username' => $username], 'id', MUST_EXIST);
+
+        // element might not be visible. So the window is maximized.
+        $this->getSession()->getDriver()->maximizeWindow();
+
         $this->execute('behat_general::i_click_on', ['.imggroup-' . $record->id, 'css']);
     }
 
@@ -118,22 +122,6 @@ class behat_cleanupusers extends behat_base {
             MUST_EXIST);
 
         $this->execute('behat_general::i_click_on', ['.imggroup-' . $record->id, 'css']);
-/*
-        $elementclass = "imggroup-" . $record->id;
-        $element = './/*[contains(@class,\''. $elementclass .'\')]';
-        echo $element .PHP_EOL;
-
-        echo 'click on item' . PHP_EOL;
-        $js = "document.evaluate(\"".$element."\", document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue.click()";
-        try {
-            $output = $this->getSession()->getDriver()->evaluateScript($js);
-        } catch (Exception $e) {
-            echo 'Exception caught: ' . $e->getMessage();
-        }
-
-        if ($this->running_javascript()) {
-            $this->getSession()->wait(1000);
-        }*/
     }
 
     /**

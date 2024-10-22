@@ -60,6 +60,12 @@ if ($hassiteconfig) {
 
     $ADMIN->add('tool_cleanupusers', $settings);
 
+    // Adds an entry for every sub-plugin with a settings.php.
+    foreach (core_plugin_manager::instance()->get_plugins_of_type('userstatus') as $plugin) {
+        global $CFG;
+        $plugin->load_settings($ADMIN, 'tool_cleanupusers', $hassiteconfig);
+    }
+
     // Add entry for users to be archived.
     /*
     foreach (core_plugin_manager::instance()->get_enabled_plugins('userstatus') as $plugin) {
@@ -74,30 +80,26 @@ if ($hassiteconfig) {
         ));
     }
     */
+
+    // Add link to pending actions overview.
     $ADMIN->add('tool_cleanupusers', new admin_externalpage(
-        'Manage to archive',
+        'Cleanupusers Pending actions',
+        get_string('pendingactions', 'tool_cleanupusers'),
+        "$CFG->wwwroot/$CFG->admin/tool/cleanupusers/pending.php"
+    ));
+
+    $ADMIN->add('tool_cleanupusers', new admin_externalpage(
+        'Cleanupusers Manage to archive',
         get_string('toarchivelink', 'tool_cleanupusers'),
         "$CFG->wwwroot/$CFG->admin/tool/cleanupusers/toarchive.php"
     ));
 
-/*
-    // Add entry for users to be deleted.
-    $ADMIN->add('tool_cleanupusers', new admin_externalpage(
-        'Manage to delete',
-        get_string('todelete', 'tool_cleanupusers'),
-        "$CFG->wwwroot/$CFG->admin/tool/cleanupusers/todelete.php"
-    ));
-*/
     // Add entry for achived users.
     $ADMIN->add('tool_cleanupusers', new admin_externalpage(
-        'Browse acrhived users',
+        'Cleanupusers Browse acrhived users',
         get_string('reactivate', 'tool_cleanupusers'),
         "$CFG->wwwroot/$CFG->admin/tool/cleanupusers/archiveusers.php"
     ));
 
-    // Adds an entry for every sub-plugin with a settings.php.
-    foreach (core_plugin_manager::instance()->get_plugins_of_type('userstatus') as $plugin) {
-        global $CFG;
-        $plugin->load_settings($ADMIN, 'tool_cleanupusers', $hassiteconfig);
-    }
+
 }

@@ -56,7 +56,7 @@ Feature: Cleanup settings
   # Unterscheidung der Checker bei der Filterung
 
   @javascript
-  Scenario: Run task for suspend
+  Scenario: Run suspend task (long)
     Given I log in as "admin"
 
     # lastloginchecker
@@ -112,60 +112,6 @@ Feature: Cleanup settings
     And I select "No active course Checker" checker on archiving page
 
     And I should see "Nothing to display"
-
-#  @javascript
-#  Scenario: Manually suspend user for Not enrolled in active course Checker
-#    Given I log in as "admin"
-#
-#    And I navigate to "Users > Clean up users > Users to be archived" in site administration
-#    And I select "No active course Checker" checker on archiving page
-#    And I should see "user5"
-#    When I archive "user5"
-#    Then I should see "User 'user5' has been archived"
-#    When I press "Continue"
-#    Then I should not see "user5"
-#
-#  @javascript
-#  Scenario: Manually suspend user for Never Login Checker
-#    Given I log in as "admin"
-#
-#    And I navigate to "Users > Clean up users > Users to be archived" in site administration
-#    And I select "Never Login Checker" checker on archiving page
-#    And I should see "user3"
-#    When I archive "user3"
-#    Then I should see "User 'user3' has been archived"
-#
-#    When I press "Continue"
-#    And I should not see "user3"
-
-
-#@javascript
-#  Scenario: Manually suspend user for Last Login Checker
-#    Given I log in as "admin"
-#
-#    And I navigate to "Users > Clean up users > Users to be archived" in site administration
-#    And I select "Last Login Checker" checker on archiving page
-#
-#    And I should see "user1"
-#    When I archive "user1"
-#    Then I should see "User 'user1' has been archived"
-#
-#    When I press "Continue"
-#    And I should see "Nothing to display"
-#
-#  @javascript
-#  Scenario: Manually suspend user for Suspend Checker
-#    Given I log in as "admin"
-#
-#    And I navigate to "Users > Clean up users > Users to be archived" in site administration
-#    And I select "Suspended Checker" checker on archiving page
-#
-#    And I should see "user9"
-#    When I archive "user9"
-#    Then I should see "User 'user9' has been archived"
-#
-#    When I press "Continue"
-#    And I should see "Nothing to display"
 
   @javascript
   Scenario Outline: Manually suspend user (all checkers)

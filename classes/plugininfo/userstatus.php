@@ -26,7 +26,7 @@
 
 namespace tool_cleanupusers\plugininfo;
 
-require_once(__DIR__ . '/classes/userstatuschecker.php');
+require_once(__DIR__ . '/../userstatuschecker.php');
 
 use admin_settingpage;
 use core\plugininfo\base;

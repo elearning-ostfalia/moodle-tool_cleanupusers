@@ -21,16 +21,28 @@ require_once(__DIR__ . '/classes/userstatuschecker.php');
 
 use core_external\external_api;
 
+/**
+ * updates the configuration with the new value entered with editable
+ *
+ * @param $itemtype type of inplace editable
+ * @param $plugin plugin name
+ * @param $newvalue1 new value
+ * @return array|\core\output\inplace_editable|void
+ * @throws \core_external\restricted_context_exception
+ * @throws coding_exception
+ * @throws dml_exception
+ * @throws invalid_parameter_exception
+ * @throws moodle_exception
+ */
 function tool_cleanupusers_inplace_editable($itemtype, $plugin, $newvalue1) {
+    // Must call validate_context for either system, or course or course module context.
+    // This will both check access and set current context.
+    external_api::validate_context(context_system::instance());
+
+    // Check permission of the user to update this item.
+    require_admin();
+
     if ($itemtype === 'authmethod') {
-        // Must call validate_context for either system, or course or course module context.
-        // This will both check access and set current context.
-        external_api::validate_context(context_system::instance());
-
-        // Check permission of the user to update this item.
-        require_admin();
-
-        // Clean input and update the record.
         $newvalue1 = clean_param($newvalue1, PARAM_NOTAGS);
 
         // Prepare the element for the output:
@@ -60,85 +72,37 @@ function tool_cleanupusers_inplace_editable($itemtype, $plugin, $newvalue1) {
     }
 
     if ($itemtype === 'deletetime') {
-        // Must call validate_context for either system, or course or course module context.
-        // This will both check access and set current context.
-        external_api::validate_context(context_system::instance());
-
-        // Check permission of the user to update this item.
-        require_admin();
-
-        // Clean input and update configuration.
         $newvalue1 = clean_param($newvalue1, PARAM_INT);
         if ($newvalue1 < 0 ) {
             // ignore values < 0
-            $newvalue1 = get_config(CONFIG_DELETETIME, 'userstatus_' . $plugin);
             throw new moodle_exception("value must not be negative");
         }
         set_config(CONFIG_DELETETIME, $newvalue1, 'userstatus_' . $plugin);
-
         $templ = \tool_cleanupusers\helper::render_deletetime_editable($plugin, $newvalue1);
         return $templ;
     }
 
     if ($itemtype === 'suspendtime') {
-        // Must call validate_context for either system, or course or course module context.
-        // This will both check access and set current context.
-        external_api::validate_context(context_system::instance());
-
-        // Check permission of the user to update this item.
-        require_admin();
-
-        // Clean input and update configuration.
         $newvalue1 = clean_param($newvalue1, PARAM_INT);
+        if ($newvalue1 < 0 ) {
+            // ignore values < 0
+            throw new moodle_exception("value must not be negative");
+        }
 
         set_config(CONFIG_SUSPENDTIME, $newvalue1, 'userstatus_' . $plugin);
-
-        $templ = new \core\output\inplace_editable(
-            'tool_cleanupusers',
-            'authmethod',
-            $plugin,
-            has_capability('moodle/site:config', context_system::instance()),
-            $newvalue1,
-            $newvalue1,
-            get_string('suspendtime', 'tool_cleanupusers'),
-            get_string('suspendtime', 'tool_cleanupusers')
-        );
-        return $templ;
+        return \tool_cleanupusers\helper::render_suspendtime_editable(
+            $plugin, $newvalue1);
     }
 
     if ($itemtype === 'neverloggedin') {
-        // Must call validate_context for either system, or course or course module context.
-        // This will both check access and set current context.
-        external_api::validate_context(context_system::instance());
-
-        // Check permission of the user to update this item.
-        require_admin();
-
-        // Clean input and update the record.
         $newvalue1 = clean_param($newvalue1, PARAM_NOTAGS);
-
-        // Prepare the element for the output:
-        $keylist = [];
-        $keylist[0] = get_string('suspend', 'tool_cleanupusers');
-        $keylist[1] = get_string('delete', 'tool_cleanupusers');
+        if (!empty($newvalue1) && ($newvalue1 != 0 && $newvalue1 != 1)) {
+            throw new moodle_exception("invalid value");
+        }
 
         set_config(CONFIG_NEVER_LOGGED_IN, $newvalue1, 'userstatus_' . $plugin);
-
-        $templ = new \core\output\inplace_editable(
-            'tool_cleanupusers',
-            'neverloggedin',
-            $plugin,
-            has_capability('moodle/site:config', context_system::instance()),
-            null,
-            empty($newvalue1)?0:$newvalue1,
-            get_string('neverloggedin_info', 'tool_cleanupusers'),
-            get_string('neverloggedin_info', 'tool_cleanupusers')
-        );
-        $templ->set_type_select($keylist);
-        return $templ;
+        return \tool_cleanupusers\helper::render_no_login_editiable($plugin, $newvalue1);
     }
-
-
 }
 
 

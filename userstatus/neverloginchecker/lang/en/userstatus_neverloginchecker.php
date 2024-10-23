@@ -17,11 +17,11 @@
  * This file contains language strings used in the neverloginchecker sub-plugin.
  *
  * @package userstatus_neverloginchecker
- * @copyright 2016 N Herrmann
+ * @copyright 2024 Ostfalia
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 $string['pluginname'] = 'Never Login Checker';
 $string['condition'] = 'User has never logged in';
-$string['suspendtime'] = 'Time since user is created [days]';
+$string['suspendtime'] = 'Number of days since a user is registered until he or she shall be suspended ';
 

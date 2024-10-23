@@ -96,4 +96,57 @@ class helper {
             get_string('deletetime', 'tool_cleanupusers')
         );
     }
+
+    /**
+     * @param string $pluginname
+     * @param mixed $timetosuspend
+     * @return array
+     * @throws coding_exception
+     * @throws dml_exception
+     */
+    static function render_suspendtime_editable(string $pluginname, mixed $timetosuspend): \core\output\inplace_editable
+    {
+        $mysubpluginname = "\\userstatus_" . $pluginname . "\\" . $pluginname;
+        $userstatuschecker = new $mysubpluginname();
+
+        return new \core\output\inplace_editable(
+            'tool_cleanupusers',
+            'suspendtime',
+            $pluginname,
+            has_capability('moodle/site:config', \context_system::instance()),
+            $timetosuspend,
+            $timetosuspend,
+            $userstatuschecker->get_suspend_hint(),
+            get_string('suspendtime', 'tool_cleanupusers')
+        );
+    }
+
+    /**
+     * @param $plugin
+     * @param mixed $newvalue1
+     * @return \core\output\inplace_editable
+     * @throws coding_exception
+     * @throws dml_exception
+     */
+    static function render_no_login_editiable($plugin, mixed $newvalue1): \core\output\inplace_editable
+    {
+        // Prepare the element for the output:
+        $keylist = [];
+        $keylist[0] = get_string('suspend', 'tool_cleanupusers');
+        $keylist[1] = get_string('delete', 'tool_cleanupusers');
+        $templ = new \core\output\inplace_editable(
+            'tool_cleanupusers',
+            'neverloggedin',
+            $plugin,
+            has_capability('moodle/site:config', \context_system::instance()),
+            null,
+            empty($newvalue1) ? 0 : $newvalue1,
+            get_string('neverloggedin_info', 'tool_cleanupusers'),
+            get_string('neverloggedin_info', 'tool_cleanupusers')
+        );
+        $templ->set_type_select($keylist);
+        return $templ;
+    }
+
+
 }

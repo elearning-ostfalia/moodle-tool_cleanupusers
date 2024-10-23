@@ -42,7 +42,6 @@ require_once(__DIR__ . '/classes/archive_filter_form.php');
  */
 class tool_cleanupusers_renderer extends plugin_renderer_base {
 
-
     public function render_subplugin_table() : string {
         global $OUTPUT, $DB, $CFG;
         // display strings
@@ -134,21 +133,11 @@ class tool_cleanupusers_renderer extends plugin_renderer_base {
 
             // Time to suspend
             if ($userstatuschecker->needs_suspendtime()) {
-                $timetosuspend = $userstatuschecker->get_suspendtime();
-                $tmpl = new \core\output\inplace_editable(
-                    'tool_cleanupusers',
-                    'suspendtime',
-                    $pluginname,
-                    has_capability('moodle/site:config', context_system::instance()),
-                    $timetosuspend,
-                    $timetosuspend,
-                    $userstatuschecker->get_suspend_hint(),
-                    get_string('suspendtime', 'tool_cleanupusers')
-                );
-                $timetosuspend = $OUTPUT->render($tmpl);
+                $timetosuspend = $OUTPUT->render(\tool_cleanupusers\helper::render_suspendtime_editable(
+                    $pluginname, $userstatuschecker->get_suspendtime()));
             } else {
                 // No suspendtime input
-                $timetosuspend = ''; // 'N/A';
+                $timetosuspend = '';
             }
 
             // Time to delete
@@ -157,21 +146,8 @@ class tool_cleanupusers_renderer extends plugin_renderer_base {
 
             // deleteifneverloggedin
             $neverloggendin = $userstatuschecker->delete_if_never_logged_in_on_suspendtime();
-            $keylist = [];
-            $keylist[0] = get_string('suspend', 'tool_cleanupusers');
-            $keylist[1] = get_string('delete', 'tool_cleanupusers');
-            $tmpl = new \core\output\inplace_editable(
-                'tool_cleanupusers',
-                'neverloggedin',
-                $pluginname,
-                has_capability('moodle/site:config', context_system::instance()),
-                null,
-                empty($neverloggendin)?0:$neverloggendin,
-                get_string('neverloggedin_info', 'tool_cleanupusers'),
-                get_string('neverloggedin_info', 'tool_cleanupusers')
-            );
-            $tmpl->set_type_select($keylist);
-            $neverloggendin = $OUTPUT->render($tmpl);
+            $neverloggendin = $OUTPUT->render(\tool_cleanupusers\helper::render_no_login_editiable(
+                $pluginname, $neverloggendin));
 
             // up/down link (only if pluginname is enabled)
             $updown = '';
@@ -555,5 +531,7 @@ class tool_cleanupusers_renderer extends plugin_renderer_base {
 
         return $userinformation;
     }
+
+
 }
 

@@ -51,7 +51,9 @@ if ($hassiteconfig) {
     // Host
     $settings->add(new admin_setting_configtext('userstatus_ldapchecker/host_url',
         get_string('auth_ldap_host_url_key', 'auth_ldap'),
-        get_string('auth_ldap_host_url', 'auth_ldap'),  '', PARAM_RAW_TRIMMED));
+        get_string('auth_ldap_host_url', 'auth_ldap'),
+        '',
+        PARAM_RAW_TRIMMED));
 
     // Version.
     $versions = array();
@@ -79,7 +81,10 @@ if ($hassiteconfig) {
     // User ID.
     $settings->add(new admin_setting_configtext('userstatus_ldapchecker/bind_dn',
         get_string('auth_ldap_bind_dn_key', 'auth_ldap'),
-        get_string('auth_ldap_bind_dn', 'auth_ldap'), '', PARAM_RAW_TRIMMED));
+        get_string('auth_ldap_bind_dn', 'auth_ldap'),
+        '',
+        PARAM_RAW_TRIMMED,
+        80));
 
     // Password.
     $settings->add(new admin_setting_configpasswordunmask('userstatus_ldapchecker/bind_pw',
@@ -89,14 +94,15 @@ if ($hassiteconfig) {
     // Contexts.
     $settings->add(new auth_ldap_admin_setting_special_contexts_configtext('userstatus_ldapchecker/contexts',
         get_string('auth_ldap_contexts_key', 'auth_ldap'),
-        get_string('auth_ldap_contexts', 'auth_ldap'), '', PARAM_RAW_TRIMMED));
+        get_string('auth_ldap_contexts', 'auth_ldap'), '',
+        PARAM_RAW_TRIMMED, 80));
 
 
     // Search filter.
     $settings->add(new admin_setting_configtext('userstatus_ldapchecker/search_filter',
         get_string('ldap_filter', 'userstatus_ldapchecker'),
         get_string('ldap_filter_info', 'userstatus_ldapchecker'),
-        '', PARAM_RAW_TRIMMED));
+        '', PARAM_RAW_TRIMMED, 120));
 
     // LDAP username attribute.
     $settings->add(new admin_setting_configtext('userstatus_ldapchecker/ldap_username_attribute',

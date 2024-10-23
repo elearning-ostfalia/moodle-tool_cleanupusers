@@ -129,19 +129,8 @@ class tool_cleanupusers_renderer extends plugin_renderer_base {
             }
 
             $strkeylist = json_encode($keylist);
-            $tmpl = new \core\output\inplace_editable(
-                'tool_cleanupusers',
-                'authmethod',
-                $pluginname,
-                has_capability('moodle/site:config', context_system::instance()),
-                empty(trim($authvalues))?get_string('all-authmethods', 'tool_cleanupusers'):$authvalues,
-                $strkeylist,
-                get_string('authmethod_info', 'tool_cleanupusers'),
-                get_string('authmethod', 'tool_cleanupusers')
-            );
-            $attributes = ['multiple' => true];
-            $tmpl->set_type_autocomplete($auths, $attributes);
-            $authmethod = $OUTPUT->render($tmpl);
+            $authmethod = $OUTPUT->render(\tool_cleanupusers\helper::render_auth_editable($pluginname,
+                $authvalues, $strkeylist));
 
             // Time to suspend
             if ($userstatuschecker->needs_suspendtime()) {
@@ -163,18 +152,8 @@ class tool_cleanupusers_renderer extends plugin_renderer_base {
             }
 
             // Time to delete
-            $timetodelete = $userstatuschecker->get_deletetime();
-            $tmpl = new \core\output\inplace_editable(
-                'tool_cleanupusers',
-                'deletetime',
-                $pluginname,
-                has_capability('moodle/site:config', context_system::instance()),
-                $timetodelete,
-                $timetodelete,
-                get_string('deletetime', 'tool_cleanupusers'),
-                get_string('deletetime', 'tool_cleanupusers')
-            );
-            $timetodelete = $OUTPUT->render($tmpl);
+            $timetodelete = $OUTPUT->render(\tool_cleanupusers\helper::render_deletetime_editable(
+                $pluginname, $userstatuschecker->get_deletetime()));
 
             // deleteifneverloggedin
             $neverloggendin = $userstatuschecker->delete_if_never_logged_in_on_suspendtime();

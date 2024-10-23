@@ -22,8 +22,6 @@ require_once(__DIR__ . '/classes/userstatuschecker.php');
 use core_external\external_api;
 
 function tool_cleanupusers_inplace_editable($itemtype, $plugin, $newvalue1) {
-    global $DB;
-
     if ($itemtype === 'authmethod') {
         // Must call validate_context for either system, or course or course module context.
         // This will both check access and set current context.
@@ -51,28 +49,14 @@ function tool_cleanupusers_inplace_editable($itemtype, $plugin, $newvalue1) {
         } else {
             if (is_string($newvaluearray)) {
                 $newvaluetext = $auths[$newvaluearray];
-                // $newvalue = "is_string";
             } else {
                 $newvaluetext = '';
-                // $newvalue = "is_other";
             }
         }
 
         set_config(CONFIG_AUTH_METHOD, $newvaluetext, 'userstatus_' . $plugin);
 
-        $templ = new \core\output\inplace_editable(
-            'tool_cleanupusers',
-            'authmethod',
-            $plugin,
-            has_capability('moodle/site:config', context_system::instance()),
-            empty(trim($newvaluetext))?get_string('all-authmethods', 'tool_cleanupusers'):$newvaluetext,
-            $newvalue1,
-            'Type authentication method', // new lang_string('editmytestnamefield', 'tool_mytest'),
-            'Authent. method', // new lang_string('newvaluestring', 'tool_mytest', format_string($record->name))
-        );
-        $attributes = ['multiple' => true];
-        $templ->set_type_autocomplete($auths, $attributes);
-        return $templ;
+        return \tool_cleanupusers\helper::render_auth_editable($plugin, $newvaluetext, $newvalue1);
     }
 
     if ($itemtype === 'deletetime') {
@@ -85,22 +69,14 @@ function tool_cleanupusers_inplace_editable($itemtype, $plugin, $newvalue1) {
 
         // Clean input and update configuration.
         $newvalue1 = clean_param($newvalue1, PARAM_INT);
-
+        if ($newvalue1 < 0 ) {
+            // ignore values < 0
+            $newvalue1 = get_config(CONFIG_DELETETIME, 'userstatus_' . $plugin);
+            throw new moodle_exception("value must not be negative");
+        }
         set_config(CONFIG_DELETETIME, $newvalue1, 'userstatus_' . $plugin);
 
-        $mysubpluginname = "\\userstatus_" . $plugin . "\\" . $plugin;
-        $userstatuschecker = new $mysubpluginname();
-
-        $templ = new \core\output\inplace_editable(
-            'tool_cleanupusers',
-            'authmethod',
-            $plugin,
-            has_capability('moodle/site:config', context_system::instance()),
-            $newvalue1,
-            $newvalue1,
-            $userstatuschecker->get_suspend_hint(),
-            get_string('deletetime', 'tool_cleanupusers')
-        );
+        $templ = \tool_cleanupusers\helper::render_deletetime_editable($plugin, $newvalue1);
         return $templ;
     }
 
@@ -164,3 +140,6 @@ function tool_cleanupusers_inplace_editable($itemtype, $plugin, $newvalue1) {
 
 
 }
+
+
+

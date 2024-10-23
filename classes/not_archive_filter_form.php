@@ -26,10 +26,10 @@ defined('MOODLE_INTERNAL') || die();
 
 use moodle_url;
 use tool_cleanupusers\plugininfo\userstatus;
-use tool_cleanupusers\tools;
+use tool_cleanupusers\helper;
 
 require_once("$CFG->libdir/formslib.php");
-require_once(__DIR__ . "/tools.php");
+require_once(__DIR__ . "/helper.php");
 
 use moodleform;
 use core_plugin_manager;
@@ -87,7 +87,7 @@ class not_archive_filter_form extends moodleform {
         // debugging("definition: " . $this->get_default_checker() . ' ' . $this->checker);
         $mform = $this->_form;
         // Gets all enabled plugins of type userstatus.
-        $plugins = \tool_cleanupusers\tools::get_enabled_checkers_with_displayname();
+        $plugins = \tool_cleanupusers\helper::get_enabled_checkers_with_displayname();
 
         $pluginslinks = [];
         foreach ($plugins as $plugin => $name) {

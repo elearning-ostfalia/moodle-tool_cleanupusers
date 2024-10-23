@@ -52,9 +52,6 @@ Feature: Cleanup settings
       | suspendtime | 0  | userstatus_suspendedchecker |
       | deletetime | 100  | userstatus_suspendedchecker |
 
- # TODO
-  # Unterscheidung der Checker bei der Filterung
-
   @javascript
   Scenario: Manually reactivate user (preselected by nocoursechecker)
     Given I log in as "admin"
@@ -81,6 +78,33 @@ Feature: Cleanup settings
     And I should not see "user6"
 
   @javascript
+  Scenario: Automatically reactivate user (nocoursechecker)
+    Given I log in as "admin"
+    # archive all users ready for archive
+    And I run the scheduled task "\tool_cleanupusers\task\archive_user_task"
+
+    # make invisible course visble
+    And I go to the courses management page
+    And I should see the "Course categories and courses" management page
+    And I toggle visibility of course "Inactive2" in management listing
+
+    And I navigate to "Users > Clean up users > Archived users" in site administration
+    And I navigate to "Users to be reactivated" archive page
+    And I select "No active course Checker" checker on archive page
+
+    And I should see "user6"
+
+    When I run the scheduled task "\tool_cleanupusers\task\archive_user_task"
+    And I reload the page
+
+    Then I should see "Users to be reactivated"
+    And I should see "No active course Checker"
+    And I should not see "user6"
+
+    When I navigate to "All archived users" archive page
+    Then I should not see "user6"
+
+  @javascript
   Scenario: Manually reactivate user (empty filter)
     Given I log in as "admin"
 
@@ -88,8 +112,6 @@ Feature: Cleanup settings
     And I navigate to "Users to be reactivated" archive page
     And I select "Last Login Checker" checker on archive page
     And I should see "Nothing to display"
-
-
 
   @javascript
   Scenario: Manually reactivate user (all archived users filter)

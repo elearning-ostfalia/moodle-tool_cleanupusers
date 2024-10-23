@@ -51,9 +51,6 @@ Feature: Cleanup settings
       | suspendtime | 0  | userstatus_suspendedchecker |
       | deletetime | 100  | userstatus_suspendedchecker |
 
- # TODO
-  # Unterscheidung der Checker bei der Filterung
-
   @javascript
   Scenario: Manually delete user (preselected by lastloginchecker)
     Given I log in as "admin"
@@ -88,3 +85,23 @@ Feature: Cleanup settings
     When I navigate to "All archived users" archive page
     Then I should not see "user1"
 
+  @javascript
+  Scenario: Automatically delete user (lastloginchecker)
+    Given I log in as "admin"
+    # archive all users ready for archive
+    And I run the scheduled task "\tool_cleanupusers\task\archive_user_task"
+    And simulate that "101" days have passed since archiving of "user1"
+    And I navigate to "Users > Clean up users > Archived users" in site administration
+    And I navigate to "Users to be deleted" archive page
+    And I select "Last Login Checker" checker on archive page
+    And I should see "user1"
+
+    When I run the scheduled task "\tool_cleanupusers\task\delete_user_task"
+    And I reload the page
+
+    Then I should see "Users to be deleted"
+    And I should see "Last Login Checker"
+    And I should not see "user1"
+
+    When I navigate to "All archived users" archive page
+    Then I should not see "user1"

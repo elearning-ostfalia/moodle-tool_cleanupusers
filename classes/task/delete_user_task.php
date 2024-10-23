@@ -58,7 +58,10 @@ class delete_user_task extends scheduled_task {
      * @return true
      */
     public function execute() {
-        $pluginsenabled =  \core_plugin_manager::instance()->get_enabled_plugins("userstatus");
+        // wrong order!
+        // $pluginsenabled =  \core_plugin_manager::instance()->get_enabled_plugins("userstatus");
+        // correct order:
+        $pluginsenabled = \tool_cleanupusers\plugininfo\userstatus::get_enabled_plugins();
         if (!$pluginsenabled) {
             // Nothing to be done.
             return true;

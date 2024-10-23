@@ -169,6 +169,7 @@ Aktionen ggf. auch für alle Nutzer aus dem Filter anwenden mit Nachfrage!
   Option cron/manuell bei den Suspend-Aktionen ergänzt werden. Der Wert muss dann in die
   Übersichtstabelle.
 * Anzeige des Zeitpunkts, wann Nutzer registriert wurde
+* logging von ldap wieder einschalten
 
 # Bugs
 * no course checker und manuell suspendieren => ist archiviert (OK), aber taucht nicht in der 

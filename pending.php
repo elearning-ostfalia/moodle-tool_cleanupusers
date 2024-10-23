@@ -81,7 +81,7 @@ $enabled = userstatus::get_enabled_plugins();
 
                 if (count($archivearray) > 0 || count($arraytodelete) > 0 || count($arrayreactivate)) {
                     $content .= $OUTPUT->heading($userstatuschecker->get_displayname(), 4, 'main');
-                    $content .= $renderer->render_index_page($arrayreactivate, $archivearray,
+                    $content .= $renderer->render_preview_page($arrayreactivate, $archivearray,
                         $arraytodelete, $arrayneverloggedin, $subplugin);
                 }
             } catch (Exception $e) {

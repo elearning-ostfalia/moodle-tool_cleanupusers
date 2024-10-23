@@ -197,7 +197,7 @@ class tool_cleanupusers_renderer extends plugin_renderer_base {
      * @param array $usersneverloggedin
      * @return string html
      */
-    public function render_index_page($userstoreactivate, $userstosuspend, $usertodelete, $usersneverloggedin, $checker) {
+    public function render_preview_page($userstoreactivate, $userstosuspend, $usertodelete, $usersneverloggedin, $checker) {
         global $DB;
 
         $cleanupusers = $DB->get_records('tool_cleanupusers', ['archived' => 1]);
@@ -266,6 +266,7 @@ class tool_cleanupusers_renderer extends plugin_renderer_base {
      * @return bool|string
      * @throws coding_exception
      */
+    /*
     public function render_archive_page($userstosuspend) {
         global $CFG, $DB;
         if (empty($userstosuspend)) {
@@ -292,6 +293,7 @@ class tool_cleanupusers_renderer extends plugin_renderer_base {
             return $tableobject;
         }
     }
+    */
 
     /**
      * Renders the table for users who never logged in.
@@ -348,7 +350,7 @@ class tool_cleanupusers_renderer extends plugin_renderer_base {
                 $userinformation['Willbe'] = get_string('shouldbedelted', 'tool_cleanupusers');
                 $url = new moodle_url('/admin/tool/cleanupusers/handleuser.php',
                     ['userid' => $user->id, 'action' => 'delete',
-                        'returnurl' => '/admin/tool/cleanupusers/index.php',
+                        'returnurl' => '/admin/tool/cleanupusers/pending.php',
                         'sesskey' => sesskey()]);
                 $userinformation['link'] = \html_writer::link(
                     $url,
@@ -382,7 +384,7 @@ class tool_cleanupusers_renderer extends plugin_renderer_base {
 
                 $url = new moodle_url('/admin/tool/cleanupusers/handleuser.php',
                     ['userid' => $user->id, 'action' => 'reactivate',
-                        'returnurl' => '/admin/tool/cleanupusers/index.php',
+                        'returnurl' => '/admin/tool/cleanupusers/pending.php',
                         'sesskey' => sesskey()]);
                 $userinformation['link'] = \html_writer::link(
                     $url,
@@ -415,7 +417,7 @@ class tool_cleanupusers_renderer extends plugin_renderer_base {
                 $userinformation['Willbe'] = get_string('willbe_archived', 'tool_cleanupusers');
                 $url = new moodle_url('/admin/tool/cleanupusers/handleuser.php',
                     ['userid' => $user->id, 'action' => 'suspend', 'checker' => $checker,
-                        'returnurl' => '/admin/tool/cleanupusers/index.php',
+                        'returnurl' => '/admin/tool/cleanupusers/pending.php',
                         'sesskey' => sesskey()]);
 
                 $userinformation['link'] = \html_writer::link(

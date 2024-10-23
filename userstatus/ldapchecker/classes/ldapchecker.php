@@ -111,6 +111,21 @@ class ldapchecker extends userstatuschecker { // implements userstatusinterface 
         return true;
     }
 
+
+    /**
+     * part of SQL where clause to perform the check for suspension:
+     * no user data from Moodle data is considered, not even the suspended flag.
+     * => if a user authenticated by LDAP is suspended manually,
+     * then he will always be archived if he is removed from LDAP.
+     * If this is not what is desired then the suspended checker should be
+     * moved in front of the ldap checker
+     *
+     * @return array
+     */
+    public function condition_suspend_sql() : array {
+        return ["" , null];
+    }
+
     public function shall_suspend($user) : bool {
         // check initialisation state (todo: should not be checked for every user!)
         if (!$this->is_initialised()) {

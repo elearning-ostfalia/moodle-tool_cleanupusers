@@ -96,7 +96,7 @@ abstract class userstatuschecker
     }
 
     /**
-     * part of SQL where clause to perform the check for suspendion
+     * part of SQL where clause to perform the check for suspension
      * @return array
      */
     public function condition_suspend_sql() : array {

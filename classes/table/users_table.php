@@ -97,11 +97,12 @@ class users_table extends \table_sql {
     }
 
     public function col_suspend($user) {
-        $url = new \moodle_url('/admin/tool/cleanupusers/handleuser.php',
-            ['userid' => $user->id, 'action' => 'suspend', 'checker' => $this->checker,
-                'returnurl' => $this->returnurl
-                ]);
-
+        $url = new \moodle_url('/admin/tool/cleanupusers/handleuser.php', [
+            'userid' => $user->id,
+            'sesskey' => sesskey(),
+            'action' => 'suspend', 'checker' => $this->checker,
+            'returnurl' => $this->returnurl
+        ]);
         global $OUTPUT;
         return \html_writer::link(
             $url,

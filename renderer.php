@@ -64,10 +64,6 @@ class tool_cleanupusers_renderer extends plugin_renderer_base {
 
         // construct the display array, with enabled pluginname plugins at the top, in order
         $displayauths = [];
-        $registrationauths = array();
-        $registrationauths[''] = $txt->disable;
-        $authplugins = array();
-
         foreach ($authsenabled as $auth) {
             $displayauths[$auth] = $auth;
         }
@@ -76,19 +72,7 @@ class tool_cleanupusers_renderer extends plugin_renderer_base {
                 continue; //already in the list
             }
             $displayauths[$auth] = $dir->displayname;
-
-
-            // $authplugin = get_auth_plugin($pluginname);
-            // $authplugins[$pluginname] = $userstatuschecker;
-            /// Get the pluginname title (from core or own pluginname lang files)
-            // $authtitle = $userstatuschecker; // $userstatuschecker->get_title();
-            /// Apply titles
-            // $authsenabled[$pluginname] = $pluginname; // $authtitle;
-/*            if ($userstatuschecker->can_signup()) {
-                $registrationauths[$pluginname] = $authtitle;
-            }*/
         }
-
 
         $return = $OUTPUT->heading(get_string('actpluginshdr', 'tool_cleanupusers'), 3, 'main');
         $return .= $OUTPUT->box_start('generalbox authsui');
@@ -265,7 +249,6 @@ class tool_cleanupusers_renderer extends plugin_renderer_base {
 
         // Checks if one of the given arrays is empty to prevent rendering empty arrays.
         // If not empty renders the information needed.
-
         if (empty($userstoreactivate)) {
             $rendertoreactivate = [];
         } else {
@@ -276,12 +259,6 @@ class tool_cleanupusers_renderer extends plugin_renderer_base {
         } else {
             $rendertodelete = $this->information_user_delete($usertodelete, $cleanupusers);
         }
-        /*
-        if (empty($usersneverloggedin)) {
-            $renderneverloggedin = [];
-        } else {
-            $renderneverloggedin = $this->information_user_notloggedin($usersneverloggedin, $cleanupusers);
-        }*/
         if (empty($userstosuspend)) {
             $rendertosuspend = [];
         } else {
@@ -302,11 +279,6 @@ class tool_cleanupusers_renderer extends plugin_renderer_base {
                 get_string('Willbe', 'tool_cleanupusers')],
                 $checker, $url);
         }
-/*        if (!empty($renderneverloggedin)) {
-            $output .= $this->render_table_of_users($renderneverloggedin, [get_string('Neverloggedin', 'tool_cleanupusers'),
-                get_string('lastaccess', 'tool_cleanupusers'), get_string('Archived', 'tool_cleanupusers'),
-                get_string('Willbe', 'tool_cleanupusers')]);
-        }*/
         if (!empty($rendertosuspend)) {
             $url = new \moodle_url('/admin/tool/cleanupusers/toarchive.php',
                 ['action' => not_archive_filter_form::TO_BE_ARCHIVED, 'checker' => $checker]);
@@ -420,7 +392,9 @@ class tool_cleanupusers_renderer extends plugin_renderer_base {
                 $userinformation = $this->set_user_information_for_table($user, $userinformation, $cleanupusers);
                 $userinformation['Willbe'] = get_string('shouldbedelted', 'tool_cleanupusers');
                 $url = new moodle_url('/admin/tool/cleanupusers/handleuser.php',
-                    ['userid' => $user->id, 'action' => 'delete', 'returnurl' => '/admin/tool/cleanupusers/index.php']);
+                    ['userid' => $user->id, 'action' => 'delete',
+                        'returnurl' => '/admin/tool/cleanupusers/index.php',
+                        'sesskey' => sesskey()]);
                 $userinformation['link'] = \html_writer::link(
                     $url,
                     '<red>' . $this->output->pix_icon(
@@ -453,7 +427,8 @@ class tool_cleanupusers_renderer extends plugin_renderer_base {
 
                 $url = new moodle_url('/admin/tool/cleanupusers/handleuser.php',
                     ['userid' => $user->id, 'action' => 'reactivate',
-                        'returnurl' => '/admin/tool/cleanupusers/index.php']);
+                        'returnurl' => '/admin/tool/cleanupusers/index.php',
+                        'sesskey' => sesskey()]);
                 $userinformation['link'] = \html_writer::link(
                     $url,
                     $this->output->pix_icon(
@@ -485,7 +460,8 @@ class tool_cleanupusers_renderer extends plugin_renderer_base {
                 $userinformation['Willbe'] = get_string('willbe_archived', 'tool_cleanupusers');
                 $url = new moodle_url('/admin/tool/cleanupusers/handleuser.php',
                     ['userid' => $user->id, 'action' => 'suspend', 'checker' => $checker,
-                        'returnurl' => '/admin/tool/cleanupusers/index.php']);
+                        'returnurl' => '/admin/tool/cleanupusers/index.php',
+                        'sesskey' => sesskey()]);
 
                 $userinformation['link'] = \html_writer::link(
                     $url,

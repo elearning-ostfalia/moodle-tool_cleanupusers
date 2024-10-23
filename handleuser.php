@@ -42,6 +42,7 @@ $PAGE->set_context(context_system::instance());
 $user = $DB->get_record('user', ['id' => $userid]);
 // require_capability('moodle/user:update', $PAGE->context);
 require_admin();
+require_sesskey();
 
 $url = $returnurl;
 
@@ -102,7 +103,7 @@ switch ($action) {
         break;
     // User should be deleted.
     case 'delete':
-        if ($confirm && confirm_sesskey()) {
+        if ($confirm) {
             if (!is_siteadmin($user) && $user->deleted != 1 && $USER->id != $userid) {
                 // debugging('delete ');
                 // exit();

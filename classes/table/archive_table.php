@@ -86,6 +86,7 @@ class archive_table extends \table_sql {
     public function col_reactivate($user) {
         global $OUTPUT;
         $url = new \moodle_url('/admin/tool/cleanupusers/handleuser.php', [
+            'sesskey' => sesskey(),
             'userid' => $user->id,
             'action' => 'reactivate',
             'returnurl' => $this->returnurl
@@ -102,9 +103,13 @@ class archive_table extends \table_sql {
     }
 
     public function col_delete($user) {
-        $url = new \moodle_url('/admin/tool/cleanupusers/handleuser.php',
-            ['userid' => $user->id, 'action' => 'delete', 'checker' => $user->checker,
-                'returnurl' => $this->returnurl]);
+        $url = new \moodle_url('/admin/tool/cleanupusers/handleuser.php', [
+            'sesskey' => sesskey(),
+            'userid' => $user->id,
+            'action' => 'delete',
+            'checker' => $user->checker,
+            'returnurl' => $this->returnurl
+        ]);
 
         global $OUTPUT;
         return \html_writer::link(

@@ -13,7 +13,7 @@ Feature: Cleanup settings
       | user7    | Student   | Miller7   | 1                 | ## -12 days##  | 0  | 0                 |                        |
       | user8    | Student   | Miller8   | 1                 | ## -12 days##  | 0  | 0                 |                        |
       | user9    | Student   | Miller9   | 1                 | ## -12 days##  | ## -9 days##  | 1      | Suspended              |
-      | user10   | Student   | Miller10   | 1                | ## -15 days##  | 0  | 0                 | neverlogin AND nocouse |
+      | user0    | Student   | Miller10   | 1                | ## -15 days##  | 0  | 0                 | neverlogin AND nocouse |
 
     And the following "courses" exist:
       | fullname  | shortname  | category  | relativedatesmode  | startdate      | enddate     | visible |
@@ -59,23 +59,23 @@ Feature: Cleanup settings
 
     When I navigate to "Users > Clean up users > Users to be archived" in site administration
     And I select "<otherchecker>" checker on archiving page
-    Then I should see "user10"
+    Then I should see "user0"
 
 
     When I navigate to "Users > Clean up users > Users to be archived" in site administration
     And I select "<checker>" checker on archiving page
-    Then I should see "user10"
+    Then I should see "user0"
 
-    When I archive "user10"
-    Then I should see "User 'user10' has been archived"
+    When I archive "user0"
+    Then I should see "User 'user0' has been archived"
 
     When I press "Continue"
     And I should see "Users to be archived by '<checker>'"
-    And I should not see "user10"
+    And I should not see "user0"
 
     When I navigate to "Users > Clean up users > Archived users" in site administration
-    Then I should see "user10"
-    And I should see "<checkershort>" in the "user10" "table_row"
+    Then I should see "user0"
+    And I should see "<checkershort>" in the "user0" "table_row"
 
     Examples:
       | checker                  | checkershort        | otherchecker             |
@@ -89,15 +89,15 @@ Feature: Cleanup settings
       | userstatus_plugins_enabled | <config>  |
     And I log in as "admin"
 
-    # precondition: user10 is not archived
+    # precondition: user0 is not archived
     When I navigate to "Users > Clean up users > Archived users" in site administration
-    Then I should not see "user10"
+    Then I should not see "user0"
 
     And I run the scheduled task "\tool_cleanupusers\task\archive_user_task"
 
     When I navigate to "Users > Clean up users > Archived users" in site administration
-    Then I should see "user10"
-    And I should see "<checker>" in the "user10" "table_row"
+    Then I should see "user0"
+    And I should see "<checker>" in the "user0" "table_row"
 
     Examples:
       | config                                                | checker           |

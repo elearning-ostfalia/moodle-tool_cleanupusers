@@ -3,16 +3,17 @@ Feature: Cleanup settings
 
   Background:
     Given the following "users" exist:
-      | username | firstname | lastname  | relativedatesmode | timecreated    | lastaccess | suspended |
-      | user1    | Teacher   | Miller1   | 1                 | ## -320 days## | ## -11 days ## | 0     |
-      | user2    | Teaching  | Miller2   | 1                 | ## -32 days##  | ## -9 days## | 0       |
-      | user3    | Student   | Miller3   | 1                 | ## -15 days##  | 0  | 0                 |
-      | user4    | Student   | Miller4   | 1                 | ## -14 days##  | 0  | 0                 |
-      | user5    | Student   | Miller5   | 1                 | ## -12 days##  | 0  | 0                 |
-      | user6    | Student   | Miller6   | 1                 | ## -12 days##  | 0  | 0                 |
-      | user7    | Student   | Miller7   | 1                 | ## -12 days##  | 0  | 0                 |
-      | user8    | Student   | Miller8   | 1                 | ## -12 days##  | 0  | 0                 |
-      | user9    | Student   | Miller9   | 1                 | ## -12 days##  | ## -9 days##  | 1      |
+      | username | firstname | lastname  | relativedatesmode | timecreated    | lastaccess | suspended | description            |
+      | user1    | Teacher   | Miller1   | 1                 | ## -320 days## | ## -11 days ## | 0     | Last Login             |
+      | user2    | Teaching  | Miller2   | 1                 | ## -32 days##  | ## -9 days## | 0       |                        |
+      | user3    | Student   | Miller3   | 1                 | ## -15 days##  | 0  | 0                 | Never Login            |
+      | user4    | Student   | Miller4   | 1                 | ## -14 days##  | 0  | 0                 |                        |
+      | user5    | Student   | Miller5   | 1                 | ## -12 days##  | 0  | 0                 | No active course       |
+      | user6    | Student   | Miller6   | 1                 | ## -12 days##  | 0  | 0                 |                        |
+      | user7    | Student   | Miller7   | 1                 | ## -12 days##  | 0  | 0                 |                        |
+      | user8    | Student   | Miller8   | 1                 | ## -12 days##  | 0  | 0                 |                        |
+      | user9    | Student   | Miller9   | 1                 | ## -12 days##  | ## -9 days##  | 1      | Suspended              |
+      | user10   | Student   | Miller10   | 1                | ## -15 days##  | 0  | 0                 | neverlogin AND nocouse |
 
     And the following "courses" exist:
       | fullname  | shortname  | category  | relativedatesmode  | startdate      | enddate     | visible |
@@ -52,8 +53,57 @@ Feature: Cleanup settings
       | suspendtime | 0  | userstatus_suspendedchecker |
       | deletetime | 100  | userstatus_suspendedchecker |
 
- # TODO
-  # Unterscheidung der Checker bei der Filterung
+  @javascript
+  Scenario Outline: Two checkers match (manually archived)
+    Given I log in as "admin"
+
+    When I navigate to "Users > Clean up users > Users to be archived" in site administration
+    And I select "<otherchecker>" checker on archiving page
+    Then I should see "user10"
+
+
+    When I navigate to "Users > Clean up users > Users to be archived" in site administration
+    And I select "<checker>" checker on archiving page
+    Then I should see "user10"
+
+    When I archive "user10"
+    Then I should see "User 'user10' has been archived"
+
+    When I press "Continue"
+    And I should see "Users to be archived by '<checker>'"
+    And I should not see "user10"
+
+    When I navigate to "Users > Clean up users > Archived users" in site administration
+    Then I should see "user10"
+    And I should see "<checkershort>" in the "user10" "table_row"
+
+    Examples:
+      | checker                  | checkershort        | otherchecker             |
+      | Never Login Checker      | neverloginchecker   | No active course Checker |
+      | No active course Checker | nocoursechecker     | Never Login Checker      |
+
+  @javascript
+  Scenario Outline: Two checkers match (task)
+    # check that the first configured checker will suspend the user
+    Given the following config values are set as admin:
+      | userstatus_plugins_enabled | <config>  |
+    And I log in as "admin"
+
+    # precondition: user10 is not archived
+    When I navigate to "Users > Clean up users > Archived users" in site administration
+    Then I should not see "user10"
+
+    And I run the scheduled task "\tool_cleanupusers\task\archive_user_task"
+
+    When I navigate to "Users > Clean up users > Archived users" in site administration
+    Then I should see "user10"
+    And I should see "<checker>" in the "user10" "table_row"
+
+    Examples:
+      | config                                                | checker           |
+      | neverloginchecker,nocoursechecker                     | neverloginchecker |
+      | nocoursechecker,neverloginchecker,suspendedchecker    | nocoursechecker   |
+
 
   @javascript
   Scenario: Run suspend task (long)

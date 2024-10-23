@@ -102,7 +102,7 @@ if ($hassiteconfig) {
     $settings->add(new admin_setting_configtextarea('userstatus_ldapchecker/search_filter',
         get_string('ldap_filter', 'userstatus_ldapchecker'),
         get_string('ldap_filter_info', 'userstatus_ldapchecker'),
-        '', PARAM_RAW_TRIMMED, 5, 60));
+        '', PARAM_RAW_TRIMMED, 60, 5));
 
     // LDAP username attribute.
     $settings->add(new admin_setting_configtext('userstatus_ldapchecker/ldap_username_attribute',

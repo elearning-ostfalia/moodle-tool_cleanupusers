@@ -85,7 +85,7 @@ class users_table extends \table_sql {
         if ($sqlwhere != null && $sqlwhere != '') {
             $where .= ' AND ' . $sqlwhere;
         }*/
-        $this->set_sql('id, username, lastaccess, auth, ' .
+        $this->set_sql('id, username, lastaccess, auth, suspended, ' .
             implode(', ', fields::get_name_fields()), '{user}', $sqlwhere, $param);
     }
 
@@ -104,10 +104,35 @@ class users_table extends \table_sql {
             'returnurl' => $this->returnurl
         ]);
         global $OUTPUT;
+        if ($user->suspended) {
+            // User is already suspened, so he or she only needs to be archived
+            return
+                $OUTPUT->pix_icon(
+                    't/show',
+                    get_string('archiveuser', 'tool_cleanupusers'),
+                    'moodle',
+                    ['class' => "imggroup-" . $user->id]
+                ) .
+                \html_writer::link(
+                $url,
+                $OUTPUT->pix_icon(
+                    'e/save',
+                    get_string('archiveuser', 'tool_cleanupusers'),
+                    'moodle',
+                    ['class' => "imggroup-" . $user->id]
+                )
+            );
+        }
         return \html_writer::link(
             $url,
             $OUTPUT->pix_icon(
                 't/hide',
+                get_string('hideuser', 'tool_cleanupusers'),
+                'moodle',
+                ['class' => "imggroup-" . $user->id]
+            ) .
+            $OUTPUT->pix_icon(
+                'e/save',
                 get_string('hideuser', 'tool_cleanupusers'),
                 'moodle',
                 ['class' => "imggroup-" . $user->id]

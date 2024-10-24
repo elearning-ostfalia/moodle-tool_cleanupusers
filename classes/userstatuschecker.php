@@ -67,10 +67,19 @@ abstract class userstatuschecker
         return get_string('suspendtime', 'userstatus_' . $this->name);
     }
 
+    /**
+     * shortname for internal purposes
+     * @return string
+     */
     public function get_name() : string {
         return $this->name;
     }
 
+    /**
+     * name of subplugin shown to the user
+     * @return string
+     * @throws \coding_exception
+     */
     public function get_displayname() : string {
         return get_string('pluginname', 'userstatus_' . $this->name);
     }
@@ -275,13 +284,32 @@ abstract class userstatuschecker
      * @return array of users who should be deleted.
      */
     public function get_to_delete() {
-        $sqlarray = $this->get_to_delete_sql();
-        if (count($sqlarray) == 0) {
-            throw new \coding_exception('no sql');
+        if ($this->get_deletetime() >= 0) {
+            $condition = '(tc.checker=\'' . $this->get_name() . '\' 
+                        and tc.timestamp < '. time() - $this->get_deletetime_in_sec().')';
+        }
+
+        if ($this->delete_if_never_logged_in_on_suspendtime()) {
+            // If the user shall be deleted immediately if he or she has never
+            // logged in and is suspended then delete him (or her)
+            $condition = '(' . $condition . ' OR  tca.lastaccess = 0)';
+        }
+
+        if (empty($condition)) {
+            // Do not delete anything if all records would be deleted
+            return [];
         }
 
         global $DB;
-        $sql = 'select * from ' . $sqlarray['from'] . ' where ' . $sqlarray['where'];
+        // Full join means that only users will be handled who are already
+        // suspended with the cleanupusers plugin
+        $sql = 'SELECT tca.id, tca.suspended, tca.lastaccess, tca.username, tca.deleted, tca.auth, 
+                    tc.checker, tca.firstname, tca.lastname, tc.timestamp, 
+                    tca.firstnamephonetic, tca.lastnamephonetic, tca.middlename, tca.alternatename, 
+                    tca.firstname, tca.lastname
+                FROM {tool_cleanupusers_archive} tca  
+                JOIN {tool_cleanupusers} tc ON tc.id = tca.id
+                WHERE ' . $condition;
         $users = $DB->get_records_sql($sql);
 
         $todelete = [];
@@ -363,52 +391,6 @@ abstract class userstatuschecker
 */
 
     /**
-     * All users who should be deleted will be returned in the array.
-     * The array includes merely the necessary information which comprises
-     * the userid, lastaccess, suspended, deleted and the username.
-     * The function only checks the tool_cleanupusers_archive table.
-     * Therefore users who are suspended manually are NOT screened.
-     *
-     * @return array of users who should be deleted.
-     */
-    public function get_to_delete_sql() : array {
-        if ($this->get_deletetime() >= 0) {
-            $condition = '(tc.checker=\'' . $this->get_name() . '\' 
-                        and tc.timestamp < '. time() - $this->get_deletetime_in_sec().')';
-        }
-
-        if ($this->delete_if_never_logged_in_on_suspendtime()) {
-            // If the user shall be deleted immediately if he or she has never
-            // logged in and is suspended then delete him (or her)
-            $condition = '(' . $condition . ' OR  tca.lastaccess = 0)';
-        }
-
-        // Full join means that only users will be handled who are already
-        // suspended with the cleanupusers plugin
-        $sql = [
-            // fields
-            'fields' =>
-            'tca.id, tca.suspended, tca.lastaccess, tca.username, tca.deleted, tca.auth, 
-                tc.checker, tca.firstname, tca.lastname, tc.timestamp, 
-                tca.firstnamephonetic, tca.lastnamephonetic, tca.middlename, tca.alternatename, 
-                tca.firstname, tca.lastname',
-            // from
-            'from' => '{tool_cleanupusers_archive} tca  
-                JOIN {tool_cleanupusers} tc ON tc.id = tca.id',
-                // JOIN {user} u ON u.id = tca.id // avoid join accross user table because otherwise
-                // the user filter does not work (ambiguous attributes).
-                // This can be done as the user is suspended and userdata (deleted or suspended)
-                // is not expected to be changed in this state.
-            // where
-            'where' => $condition
-//            'where' => 'u.suspended = 1 AND u.deleted = 0 AND (' . $condition . ')'
-            ];
-        return $sql;
-    }
-
-
-
-    /**
      * All users that should be reactivated will be returned.
      *
      * @return array of objects
@@ -437,12 +419,7 @@ abstract class userstatuschecker
         if (is_array($param_condition)) {
             $params = array_merge($params, $param_condition);
         }
-        // debugging("get_to_reactivate");
-        // debugging($params);
         $users = $DB->get_records_sql($sql, $params);
-        // debugging($this->name);
-
-        // var_dump($users);
 
         $toactivate = [];
         foreach ($users as $key => $user) {
@@ -459,9 +436,6 @@ abstract class userstatuschecker
                 $toactivate[$key] = $activateuser;
             }
         }
-
-        // debugging("get_to_reactivate");
-        // var_dump($toactivate);
 
         return $toactivate;
     }

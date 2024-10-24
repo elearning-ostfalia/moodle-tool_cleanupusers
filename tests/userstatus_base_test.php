@@ -25,79 +25,12 @@
 
 namespace tool_cleanupusers;
 
-define('YEARAGO',       (time() - (86400 * 366)));
-define('LAST_MONTH',    (time() - (86400 * 30)));
-define('ELEVENDAYSAGO', (time() - (86400 * 11)));
-define('NINEDAYSAGO',   (time() - (86400 * 9)));
-define('YESTERDAY',     (time() - 86400));
-define('TOMORROW',      (time() + 86400));
+require_once(__DIR__ . '/cleanupusers_testcase.php');
 
-define('AUTH_METHOD', 'shibboleth');
-
-require_once(__DIR__ . '/../classes/userstatuschecker.php');
-
-abstract class userstatus_base_test extends \advanced_testcase
+abstract class userstatus_base_test extends cleanupusers_testcase
 {
     protected $generator = null;
     protected $checker = null;
-    /**
-     * @param array $returnsuspend
-     * @param \stdClass|null $user
-     * @return array
-     */
-    protected function assertEqualsUsersArrays(array $returnsuspend, ?\stdClass $user)
-    {
-        $this->assertEquals(1, count($returnsuspend));
-
-        $this->assertEqualsCanonicalizing(array_map(fn($user) => $user->username, $returnsuspend), [$user->username]);
-
-        // Compare content
-        $archuser = reset($returnsuspend); // get one and only element from array
-        $array2 = (array)($archuser);
-        $checker = get_class($this->checker);
-        // strip namespace from checker class
-        $index = strpos($checker, "\\");
-        if ($index === false)
-            throw new \coding_exception("cannot determine namespace of " . $checker);
-
-        $checker = substr($checker, $index + 1);
-        $user->checker = $checker; // checker is not contained in user => add for check
-        $this->assertEquals($array2, array_intersect_assoc((array)$user, $array2));
-    }
-
-    protected function create_test_user($username, $extra_attributes = []) {
-        return $this->generator->create_user(array_merge(
-            ['username' => $username, 'auth' => AUTH_METHOD],
-            $extra_attributes));
-    }
-
-    protected function create_user_and_enrol($username, $course = null) {
-        $user = $this->create_test_user($username);
-        if ($course != null) {
-            $this->generator->enrol_user($user->id, $course->id);
-        }
-        return $user;
-    }
-
-    protected function archive($user, $when, $username) {
-        $this->insert_into_metadata_table($user, $when);
-        $this->insert_into_archive($user, $username);
-    }
-
-    protected function insert_into_archive($user, $username) {
-        global $DB;
-        $DB->insert_record_raw('tool_cleanupusers_archive', ['id' => $user->id, 'auth' => 'shibboleth',
-            'username' => $username,
-            'suspended' => $user->suspended, 'timecreated' => $user->timecreated],
-            true, false, true);
-    }
-
-    protected function insert_into_metadata_table($user, $when) {
-        global $DB;
-        $DB->insert_record_raw('tool_cleanupusers',
-            ['id' => $user->id, 'archived' => true,
-                'timestamp' => $when, 'checker' => 'nocoursechecker'], true, false, true);
-    }
 
     /**
      * @return string
@@ -168,17 +101,15 @@ abstract class userstatus_base_test extends \advanced_testcase
     }
 
     public function test_config_auth_plus_suspend() {
-        set_config(CONFIG_AUTH_METHOD, 'email,' . AUTH_METHOD, $this->get_plugin_name());
+        $this->set_config(CONFIG_AUTH_METHOD, 'email,' . AUTH_METHOD, $this->get_plugin_name());
         // Create new checker instance so that configuration will be "reread".
-        $this->checker = $this->create_checker();
         $user = $this->typical_scenario_for_suspension();
         $this->assertEqualsUsersArrays($this->checker->get_to_suspend(), $user);
     }
 
     public function test_config_no_auth_suspend_1() {
-        set_config(CONFIG_AUTH_METHOD, '', $this->get_plugin_name());
+        $this->set_config(CONFIG_AUTH_METHOD, '', $this->get_plugin_name());
         // Create new checker instance so that configuration will be "reread".
-        $this->checker = $this->create_checker();
         $user = $this->typical_scenario_for_suspension();
         $this->assertEqualsUsersArrays($this->checker->get_to_suspend(), $user);
     }
@@ -192,9 +123,7 @@ abstract class userstatus_base_test extends \advanced_testcase
     }
 
     public function test_config_other_auth_no_suspend() {
-        set_config(CONFIG_AUTH_METHOD, 'email', $this->get_plugin_name());
-        // Create new checker instance so that configuration will be "reread".
-        $this->checker = $this->create_checker();
+        $this->set_config(CONFIG_AUTH_METHOD, 'email', $this->get_plugin_name());
         $user = $this->typical_scenario_for_suspension();
         $this->assertEquals(0, count($this->checker->get_to_suspend()));
     }
@@ -343,8 +272,7 @@ abstract class userstatus_base_test extends \advanced_testcase
         sleep(1); // ensure time condition is met
         $this->assertEquals(0, count($this->checker->get_to_delete()));
 
-        set_config(CONFIG_DELETETIME, 0, $this->get_plugin_name());
-        $this->checker = $this->create_checker();
+        $this->set_config(CONFIG_DELETETIME, 0, $this->get_plugin_name());
 
         $this->assertEqualsUsersArrays($this->checker->get_to_delete(), $user);
     }
@@ -412,7 +340,7 @@ abstract class userstatus_base_test extends \advanced_testcase
      * @throws \coding_exception
      */
     public function test_not_logged_in_configured_but_logged_in_no_delete() {
-        set_config(CONFIG_NEVER_LOGGED_IN, '1', $this->get_plugin_name());
+        $this->set_config(CONFIG_NEVER_LOGGED_IN, '1', $this->get_plugin_name());
 
         $user = $this->typical_scenario_for_suspension();
         global $DB;
@@ -440,8 +368,7 @@ abstract class userstatus_base_test extends \advanced_testcase
      * @throws \coding_exception
      */
     public function test_not_logged_in_configured_and_not_logged_in_delete() {
-        set_config(CONFIG_NEVER_LOGGED_IN, '1', $this->get_plugin_name());
-        $this->checker = $this->create_checker(); // recreate checker in order to read new config
+        $this->set_config(CONFIG_NEVER_LOGGED_IN, '1', $this->get_plugin_name());
 
         $user = $this->typical_scenario_for_suspension();
         if ($this->checker->get_to_suspend() != null and $user->lastaccess == 0) {
@@ -606,8 +533,7 @@ abstract class userstatus_base_test extends \advanced_testcase
      * does not work: checker does not check if it is enabled! ???
     public function test_config_no_plugin_enabled()
     {
-        set_config('userstatus_plugins_enabled', "");
-        $this->checker = $this->create_checker();
+        $this->set_config('userstatus_plugins_enabled', "");
         $user = $this->typical_scenario_for_suspension();
         $this->assertEquals(0, count($this->checker->get_to_suspend()));
     }*/

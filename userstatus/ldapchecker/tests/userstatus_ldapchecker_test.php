@@ -36,6 +36,7 @@ require_once(__DIR__.'/../../../tests/userstatus_base_test.php');
  * @copyright  2016/17 N Herrmann
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+#[CoversClass(\userstatus_ldapchecker\ldapchecker::class)]
 class userstatus_ldapchecker_test extends \tool_cleanupusers\userstatus_base_test {
 
     protected function setup() : void {

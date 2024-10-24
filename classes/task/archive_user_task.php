@@ -172,9 +172,9 @@ class archive_user_task extends scheduled_task {
                         case 'reactivate':
                             $changinguser->activate_me();
                             break;
-                        case 'delete':
+/*                        case 'delete':
                             $changinguser->delete_me();
-                            break;
+                            break;*/
                         // No default since if-clause checks the intention parameter.
                     }
                     $countersuccess++;

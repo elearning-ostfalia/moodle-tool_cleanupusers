@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Site to reactivate users.
+ * Page to manage archived users
  *
  * @package    tool_cleanupusers
  * @copyright  2024 Ostfalia

@@ -37,10 +37,8 @@ use advanced_testcase;
  * @copyright  2024 Ostfalia
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  *
- * @covers \userstatus_suspendedchecker\suspendedchecker::get_to_suspend()
- * @covers \userstatus_suspendedchecker\suspendedchecker::get_to_reactivate()
- *
  */
+#[CoversClass(\userstatus_suspendedchecker\suspendedchecker::class)]
 final class userstatus_suspendedchecker_test extends \tool_cleanupusers\userstatus_base_test {
 
     protected function setup() : void {

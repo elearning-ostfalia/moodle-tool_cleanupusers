@@ -36,10 +36,6 @@ use advanced_testcase;
  * @group      tool_cleanupusers_timechecker
  * @copyright  2016/17 N Herrmann
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- *
- * @covers \userstatus_lastloginchecker\lastloginchecker::get_to_suspend()
- * @covers \userstatus_lastloginchecker\lastloginchecker::get_to_reactivate()
- *
  */
 final class userstatus_lastloginchecker_test extends \tool_cleanupusers\userstatus_base_test {
 

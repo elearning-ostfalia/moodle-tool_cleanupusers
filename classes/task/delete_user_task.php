@@ -78,22 +78,29 @@ class delete_user_task extends scheduled_task {
 
             $suspendresult = [];
 
-            $result = $this->change_user_deprovisionstatus($reactivatearray, 'reactivate', $subplugin);
+/*            $result = $this->change_user_deprovisionstatus($reactivatearray, 'reactivate', $subplugin);
             $unabletoactivate = $result['failures'];
             $useractivated = $result['countersuccess'];
+*/
 
             $arraytodelete = $userstatuschecker->get_to_delete();
+
+            // do not delete users who must be reactivated (but do not reactivate them here)
+            $arraytodelete = array_diff_key($arraytodelete, $reactivatearray);
+
             $deleteresult = $this->change_user_deprovisionstatus($arraytodelete, 'delete', $subplugin);
             $unabletodelete = $deleteresult['failures'];
             $userdeleted = $deleteresult['countersuccess'];
+
+
 
             // Admin is informed about the cron-job and the amount of users that are affected.
 
             $admin = get_admin();
             // Number of users suspended or deleted.
             $messagetext =
-                "\r\n" . get_string('e-mail-deleted', 'tool_cleanupusers', $userdeleted) .
-                "\r\n" . get_string('e-mail-activated', 'tool_cleanupusers', $useractivated);
+                "\r\n" . get_string('e-mail-deleted', 'tool_cleanupusers', $userdeleted)/* .
+                "\r\n" . get_string('e-mail-activated', 'tool_cleanupusers', $useractivated)*/;
 
             // No Problems occured during the cron-job.
             if (empty($unabletoactivate) && empty($unabletoarchive) && empty($unabletodelete)) {
@@ -104,11 +111,11 @@ class delete_user_task extends scheduled_task {
                     'e-mail-problematic_delete',
                     'tool_cleanupusers',
                     count($unabletodelete)
-                ) . "\r\n\r\n" . get_string(
+                ) /*. "\r\n\r\n" . get_string(
                     'e-mail-problematic_reactivate',
                     'tool_cleanupusers',
                     count($unabletoactivate)
-                );
+                )*/;
             }
 
             // Email is send from the do not reply user.
@@ -134,10 +141,10 @@ class delete_user_task extends scheduled_task {
      */
     private function change_user_deprovisionstatus($userarray, $intention, $checker) {
         // Checks whether the intention is valid.
-        if (!in_array($intention, ['suspend', 'reactivate', 'delete'])) {
+/*        if (!in_array($intention, ['suspend', 'reactivate', 'delete'])) {
             throw new \coding_exception('Invalid parameters in tool_cleanupusers.');
         }
-
+*/
         // Number of successfully changed users.
         $countersuccess = 0;
 
@@ -159,7 +166,8 @@ class delete_user_task extends scheduled_task {
                     $checker
                 );
                 try {
-                    switch ($intention) {
+                    $changinguser->delete_me();
+/*                    switch ($intention) {
                         case 'suspend':
                             $changinguser->archive_me($checker);
                             break;
@@ -167,10 +175,9 @@ class delete_user_task extends scheduled_task {
                             $changinguser->activate_me();
                             break;
                         case 'delete':
-                            $changinguser->delete_me();
                             break;
                         // No default since if-clause checks the intention parameter.
-                    }
+                    }*/
                     $countersuccess++;
                 } catch (\Throwable $e) {
                     $failures[$key] = $user->id;

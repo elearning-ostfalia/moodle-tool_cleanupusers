@@ -163,6 +163,16 @@ Feature: Cleanup settings
 
     And I should see "Nothing to display"
 
+    And I navigate to "Users > Clean up users > Archived users" in site administration
+
+    And I should see "user1"
+    And I should see "user3"
+    And I should see "user4"
+    And I should see "user5"
+    And I should see "user6"
+    And I should see "user7"
+    And I should see "user8"
+
   @javascript
   Scenario Outline: Manually suspend user (all checkers)
     Given I log in as "admin"

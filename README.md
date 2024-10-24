@@ -170,7 +170,8 @@ Aktionen ggf. auch für alle Nutzer aus dem Filter anwenden mit Nachfrage!
   Übersichtstabelle.
 * Anzeige des Zeitpunkts, wann Nutzer registriert wurde
 * logging von ldap wieder einschalten
-* Testen, dass nicht mehr archiviert/gelöscht wird als nötig
+* Testen, dass nicht mehr archiviert/reaktiviert/gelöscht wird als nötig
+  (für das Löschen gibt es bereits einen Behat-Test, schöner wären phpunit-Tests dafür)
 
 # Bugs
 * no course checker und manuell suspendieren => ist archiviert (OK), aber taucht nicht in der 

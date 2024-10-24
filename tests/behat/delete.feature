@@ -105,3 +105,66 @@ Feature: Cleanup settings
 
     When I navigate to "All archived users" archive page
     Then I should not see "user1"
+
+
+  @javascript
+  Scenario: Delete correct users
+    # Precondtion: several users can be deleted by several checkers
+    # ensure that only the appropriate uesrs are deleted
+    # (disable checker and check if the users belonging to that checker are not deleted)
+    Given I log in as "admin"
+    And I run the scheduled task "\tool_cleanupusers\task\archive_user_task"
+    # check that Never Login Checker and No active course Checker do not delete
+    And I navigate to "Users > Clean up users > Archived users" in site administration
+    And I navigate to "Users to be deleted" archive page
+    When I select "Never Login Checker" checker on archive page
+    Then I should see "Nothing to display"
+    When I select "No active course Checker" checker on archive page
+    Then I should see "Nothing to display"
+
+    # update settings
+    And the following config values are set as admin:
+      | deleteifneverloggedin | 1  | userstatus_neverloginchecker |
+    And the following config values are set as admin:
+      | deleteifneverloggedin | 1  | userstatus_nocoursechecker |
+
+    # check that Never Login Checker and No active course Checker will delete
+    And I navigate to "Users > Clean up users > Archived users" in site administration
+    And I navigate to "Users to be deleted" archive page
+
+    When I select "Never Login Checker" checker on archive page
+    Then I should see "user3"
+    And I should see "user4"
+
+    When I select "No active course Checker" checker on archive page
+    Then I should see "user5"
+    And I should see "user6"
+    And I should see "user7"
+    And I should see "user8"
+
+    # update settings so that No active course Checker will not delete
+    And the following config values are set as admin:
+      | deleteifneverloggedin | 0  | userstatus_nocoursechecker |
+
+    When I select "Never Login Checker" checker on archive page
+    Then I should see "user3"
+    And I should see "user4"
+
+    When I select "No active course Checker" checker on archive page
+    Then I should see "Nothing to display"
+
+    # run delete task and check
+    When I run the scheduled task "\tool_cleanupusers\task\delete_user_task"
+    And I reload the page
+    Then I should see "Nothing to display"
+
+    When I select "No active course Checker" checker on archive page
+    Then I should see "Nothing to display"
+
+    When I navigate to "All archived users" archive page
+    Then I should see "user5"
+    And I should see "user6"
+    And I should see "user7"
+    And I should see "user8"
+    Then I should not see "user3"
+    And I should not see "user4"

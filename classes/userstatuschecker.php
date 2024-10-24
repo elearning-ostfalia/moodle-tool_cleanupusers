@@ -285,8 +285,7 @@ abstract class userstatuschecker
      */
     public function get_to_delete() {
         if ($this->get_deletetime() >= 0) {
-            $condition = '(tc.checker=\'' . $this->get_name() . '\' 
-                        and tc.timestamp < '. time() - $this->get_deletetime_in_sec().')';
+            $condition = '(tc.timestamp < '. time() - $this->get_deletetime_in_sec().')';
         }
 
         if ($this->delete_if_never_logged_in_on_suspendtime()) {
@@ -303,14 +302,14 @@ abstract class userstatuschecker
         global $DB;
         // Full join means that only users will be handled who are already
         // suspended with the cleanupusers plugin
-        $sql = 'SELECT tca.id, tca.suspended, tca.lastaccess, tca.username, tca.deleted, tca.auth, 
-                    tc.checker, tca.firstname, tca.lastname, tc.timestamp, 
-                    tca.firstnamephonetic, tca.lastnamephonetic, tca.middlename, tca.alternatename, 
-                    tca.firstname, tca.lastname
-                FROM {tool_cleanupusers_archive} tca  
-                JOIN {tool_cleanupusers} tc ON tc.id = tca.id
+        $sql = 'SELECT tca.id, tca.suspended, tca.lastaccess, tca.username, tca.deleted, tca.auth ' .
+//                    , tc.checker, tca.firstname, tca.lastname, tc.timestamp,
+//                    , tca.firstnamephonetic, tca.lastnamephonetic, tca.middlename, tca.alternatename,
+//                    , tca.firstname, tca.lastname
+'               FROM {tool_cleanupusers_archive} tca  
+                JOIN {tool_cleanupusers} tc ON tc.id = tca.id and tc.checker = :checker
                 WHERE ' . $condition;
-        $users = $DB->get_records_sql($sql);
+        $users = $DB->get_records_sql($sql, ["checker" => $this->name]);
 
         $todelete = [];
         foreach ($users as $key => $user) {

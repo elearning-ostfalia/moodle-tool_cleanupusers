@@ -170,6 +170,7 @@ Aktionen ggf. auch für alle Nutzer aus dem Filter anwenden mit Nachfrage!
   Übersichtstabelle.
 * Anzeige des Zeitpunkts, wann Nutzer registriert wurde
 * logging von ldap wieder einschalten
+* Testen, dass nicht mehr archiviert/gelöscht wird als nötig
 
 # Bugs
 * no course checker und manuell suspendieren => ist archiviert (OK), aber taucht nicht in der 

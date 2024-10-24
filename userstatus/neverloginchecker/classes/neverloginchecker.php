@@ -43,7 +43,7 @@ class neverloginchecker extends userstatuschecker {
     }
 
     public function condition_suspend_sql() : array {
-        return [" suspended = 0 and lastaccess = 0 and timecreated < :timelimit" ,
+        return [" lastaccess = 0 and timecreated < :timelimit" ,
             [ 'timelimit'  => time() - $this->get_suspendtime_in_sec() ]];
     }
 

@@ -99,10 +99,25 @@ switch ($userfilter->get_action()) {
         // Update page URL
         $PAGE->set_url(new moodle_url('/admin/tool/cleanupusers/archiveusers.php'),
             ['action' => $userfilter->get_action(), 'checker' => $checker]);
-
-        $sql = \tool_cleanupusers\userstatuschecker::get_to_delete_sql($checker);
-        $archivetable = new \tool_cleanupusers\table\archive_table('tool_cleanupusers_todelete_table',
-            $sqlfilter, $paramfilter, "delete", $sql, $returnurl);
+        $subpluginname = "\\userstatus_" . $checker . "\\" . $checker;
+        if (!class_exists($subpluginname)) {
+            core\notification::warning($subpluginname . ' does not exist');
+        } else {
+            $userstatuschecker = new $subpluginname();
+            try {
+                $users = $userstatuschecker->get_to_delete();
+                if ($sqlfilter != null && $sqlfilter != '') {
+                    $sqlfilter .= ' AND ' . archiveuser_filtering::users_to_sql_filter($users, 'a');
+                } else {
+                    $sqlfilter = archiveuser_filtering::users_to_sql_filter($users, 'a');
+                }
+                // var_dump($sqlfilter);
+                $archivetable = new \tool_cleanupusers\table\archive_table('tool_cleanupusers_todelete_table',
+                    $sqlfilter, $paramfilter, "delete", [], $returnurl);
+            } catch (Exception $e) {
+                core\notification::warning($checker . ': ' . $e->getMessage());
+            }
+        }
         break;
     case archive_filter_form::ALL_USERS:
         // only user filter will be applied

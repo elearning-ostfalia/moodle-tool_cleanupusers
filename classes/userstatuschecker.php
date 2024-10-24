@@ -76,7 +76,8 @@ abstract class userstatuschecker
     }
 
     /**
-     * check if the given user fulfills the suspension condition
+     * check if the given user retrived via condition_suspend_sql
+     * actually fulfills the suspension condition
      *
      * @param $user
      * @return true
@@ -100,7 +101,7 @@ abstract class userstatuschecker
      * @return array
      */
     public function condition_suspend_sql() : array {
-        return ["suspended = 0" , null];
+        return ["" , null];
     }
 
     /**
@@ -117,9 +118,10 @@ abstract class userstatuschecker
      * @return string
      */
     public function get_authentication_method() :string {
-        if (!isset($this->config) || !isset($this->config->auth_method))
+
+        if (!isset($this->config) || !isset($this->config->{CONFIG_AUTH_METHOD}))
             return '';
-        return $this->config->auth_method;
+        return $this->config->{CONFIG_AUTH_METHOD};
     }
 
     /**
@@ -130,23 +132,23 @@ abstract class userstatuschecker
         return true;
     }
     /**
-     * returns the period after suspension before deletion
+     * returns the period after suspension before deletion [days]
      * @return string
      */
     public function get_deletetime() : float {
-        if (!isset($this->config->deletetime) || $this->config->deletetime == null) {
+        if (!isset($this->config->{CONFIG_DELETETIME}) || ($this->config->{CONFIG_DELETETIME} == null)) {
             // initial state
             return 365;
         }
-        return $this->config->deletetime;
+        return $this->config->{CONFIG_DELETETIME};
     }
 
     public function get_suspendtime() : float {
-        if (!isset($this->config->suspendtime) || $this->config->suspendtime == null) {
+        if (!isset($this->config->{CONFIG_SUSPENDTIME}) || ($this->config->{CONFIG_SUSPENDTIME} == null)) {
             // initial state
             return 365;
         }
-        return $this->config->suspendtime;
+        return $this->config->{CONFIG_SUSPENDTIME};
     }
 
     public function get_deletetime_in_sec() : int {
@@ -163,10 +165,10 @@ abstract class userstatuschecker
      * @return bool
      */
     public function delete_if_never_logged_in_on_suspendtime() : bool {
-        if (!isset($this->config->deleteifneverloggedin) || $this->config->deleteifneverloggedin == null) {
+        if (!isset($this->config->{CONFIG_NEVER_LOGGED_IN}) || ($this->config->{CONFIG_NEVER_LOGGED_IN} == null)) {
             return false;
         }
-        return $this->config->deleteifneverloggedin;
+        return $this->config->{CONFIG_NEVER_LOGGED_IN};
     }
 
     protected function log($text) {
@@ -176,7 +178,7 @@ abstract class userstatuschecker
         */
     }
 
-    private function get_auth_sql($alias) : string {
+    protected function get_auth_sql($alias) : string {
         if (empty($this->get_authentication_method()))
             return ' true ';
         // In case there are more authentication methods selected
@@ -273,9 +275,9 @@ abstract class userstatuschecker
      * @return array of users who should be deleted.
      */
     public function get_to_delete() {
-        $sqlarray = self::get_to_delete_sql($this->get_name());
+        $sqlarray = $this->get_to_delete_sql();
         if (count($sqlarray) == 0) {
-            return [];
+            throw new \coding_exception('no sql');
         }
 
         global $DB;
@@ -369,55 +371,13 @@ abstract class userstatuschecker
      *
      * @return array of users who should be deleted.
      */
-    public static function get_to_delete_sql($checker) : array {
-        // Get list with enabled subplugins.
-        /* if (empty($checker)) {
-            $pluginsenabled =  \core_plugin_manager::instance()->get_enabled_plugins("userstatus");
-            if (count($pluginsenabled) == 0) {
-                \core\notification::warning("No userstatus plugin enabled");
-                return [];
-            }
-        } else {
-            $pluginsenabled = [];
-            $pluginsenabled[$checker] = $checker;
-        }
-        // Get delete time value for each subplugin.
-        $checkers = [];
-        foreach ($pluginsenabled as $subpluginname => $dir) {
-            if (empty($subpluginname)) {
-                continue;
-            }
-            $subplugin = "\\userstatus_" . $subpluginname . "\\" . $subpluginname;
-            if (!class_exists($subplugin)) {
-                // plugin might have been uninstalled?
-                continue;
-            }
-            $subplugin = new $subplugin();
-            if ($subplugin->get_deletetime() >= 0) {
-                $checkers[] = '(tc.checker=\'' . $subpluginname . '\' 
-                and tc.timestamp < '. time() - $subplugin->get_deletetime_in_sec().')';
-            }
-        }
-        if (count($checkers) == 0) {
-            \core\notification::warning("No valid and active userstatus plugin enabled for deletion");
-            return [];
-        }
-        $condition = implode(' OR ', $checkers);
-        */
-
-        $subplugin = "\\userstatus_" . $checker . "\\" . $checker;
-        if (!class_exists($subplugin)) {
-            // plugin might have been uninstalled?
-            throw new coding_exception('invalid subpligin ' . $checker);
-        }
-        $subplugin = new $subplugin();
-        if ($subplugin->get_deletetime() >= 0) {
-            $condition = '(tc.checker=\'' . $checker . '\' 
-                        and tc.timestamp < '. time() - $subplugin->get_deletetime_in_sec().')';
+    public function get_to_delete_sql() : array {
+        if ($this->get_deletetime() >= 0) {
+            $condition = '(tc.checker=\'' . $this->get_name() . '\' 
+                        and tc.timestamp < '. time() - $this->get_deletetime_in_sec().')';
         }
 
-        // var_dump($checkers);
-        if ($subplugin->delete_if_never_logged_in_on_suspendtime()) {
+        if ($this->delete_if_never_logged_in_on_suspendtime()) {
             // If the user shall be deleted immediately if he or she has never
             // logged in and is suspended then delete him (or her)
             $condition = '(' . $condition . ' OR  tca.lastaccess = 0)';
@@ -444,58 +404,6 @@ abstract class userstatuschecker
 //            'where' => 'u.suspended = 1 AND u.deleted = 0 AND (' . $condition . ')'
             ];
         return $sql;
-/*
-        global $DB;
-        $users = $DB->get_records_sql(
-            "SELECT tca.id, tca.suspended, tca.lastaccess, tca.username, 
-                    tca.deleted, tca.auth, tc.checker
-                FROM {user} u
-                JOIN {tool_cleanupusers} tc ON u.id = tc.id 
-                JOIN {tool_cleanupusers_archive} tca ON u.id = tca.id
-                WHERE 
-                    u.suspended = 1
-                    AND u.deleted = 0
-                    AND (" . $condition . ")"
-        );
-        var_dump($users);
-        return $users;
-*/
-/*
-        // debugging($this->name);
-        // debugging("get_to_delete 1");
-        // var_dump($users);
-        $todelete = [];
-        foreach ($users as $key => $user) {
-            if (!is_siteadmin($user) && !isguestuser($user)) {
-                $deleteuser = new archiveduser(
-                    $user->id,
-                    $user->suspended,
-                    $user->lastaccess,
-                    $user->username,
-                    $user->deleted,
-                    $user->auth,
-                    $user->checker
-                );
-                $todelete[$key] = $deleteuser;
-            }
-        }
-*/
-        /*
-        // get all users who need to be reactivated by this plugin
-        // and remove them from the list of users to be deleted.
-        // => prevent users from deletion if they shall be reactivated
-        if (count($todelete) > 0) {
-            $toreactivate = $this->get_to_reactivate();
-            foreach ($todelete as $key => $user) {
-                if (array_key_exists($key, $toreactivate)) {
-                    unset($todelete[$key]);
-                }
-            }
-            // $todelete = array_diff($todelete, $toreactivate);
-            // var_dump($todelete);
-        }*/
-
-        // return $todelete;
     }
 
 

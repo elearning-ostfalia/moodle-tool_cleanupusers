@@ -41,7 +41,7 @@ class lastloginchecker extends userstatuschecker {
     }
 
     public function condition_suspend_sql() : array {
-        return [" suspended = 0 and lastaccess != 0 AND lastaccess < :timelimit" ,
+        return [" lastaccess != 0 AND lastaccess < :timelimit" ,
             [ 'timelimit'  => time() - $this->get_suspendtime_in_sec() ]];
     }
 

@@ -121,15 +121,6 @@ final class userstatus_nocoursechecker_test extends \tool_cleanupusers\userstatu
         $this->assertEquals(0, count($this->checker->get_to_suspend()));
     }
 
-    /**
-     * user is already (manually) suspended. Do not handle with this plugin.
-     * @return void
-     */
-    public function test_user_manually_suspended_no_suspend() {
-        $user = $this->create_test_user('manually_suspended', ['suspended' => 1]);
-        $this->assertEquals(0, count($this->checker->get_to_suspend()));
-    }
-
     // ---------------------------------------------
     // Suspend: scenarios handled by this plugin
     // ---------------------------------------------

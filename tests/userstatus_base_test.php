@@ -200,20 +200,19 @@ abstract class userstatus_base_test extends \advanced_testcase
     }
 
     /**
-     * already manually suspended
+     * checks what happens if the user is already manually suspended
+     * => should also be suspended because the user needs to be archived
      * @return void
      * @throws \dml_exception
      */
-    public function test_already_suspended_not_suspend() {
+    public function test_already_suspended_suspend() {
         $user = $this->typical_scenario_for_suspension();
-        if (!$user->suspended) {
-            // This scenario cannot be run with suspendedchecker
-            global $DB;
-            $user->suspended = 1;
-            $DB->update_record('user', $user);
-            $this->assertEquals(0, count($this->checker->get_to_suspend()));
-            $this->assertEquals(0, count($this->checker->get_to_reactivate()));
-        }
+        global $DB;
+        $user->suspended = 1;
+        $DB->update_record('user', $user);
+
+        $this->assertEqualsUsersArrays($this->checker->get_to_suspend(), $user);
+        $this->assertEquals(0, count($this->checker->get_to_reactivate()));
     }
 
     public function test_already_deleted_not_suspend() {
@@ -433,14 +432,16 @@ abstract class userstatus_base_test extends \advanced_testcase
     }
 
     /**
-     * user is suspended and could be deleted at once if he or she never logged in.
-     * And user has not logged not => expect to be deleted
+     * Configuration: user shall be deleted immediately if never logged in.
+     * Precondition: User is archived and has not logged not
+     * => expect to be deleted
      *
      * @return void
      * @throws \coding_exception
      */
     public function test_not_logged_in_configured_and_not_logged_in_delete() {
         set_config(CONFIG_NEVER_LOGGED_IN, '1', $this->get_plugin_name());
+        $this->checker = $this->create_checker(); // recreate checker in order to read new config
 
         $user = $this->typical_scenario_for_suspension();
         if ($this->checker->get_to_suspend() != null and $user->lastaccess == 0) {
@@ -449,8 +450,12 @@ abstract class userstatus_base_test extends \advanced_testcase
             // run cron
             $cronjob = new \tool_cleanupusers\task\archive_user_task();
             $cronjob->execute();
+            $this->assertEquals(0, count($this->checker->get_to_suspend()));
 
             $this->assertEqualsUsersArrays($this->checker->get_to_delete(), $user);
+            $cronjob = new \tool_cleanupusers\task\delete_user_task();
+            $cronjob->execute();
+            $this->assertEquals(0, count($this->checker->get_to_delete()));
         }
     }
 

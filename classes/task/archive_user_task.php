@@ -26,11 +26,11 @@
 
 namespace tool_cleanupusers\task;
 
-use tool_cleanupusers\cleanupusers_exception;
 // Needed for the default plugin.
-use tool_cleanupusers\archiveduser;
 use tool_cleanupusers\event\deprovisionusercronjob_completed;
 use core\task\scheduled_task;
+use tool_cleanupusers\helper;
+
 /**
  * A class for a scheduled task for tool_cleanupusers cron.
  *
@@ -75,18 +75,15 @@ class archive_user_task extends scheduled_task {
             // Private function is executed to suspend, delete and activate users.
             $archivearray = $userstatuschecker->get_to_suspend();
             $reactivatearray = $userstatuschecker->get_to_reactivate();
-            $arraytodelete = []; // $userstatuschecker->get_to_delete();
-
-            $suspendresult = $this->change_user_deprovisionstatus($archivearray, 'suspend', $subplugin);
+            $arraytodelete = [];
+            $suspendresult = helper::change_user_deprovisionstatus($archivearray, 'suspend', $subplugin);
             $unabletoarchive = $suspendresult['failures'];
             $userarchived = $suspendresult['countersuccess'];
 
-            $result = $this->change_user_deprovisionstatus($reactivatearray, 'reactivate', $subplugin);
+            $result = helper::change_user_deprovisionstatus($reactivatearray, 'reactivate', $subplugin);
             $unabletoactivate = $result['failures'];
             $useractivated = $result['countersuccess'];
 
-            // $deleteresult = $this->change_user_deprovisionstatus($arraytodelete, 'delete', $subplugin);
-            // $unabletodelete = $deleteresult['failures'];
             $userdeleted = []; // $deleteresult['countersuccess'];
 
             // Admin is informed about the cron-job and the amount of users that are affected.
@@ -130,62 +127,4 @@ class archive_user_task extends scheduled_task {
         return true;
     }
 
-    /**
-     * Deletes, suspends or reactivates an array of users.
-     *
-     * @param  array $userarray of users
-     * @param  string $intention of suspend, delete, reactivate
-     * @return array ['numbersuccess'] successfully changed users ['failures'] userids, who could not be changed.
-     * @throws \coding_exception
-     */
-    private function change_user_deprovisionstatus($userarray, $intention, $checker) {
-        // Checks whether the intention is valid.
-        if (!in_array($intention, ['suspend', 'reactivate', 'delete'])) {
-            throw new \coding_exception('Invalid parameters in tool_cleanupusers.');
-        }
-
-        // Number of successfully changed users.
-        $countersuccess = 0;
-
-        // Array of users who could not be changed.
-        $failures = [];
-
-        // Alternatively one could have written different function for each intention.
-        // However, this would have produced duplicated code.
-        // Therefore, checking the intention parameter repeatedly was preferred.
-        foreach ($userarray as $key => $user) {
-            if ($user->deleted == 0 && !is_siteadmin($user) && !isguestuser($user)) {
-                $changinguser = new archiveduser(
-                    $user->id,
-                    $user->suspended,
-                    $user->lastaccess,
-                    $user->username,
-                    $user->deleted,
-                    $user->auth,
-                    $checker
-                );
-                try {
-                    switch ($intention) {
-                        case 'suspend':
-                            $changinguser->archive_me($checker);
-                            break;
-                        case 'reactivate':
-                            $changinguser->activate_me();
-                            break;
-/*                        case 'delete':
-                            $changinguser->delete_me();
-                            break;*/
-                        // No default since if-clause checks the intention parameter.
-                    }
-                    $countersuccess++;
-                } catch (\Throwable $e) {
-                    $failures[$key] = $user->id;
-                }
-            }
-        }
-        $result = [];
-        $result['countersuccess'] = $countersuccess;
-        $result['failures'] = $failures;
-        return $result;
-    }
 }

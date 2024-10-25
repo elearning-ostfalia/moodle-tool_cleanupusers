@@ -23,6 +23,8 @@
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+use tool_cleanupusers\helper;
+
 require_once('../../../config.php');
 require_login();
 
@@ -88,13 +90,12 @@ switch ($action) {
             );
             try {
                 $deprovisionuser->activate_me();
-                $user = $DB->get_record('user', ['id' => $userid],
-                    '*', MUST_EXIST);
             } catch (\tool_cleanupusers\cleanupusers_exception $e) {
                 // Notice user could not be reactivated.
                 notice(get_string('errormessagenoaction', 'tool_cleanupusers'), $url);
             }
             // User successfully reactivated.
+            $user = $DB->get_record('user', ['id' => $userid], '*', MUST_EXIST);
             notice(get_string('usersreactivated', 'tool_cleanupusers', $user->username), $url);
         } else {
             // Notice user could not be reactivated.
@@ -104,32 +105,17 @@ switch ($action) {
     // User should be deleted.
     case 'delete':
         if ($confirm) {
-            if (!is_siteadmin($user) && $user->deleted != 1 && $USER->id != $userid) {
-                // debugging('delete ');
-                // exit();
-                $archiveuser = $DB->get_record('tool_cleanupusers_archive', ['id' => $userid],
-                    '*', MUST_EXIST);
-                $deprovisionuser = new \tool_cleanupusers\archiveduser(
-                    $userid,
-                    $user->suspended,
-                    $user->lastaccess,
-                    $user->username,
-                    $user->deleted,
-                    $user->auth,
-                    ''
-                );
-                try {
-                    $deprovisionuser->delete_me();
-                } catch (\tool_cleanupusers\cleanupusers_exception $e) {
-                    $url = new moodle_url('/admin/tool/cleanupusers/index.php');
-                    // Notice user could not be deleted.
-                    notice(get_string('errormessagenoaction', 'tool_cleanupusers'), $url);
-                }
-                notice(get_string('usersdeleted', 'tool_cleanupusers', $archiveuser->username), $url);
-            } else {
+            $archiveuser = $DB->get_record('tool_cleanupusers_archive', ['id' => $userid],
+                '*', MUST_EXIST);
+            $userarray = [];
+            $userarray[$userid] = $archiveuser;
+
+            $result = helper::change_user_deprovisionstatus($userarray, 'delete', '');
+            if (!empty($result['failures']) || $result['countersuccess'] != 1) {
                 // Notice user could not be deleted.
-                notice(get_string('errormessagenoaction', 'tool_cleanupusers'), $url);
+                notice(get_string('errormessagenoaction', 'tool_cleanupusers'), $returnurl);
             }
+            notice(get_string('usersdeleted', 'tool_cleanupusers', $archiveuser->username), $url);
         } else {
             $yesurl = new moodle_url($PAGE->url, [
                 'confirm'=>1, 'sesskey'=>sesskey(), 'userid' => $userid, 'action' => $action, 'returnurl' => $returnurl

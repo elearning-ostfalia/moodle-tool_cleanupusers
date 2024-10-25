@@ -77,17 +77,17 @@ class archive_user_task extends scheduled_task {
 
             // Private function is executed to suspend, delete and activate users.
             $archivearray = $userstatuschecker->get_to_suspend();
-            $suspendresult = $this->change_user_deprovisionstatus($archivearray, 'suspend', $subplugin);
+            $suspendresult = helper::change_user_deprovisionstatus($archivearray, 'suspend', $subplugin);
             $unabletoarchive = $suspendresult['failures'];
             $userarchived = $suspendresult['countersuccess'];
             $archievdusers = $suspendresult['archivedusers'];
 
             $reactivatearray = $userstatuschecker->get_to_reactivate();
-            $result = $this->change_user_deprovisionstatus($reactivatearray, 'reactivate', $subplugin);
+            $result = helper::change_user_deprovisionstatus($reactivatearray, 'reactivate', $subplugin);
             $unabletoactivate = $result['failures'];
 
             $arraytodelete = $userstatuschecker->get_to_delete();
-            $deleteresult = $this->change_user_deprovisionstatus($arraytodelete, 'delete', $subplugin);
+            $deleteresult = helper::change_user_deprovisionstatus($arraytodelete, 'delete', $subplugin);
             $unabletodelete = $deleteresult['failures'];
             $userdeleted = $deleteresult['countersuccess'];
 
@@ -135,6 +135,7 @@ class archive_user_task extends scheduled_task {
      * @return array ['numbersuccess'] successfully changed users ['failures'] userids, who could not be changed.
      * @throws \coding_exception
      */
+    /*
     private function change_user_deprovisionstatus($userarray, $intention, $checker) {
         // Checks whether the intention is valid.
         if (!in_array($intention, array('suspend', 'reactivate', 'delete'))) {
@@ -183,6 +184,7 @@ class archive_user_task extends scheduled_task {
         $result['archivedusers'] = $archivedusers;
         return $result;
     }
+    */
 
     private function write_csv($users){
         $path = '/var/www/html/moodle/hrz-mdl/admin/tool/cleanupusers/logs';

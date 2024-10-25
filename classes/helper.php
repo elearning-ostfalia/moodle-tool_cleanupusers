@@ -148,5 +148,67 @@ class helper {
         return $templ;
     }
 
+    /**
+     * Deletes, suspends or reactivates an array of users.
+     *
+     * @param  array $userarray of users
+     * @param  string $intention of suspend, delete, reactivate
+     * @return array ['numbersuccess'] successfully changed users ['failures'] userids, who could not be changed.
+     * @throws \coding_exception
+     */
+    static public function change_user_deprovisionstatus($userarray, $intention, $checker) {
+        // Checks whether the intention is valid.
+        if (!in_array($intention, ['suspend', 'reactivate', 'delete'])) {
+            throw new \coding_exception('Invalid parameters in tool_cleanupusers.');
+        }
+
+        // Number of successfully changed users.
+        $countersuccess = 0;
+
+        // Array of users who could not be changed.
+        $failures = [];
+
+        // Alternatively one could have written different function for each intention.
+        // However, this would have produced duplicated code.
+        // Therefore, checking the intention parameter repeatedly was preferred.
+        foreach ($userarray as $key => $user) {
+            global $USER;
+            if ($user->deleted == 0 && !is_siteadmin($user) && !isguestuser($user) && $USER->id != $user->id) {
+                $changinguser = new archiveduser(
+                    $user->id,
+                    $user->suspended,
+                    $user->lastaccess,
+                    $user->username,
+                    $user->deleted,
+                    $user->auth,
+                    $checker
+                );
+                try {
+                    switch ($intention) {
+                        case 'suspend':
+                            if (empty($checker)) {
+                                throw new \coding_exception('checker name is missing');
+                            }
+                            $changinguser->archive_me($checker);
+                            break;
+                        case 'reactivate':
+                            $changinguser->activate_me();
+                            break;
+                        case 'delete':
+                            $changinguser->delete_me();
+                            break;
+                        // No default since if-clause checks the intention parameter.
+                    }
+                    $countersuccess++;
+                } catch (\Throwable $e) {
+                    $failures[$key] = $user->id;
+                }
+            }
+        }
+        $result = [];
+        $result['countersuccess'] = $countersuccess;
+        $result['failures'] = $failures;
+        return $result;
+    }
 
 }

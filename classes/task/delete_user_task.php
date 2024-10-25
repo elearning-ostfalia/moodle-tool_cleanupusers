@@ -31,6 +31,8 @@ use tool_cleanupusers\cleanupusers_exception;
 use tool_cleanupusers\archiveduser;
 use tool_cleanupusers\event\deprovisionusercronjob_completed;
 use core\task\scheduled_task;
+use tool_cleanupusers\helper;
+
 /**
  * A class for a scheduled task for tool_cleanupusers cron.
  *
@@ -74,7 +76,7 @@ class delete_user_task extends scheduled_task {
 
             // Private function is executed to suspend, delete and activate users.
             $arraytodelete = $userstatuschecker->get_to_delete();
-            $deleteresult = $this->change_user_deprovisionstatus($arraytodelete, 'delete', $subplugin);
+            $deleteresult = helper::change_user_deprovisionstatus($arraytodelete, 'delete', $subplugin);
             $unabletodelete = $deleteresult['failures'];
             $userdeleted = $deleteresult['countersuccess'];
 
@@ -123,12 +125,13 @@ class delete_user_task extends scheduled_task {
      * @return array ['numbersuccess'] successfully changed users ['failures'] userids, who could not be changed.
      * @throws \coding_exception
      */
-    private function change_user_deprovisionstatus($userarray, $intention, $checker) {
+//    private function change_user_deprovisionstatus($userarray, $intention, $checker) {
         // Checks whether the intention is valid.
 /*        if (!in_array($intention, ['suspend', 'reactivate', 'delete'])) {
             throw new \coding_exception('Invalid parameters in tool_cleanupusers.');
         }
 */
+    /*
         // Number of successfully changed users.
         $countersuccess = 0;
 
@@ -161,5 +164,5 @@ class delete_user_task extends scheduled_task {
         $result['countersuccess'] = $countersuccess;
         $result['failures'] = $failures;
         return $result;
-    }
+    }*/
 }

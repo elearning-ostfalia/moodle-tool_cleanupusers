@@ -330,19 +330,8 @@ abstract class userstatuschecker
         // get all users who need to be reactivated by this plugin
         // and remove them from the list of users to be deleted.
         // => prevent users from deletion if they shall be reactivated
-        // DO IT HERE OR IN TASK???
-        if (count($todelete) > 0) {
-            $toreactivate = $this->get_to_reactivate();
-            foreach ($todelete as $key => $user) {
-                if (array_key_exists($key, $toreactivate)) {
-                    unset($todelete[$key]);
-                }
-            }
-            // $todelete = array_diff($todelete, $toreactivate);
-            // var_dump($todelete);
-        }
-
-        return $todelete;
+        $toreactivate = $this->get_to_reactivate();
+        return array_diff_key($todelete, $toreactivate);
     }
     /*
     public function get_to_delete() {

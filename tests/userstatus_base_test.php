@@ -529,6 +529,39 @@ abstract class userstatus_base_test extends cleanupusers_testcase
         $this->assertEquals(0, count($this->checker->get_to_delete()));
     }
 
+    public function test_reactivate_and_delete_possible_no_delete() {
+        $user = $this->typical_scenario_for_reactivation();
+        if (!$user || $user->lastaccess != 0) {
+            // No such scenario available (suspendedchecker)
+            return;
+        }
+
+        assert($user->lastaccess == 0); // User has never logged in!
+        $this->assertTrue(array_key_exists($user->username, $this->get_archive()));
+        // Modify delete so that the user will be deleted if he has never logged in
+        // => user can be reactivated AND deleted
+        $this->set_config(CONFIG_NEVER_LOGGED_IN, 1, $this->get_plugin_name());
+        $this->assertEquals(0, count($this->checker->get_to_delete()));
+        // $this->assertEqualsUsersArrays($this->checker->get_to_delete(), $user);
+        $this->assertEqualsUsersArrays($this->checker->get_to_reactivate(), $user);
+
+        // run cron
+        $cronjob = new \tool_cleanupusers\task\archive_user_task();
+        $cronjob->execute();
+
+        if ($this->get_plugin_name() == 'userstatus_ldapchecker') {
+            // Task does not work properly for ldapchecker
+            // because a new ldapchecker instance is generated in task
+            // which does not have the previously set lookup data.
+            return;
+        }
+
+        // expect user to be not in archive
+        $this->assertFalse(array_key_exists($user->username, $this->get_archive()));
+        $this->assertTrue(array_key_exists($user->username, $this->get_normal_users()));
+    }
+
+
     /*
      * does not work: checker does not check if it is enabled! ???
     public function test_config_no_plugin_enabled()
@@ -537,6 +570,8 @@ abstract class userstatus_base_test extends cleanupusers_testcase
         $user = $this->typical_scenario_for_suspension();
         $this->assertEquals(0, count($this->checker->get_to_suspend()));
     }*/
+
+
 
     /**
      * Methodes recommended by moodle to assure database and dataroot is reset.

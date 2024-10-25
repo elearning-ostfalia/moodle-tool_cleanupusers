@@ -49,6 +49,18 @@ class userstatus_ldapchecker_test extends \tool_cleanupusers\userstatus_base_tes
         $this->resetAfterTest(true);
     }
 
+    protected function set_config($name, $value, $plugin = null) {
+        $oldchecker = $this->checker;
+        parent::set_config($name, $value, $plugin);
+        if (isset($oldchecker)) {
+            $myClassReflection = new ReflectionClass(get_class($oldchecker));
+            $secret = $myClassReflection->getProperty('lookup');
+            $secret->setAccessible(true);
+            $ldaplist = $secret->getValue($oldchecker);
+            $this->checker->fill_ldap_response_for_testing($ldaplist);
+        }
+    }
+
     protected function create_checker() {
         return new \userstatus_ldapchecker\ldapchecker(true);
     }

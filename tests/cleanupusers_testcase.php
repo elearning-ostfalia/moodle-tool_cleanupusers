@@ -122,4 +122,10 @@ abstract class cleanupusers_testcase extends \advanced_testcase
         global $DB;
         return $DB->get_records('tool_cleanupusers_archive', null, null, 'username');
     }
+
+    protected function get_normal_users() {
+        global $DB;
+        return $DB->get_records('user', null, null, 'username');
+    }
+
 }

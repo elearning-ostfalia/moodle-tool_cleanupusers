@@ -44,7 +44,7 @@ defined('MOODLE_INTERNAL') || die;
 class ldapchecker extends userstatuschecker { // implements userstatusinterface {
 
     /** @var array lookuptable for ldap users */
-    private $lookup = array();
+    protected $lookup = array();
 
     private $testing = false;
 

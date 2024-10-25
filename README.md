@@ -170,7 +170,8 @@ Aktionen ggf. auch für alle Nutzer aus dem Filter anwenden mit Nachfrage!
   Übersichtstabelle.
 * Anzeige des Zeitpunkts, wann Nutzer registriert wurde
 * logging von ldap wieder einschalten
-* Testen, dass ein Nutzer, der reaktiviert werden müsste, nicht gelöscht wird!
+* handleuser: Testen, dass ein Nutzer, der bearbeitet werden soll, auch tatsächlich dafür geeignet ist
+  (Hacker-Angriffen vorbeugen)
 
 # Bugs
 * no course checker und manuell suspendieren => ist archiviert (OK), aber taucht nicht in der 

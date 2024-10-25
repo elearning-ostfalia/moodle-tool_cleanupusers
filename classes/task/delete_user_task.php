@@ -73,26 +73,10 @@ class delete_user_task extends scheduled_task {
             $userstatuschecker = new $mysubpluginname();
 
             // Private function is executed to suspend, delete and activate users.
-            $archivearray = [];
-            $reactivatearray = $userstatuschecker->get_to_reactivate();
-
-            $suspendresult = [];
-
-/*            $result = $this->change_user_deprovisionstatus($reactivatearray, 'reactivate', $subplugin);
-            $unabletoactivate = $result['failures'];
-            $useractivated = $result['countersuccess'];
-*/
-
             $arraytodelete = $userstatuschecker->get_to_delete();
-
-            // do not delete users who must be reactivated (but do not reactivate them here)
-            $arraytodelete = array_diff_key($arraytodelete, $reactivatearray);
-
             $deleteresult = $this->change_user_deprovisionstatus($arraytodelete, 'delete', $subplugin);
             $unabletodelete = $deleteresult['failures'];
             $userdeleted = $deleteresult['countersuccess'];
-
-
 
             // Admin is informed about the cron-job and the amount of users that are affected.
 
@@ -102,7 +86,7 @@ class delete_user_task extends scheduled_task {
                 "\r\n" . get_string('e-mail-deleted', 'tool_cleanupusers', $userdeleted)/* .
                 "\r\n" . get_string('e-mail-activated', 'tool_cleanupusers', $useractivated)*/;
 
-            // No Problems occured during the cron-job.
+            // No Problems occurred during the cron-job.
             if (empty($unabletoactivate) && empty($unabletoarchive) && empty($unabletodelete)) {
                 $messagetext .= "\r\n\r\n" . get_string('e-mail-noproblem', 'tool_cleanupusers');
             } else {
@@ -167,17 +151,6 @@ class delete_user_task extends scheduled_task {
                 );
                 try {
                     $changinguser->delete_me();
-/*                    switch ($intention) {
-                        case 'suspend':
-                            $changinguser->archive_me($checker);
-                            break;
-                        case 'reactivate':
-                            $changinguser->activate_me();
-                            break;
-                        case 'delete':
-                            break;
-                        // No default since if-clause checks the intention parameter.
-                    }*/
                     $countersuccess++;
                 } catch (\Throwable $e) {
                     $failures[$key] = $user->id;

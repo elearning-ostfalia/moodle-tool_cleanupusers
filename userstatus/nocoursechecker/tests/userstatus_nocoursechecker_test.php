@@ -189,5 +189,4 @@ final class userstatus_nocoursechecker_test extends \tool_cleanupusers\userstatu
 
         $this->assertEquals(0, count($this->checker->get_to_reactivate()));
     }
-
 }

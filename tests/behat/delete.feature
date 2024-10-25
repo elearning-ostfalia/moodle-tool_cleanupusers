@@ -106,6 +106,31 @@ Feature: Cleanup settings
     When I navigate to "All archived users" archive page
     Then I should not see "user1"
 
+  @javascript
+  Scenario: Do not delete if reactivate possible
+    Given I log in as "admin"
+    And I run the scheduled task "\tool_cleanupusers\task\archive_user_task"
+
+    And the following config values are set as admin:
+      | deleteifneverloggedin | 1  | userstatus_nocoursechecker |
+
+    And I navigate to "Users > Clean up users > Archived users" in site administration
+    And I navigate to "Users to be deleted" archive page
+    When I select "No active course Checker" checker on archive page
+    Then I should see "user5"
+    And I should see "user6"
+    And I should see "user7"
+    And I should see "user8"
+
+    # make invisible course visble
+    And I go to the courses management page
+    And I should see the "Course categories and courses" management page
+    And I toggle visibility of course "Inactive2" in management listing
+
+    And I navigate to "Users > Clean up users > Archived users" in site administration
+    And I navigate to "Users to be deleted" archive page
+    When I select "No active course Checker" checker on archive page
+    And I should not see "user6"
 
   @javascript
   Scenario: Delete correct users

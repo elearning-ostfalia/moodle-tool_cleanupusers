@@ -105,40 +105,6 @@ class not_archive_filter_form extends moodleform {
                 $selectmenu->export_for_template($OUTPUT))
         );
         $mform->addElement('html', $options);
-
-/*
-        $actions = [];
-        // $actions[self::MANUALLY_SUSPENDED] = 'users manually suspended';
-        $actions[self::TO_BE_ARCHIVED] = 'users to be archived by';
-
-        $selectline = [];
-        //$selectline[] = &$mform->createElement('select', 'action', '', $actions);
-        $selectline[] = &$mform->createElement('html', 'Show users to be archived by &nbsp;');
-        $selectline[] = &$mform->createElement('select', 'subplugin', '', $plugins);
-        // $mform->addGroup($selectline, 'selectline', 'Show', array(' '), false);
-        $mform->addGroup($selectline, 'selectline', '', array(' '), false);
-
-        // $mform->hideIf('subplugin', 'action', 'eq', self::MANUALLY_SUSPENDED);
-
-        $mform->setDefault('action', self::DEFAULT_ACTION);
-        if (count($plugins) == 0) {
-            \core\notification::warning(get_string('errormessagenoplugin', 'tool_cleanupusers'));
-        } else {
-            $mform->setDefault('subplugin', $this->get_default_checker());
-        }
-
-        // Add invisible submit button
-        $context = [
-            'pluginid' => 'id_subplugin',
-            'actionid' => 'id_action',
-            'hidevalue' => 2000, // No hide value self::MANUALLY_SUSPENDED
-        ];
-        global $OUTPUT;
-        $mform->addElement('html', $OUTPUT->render_from_template('tool_cleanupusers/filterform', $context));
-*/
-        //        }
-        // $mform->addElement('submit', 'reset', 'Submit');
-
     }
 
     /**
@@ -150,28 +116,17 @@ class not_archive_filter_form extends moodleform {
      * @return bool|array array in case the sub-plugin is not valid, otherwise true.
      */
     public function validation($data, $files) {
-        // debugging('validation');
-
-        // var_dump($data);
-/*        switch ($data['action']) {
-            case self::MANUALLY_SUSPENDED:
-                return true;
-            case self::TO_BE_ARCHIVED:*/
-                $plugins = \tool_cleanupusers\plugininfo\userstatus::get_enabled_plugins();
-                if (key_exists('subplugin', $data)) {
-                    $plugin = $data['subplugin'];
-                } else {
-                    global $SESSION;
-                    $plugin = $SESSION->checker;
-                }
-                $issubplugin = array_key_exists($plugin, $plugins);
-                if (!$issubplugin) {
-                    return ['subplugin' => get_string('errormessagesubplugin', 'tool_cleanupusers')];
-                }
-                return $issubplugin;
-/*            default:
-                break;
+        $plugins = \tool_cleanupusers\plugininfo\userstatus::get_enabled_plugins();
+        if (key_exists('subplugin', $data)) {
+            $plugin = $data['subplugin'];
+        } else {
+            global $SESSION;
+            $plugin = $SESSION->checker;
         }
-        return ['action' => get_string('errormessageaction', 'tool_cleanupusers')];*/
+        $issubplugin = array_key_exists($plugin, $plugins);
+        if (!$issubplugin) {
+            return ['subplugin' => get_string('errormessagesubplugin', 'tool_cleanupusers')];
+        }
+        return $issubplugin;
     }
 }

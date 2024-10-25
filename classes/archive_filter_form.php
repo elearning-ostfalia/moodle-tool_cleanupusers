@@ -38,7 +38,7 @@ use core_plugin_manager;
  * Form Class which allows the sideadmin to select between the available sub-plugins.
  *
  * @package   tool_cleanupusers
- * @copyright 2017 N. Herrmann
+ * @copyright 2024 Ostfalia
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -83,9 +83,6 @@ class archive_filter_form extends moodleform {
             // debugging("userstatus::get_enabled_plugins " . reset($plugins));
             return reset($plugins);
         }
-
-        // $plugins = userstatus::get_enabled_plugins();
-        // return reset($plugins);
     }
 
     public function get_default_action() {
@@ -153,32 +150,6 @@ class archive_filter_form extends moodleform {
             );
             $mform->addElement('html', $options);
         }
-
-/*
-        $selectline = [];
-        $selectline[] = &$mform->createElement('select', 'action', '', $actions);
-        $selectline[] = &$mform->createElement('select', 'subplugin', '', $plugins);
-        $mform->addGroup($selectline, 'selectline', 'Show', array(' '), false);
-
-        $mform->setDefault('action', self::DEFAULT_ACTION);
-        if (count($plugins) == 0) {
-            \core\notification::warning(get_string('errormessagenoplugin', 'tool_cleanupusers'));
-        } else {
-            $mform->setDefault('subplugin', $this->get_default_checker());
-        }
-
-        // Add invisible submit button
-        $context = [
-            'pluginid' => 'id_subplugin',
-            'actionid' => 'id_action',
-            'hidevalue' => self::ALL_USERS
-        ];
-        global $OUTPUT;
-        $mform->addElement('html', $OUTPUT->render_from_template('tool_cleanupusers/filterform', $context));
-*/
-        //        }
-        // $mform->addElement('submit', 'reset', 'Submit');
-
     }
 
     /**

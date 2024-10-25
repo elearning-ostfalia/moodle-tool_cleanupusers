@@ -217,31 +217,18 @@ class tool_cleanupusers_renderer extends plugin_renderer_base {
             $archivetable = new \tool_cleanupusers\table\archive_table(
                 'tool_cleanupusers_pending_reactivate_table',
                 $sqlfilter, [], "reactivate", [], $returnurl);
-            $archivetable->define_baseurl($PAGE->url);
-
-            $output .= \html_writer::tag('h5', get_string('willbereactivated', 'tool_cleanupusers'));
-            $output .= $archivetable->get_content($limit);
-            if (count($userstoreactivate) > $limit) {
-                $output .= \html_writer::link($url, '... watch full table ');
-            }
+            $output .= $this->output_table($archivetable, $limit, $userstoreactivate,
+                get_string('willbereactivated', 'tool_cleanupusers'), $url);
         }
         if (!empty($userstosuspend)) {
             $url = new \moodle_url('/admin/tool/cleanupusers/toarchive.php',
                 ['action' => not_archive_filter_form::TO_BE_ARCHIVED, 'checker' => $checker]);
             $limitedarray = array_slice($userstosuspend, 0, $limit, true);
-            $sqlfilter = helper::users_to_sql_filter($limitedarray);
-
             $archivetable = new \tool_cleanupusers\table\users_table(
                 'tool_cleanupusers_pending_suspend_table',
-                $sqlfilter, [], $checker, $returnurl);
-            global $PAGE;
-            $archivetable->define_baseurl($PAGE->url);
-
-            $output .= \html_writer::tag('h5', get_string('willbesuspended', 'tool_cleanupusers'));
-            $output .= $archivetable->get_content($limit);
-            if (count($userstosuspend) > $limit) {
-                $output .= \html_writer::link($url, '... watch full table ');
-            }
+                helper::users_to_sql_filter($limitedarray), [], $checker, $returnurl);
+            $output .= $this->output_table($archivetable, $limit, $userstosuspend,
+                get_string('willbesuspended', 'tool_cleanupusers'), $url);
         }
         if (!empty($usertodelete)) {
             $url = new \moodle_url('/admin/tool/cleanupusers/archiveusers.php',
@@ -252,14 +239,8 @@ class tool_cleanupusers_renderer extends plugin_renderer_base {
             $archivetable = new \tool_cleanupusers\table\archive_table(
                 'tool_cleanupusers_pending_delete_table',
                 $sqlfilter, [], "delete", [], $returnurl);
-            global $PAGE;
-            $archivetable->define_baseurl($PAGE->url);
-
-            $output .= \html_writer::tag('h5', get_string('willbedeleted', 'tool_cleanupusers'));
-            $output .= $archivetable->get_content($limit);
-            if (count($usertodelete) > $limit) {
-                $output .= \html_writer::link($url, '... watch full table ');
-            }
+            $output .= $this->output_table($archivetable, $limit, $usertodelete,
+                get_string('willbedeleted', 'tool_cleanupusers'), $url);
         }
 
         return $output;
@@ -276,6 +257,28 @@ class tool_cleanupusers_renderer extends plugin_renderer_base {
         } else {
             return $this->heading(get_string('pluginname', 'tool_cleanupusers'));
         }
+    }
+
+    /**
+     * @param \tool_cleanupusers\table\users_table $archivetable
+     * @param int $limit
+     * @param array $userarray
+     * @param string $title
+     * @param moodle_url $url
+     * @return string
+     * @throws coding_exception
+     */
+    private function output_table($archivetable, int $limit, array $userarray, string $title, moodle_url $url): string
+    {
+        global $PAGE;
+        $archivetable->define_baseurl($PAGE->url);
+
+        $output = \html_writer::tag('h5', $title);
+        $output .= $archivetable->get_content($limit);
+        if (count($userarray) > $limit) {
+            $output .= \html_writer::link($url, '... watch full table ');
+        }
+        return $output;
     }
 }
 

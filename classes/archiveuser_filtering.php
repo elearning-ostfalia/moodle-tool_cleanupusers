@@ -62,13 +62,6 @@ class archiveuser_filtering extends \user_filtering
             $this->checkerform = new not_archive_filter_form($urlchecker);
         }
 
-/*        if (!isset($urlaction)) {
-            // no action => delete old session variables
-            unset($SESSION->checker);
-            unset($SESSION->action);
-        }*/
-
-
         if ($formdata = $this->checkerform->get_data()) {
             $arraydata = get_object_vars($formdata);
             if ($this->checkerform->is_validated()) {

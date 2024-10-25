@@ -43,29 +43,17 @@ class users_table extends \table_sql {
      * @param String $sqlwhere
      * @param array $param
      */
-    public function __construct($uniqueid, $sqlwhere, $param, $intention, $checker, $returnurl) {
+    public function __construct($uniqueid, $sqlwhere, $param, $checker, $returnurl) {
         parent::__construct($uniqueid);
         $this->checker = $checker;
         $this->returnurl = $returnurl;
 
         // Define the list of columns to show.
-        $columns = ['id', 'username', 'fullname', 'lastaccess', 'auth', $intention];
+        $columns = ['id', 'username', 'fullname', 'lastaccess', 'auth', 'suspend'];
         $this->define_columns($columns);
 
-        // debugging($intention);
         // Define the titles of columns to show in header.
-        switch ($intention) { // todo make enum or something like that.
-            case 'suspend':
-                $header = get_string('willbesuspended', 'tool_cleanupusers');
-                break;
-            case 'delete':
-                $header = get_string('willbedeleted', 'tool_cleanupusers');
-                break;
-            default:
-                debugging($intention);
-                $header = get_string('Neverloggedin', 'tool_cleanupusers');
-                break;
-        }
+        $header = get_string('willbesuspended', 'tool_cleanupusers');
 
         $headers = [
             get_string('id', 'tool_cleanupusers'),
@@ -75,16 +63,6 @@ class users_table extends \table_sql {
             get_string('authmethod', 'tool_cleanupusers'),
             ''];
         $this->define_headers($headers);
-/*
-        $idsasstring = '';
-        foreach ($users as $user) {
-            $idsasstring .= $user->id . ',';
-        }
-        $idsasstring = rtrim($idsasstring, ',');
-        $where = 'id IN (' . $idsasstring . ')';
-        if ($sqlwhere != null && $sqlwhere != '') {
-            $where .= ' AND ' . $sqlwhere;
-        }*/
         $this->set_sql('id, username, lastaccess, auth, suspended, ' .
             implode(', ', fields::get_name_fields()), '{user}', $sqlwhere, $param);
     }
@@ -138,5 +116,16 @@ class users_table extends \table_sql {
                 ['class' => "imggroup-" . $user->id]
             )
         );
+    }
+
+    /**
+     * Get the table content.
+     */
+    public function get_content($limit): string {
+        ob_start();
+        $this->out($limit, false);
+        $content = ob_get_contents();
+        ob_end_clean();
+        return $content;
     }
 }

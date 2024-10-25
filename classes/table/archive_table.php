@@ -133,4 +133,15 @@ class archive_table extends \table_sql {
         else
             return get_string('neverlogged', 'tool_cleanupusers');
     }
+
+    /**
+     * Get the table content.
+     */
+    public function get_content($limit): string {
+        ob_start();
+        $this->out($limit, false);
+        $content = ob_get_contents();
+        ob_end_clean();
+        return $content;
+    }
 }

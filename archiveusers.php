@@ -24,6 +24,7 @@
 
 use tool_cleanupusers\archive_filter_form;
 use tool_cleanupusers\archiveuser_filtering;
+use tool_cleanupusers\helper;
 
 global $CFG, $PAGE, $OUTPUT;
 
@@ -82,9 +83,9 @@ switch ($userfilter->get_action()) {
             try {
                 $arrayreactivate = $userstatuschecker->get_to_reactivate();
                 if ($sqlfilter != null && $sqlfilter != '') {
-                    $sqlfilter .= ' AND ' . archiveuser_filtering::users_to_sql_filter($arrayreactivate, 'a');
+                    $sqlfilter .= ' AND ' . helper::users_to_sql_filter($arrayreactivate, 'a');
                 } else {
-                    $sqlfilter = archiveuser_filtering::users_to_sql_filter($arrayreactivate, 'a');
+                    $sqlfilter = helper::users_to_sql_filter($arrayreactivate, 'a');
                 }
                 // var_dump($sqlfilter);
                 $archivetable = new \tool_cleanupusers\table\archive_table('tool_cleanupusers_toarchive_table',
@@ -107,9 +108,9 @@ switch ($userfilter->get_action()) {
             try {
                 $users = $userstatuschecker->get_to_delete();
                 if ($sqlfilter != null && $sqlfilter != '') {
-                    $sqlfilter .= ' AND ' . archiveuser_filtering::users_to_sql_filter($users, 'a');
+                    $sqlfilter .= ' AND ' . helper::users_to_sql_filter($users, 'a');
                 } else {
-                    $sqlfilter = archiveuser_filtering::users_to_sql_filter($users, 'a');
+                    $sqlfilter = helper::users_to_sql_filter($users, 'a');
                 }
                 // var_dump($sqlfilter);
                 $archivetable = new \tool_cleanupusers\table\archive_table('tool_cleanupusers_todelete_table',

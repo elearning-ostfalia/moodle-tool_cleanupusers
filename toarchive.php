@@ -23,6 +23,7 @@
  */
 
 use tool_cleanupusers\archiveuser_filtering;
+use tool_cleanupusers\helper;
 
 global $CFG, $PAGE, $OUTPUT;
 
@@ -54,82 +55,45 @@ $renderer = $PAGE->get_renderer('tool_cleanupusers');
 
 $content = '';
 echo $OUTPUT->header();
-/*
-if (!empty($checker)) {
-    echo $renderer->get_heading(get_string('toarchive', 'tool_cleanupusers', $plugin->get_displayname()));
-} else {
-    echo $renderer->get_heading(get_string('toarchive', 'tool_cleanupusers'));
-}*/
-// echo $renderer->get_heading(get_string('toarchive', 'tool_cleanupusers'));
-
-/* debugging('vorher');
-debugging($action);
-debugging($checker);*/
 
 
-$userfilter = new \tool_cleanupusers\archiveuser_filtering(false, $action, $checker); // user_filtering();
+$userfilter = new \tool_cleanupusers\archiveuser_filtering(false, $action, $checker);
 $userfilter->display();
-[$sql, $param] = $userfilter->get_full_sql_filter();
+[$sqlfilter, $param] = $userfilter->get_full_sql_filter();
 $checker = $userfilter->get_checker();
 $action = $userfilter->get_action();
 
 $returnurl = new moodle_url('/admin/tool/cleanupusers/toarchive.php',
     ['action' => $action, 'checker' => $checker]);
 
-/*debugging('nachher');
-debugging($action);
-debugging($checker);*/
-
-// debugging($userfilter->get_action());
-switch ($action) {
-    case \tool_cleanupusers\not_archive_filter_form::TO_BE_ARCHIVED:
-// var_dump($sqlfilter);echo '<br>';
-// var_dump($paramfilter);
-
-        // Update page URL
-        $PAGE->set_url($returnurl);
-
-        $subpluginname = "\\userstatus_" . $checker . "\\" . $checker;
-        if (!class_exists($subpluginname)) {
-            core\notification::warning($subpluginname . ' does not exist');
-        } else {
-            // var_dump($checker);
-            $userstatuschecker = new $subpluginname();
-            $PAGE->set_title(get_string('toarchiveby', 'tool_cleanupusers', $userstatuschecker->get_displayname()));
-            // echo $renderer->get_heading(get_string('toarchiveby', 'tool_cleanupusers', $userstatuschecker->get_displayname()));
-            // debugging($userstatuschecker->get_displayname());
-
-            $archivearray = $userstatuschecker->get_to_suspend();
-            if ($sql != null && $sql != '') {
-                $sql .= ' AND ' . archiveuser_filtering::users_to_sql_filter($archivearray);
-            } else {
-                $sql = archiveuser_filtering::users_to_sql_filter($archivearray);
-            }
-            $archivetable = new \tool_cleanupusers\table\users_table(
-                'tool_cleanupusers_toarchive_table',
-                $sql, $param, "suspend", $userstatuschecker->get_name(), $returnurl);
-            $archivetable->define_baseurl($PAGE->url);
-            $archivetable->out(20, false);
-        }
-        break;
-/*
-    case \tool_cleanupusers\not_archive_filter_form::MANUALLY_SUSPENDED:
-        if (!empty($sql)) {
-            $sql .= ' AND suspended = 1';
-        } else {
-            $sql = 'suspended = 1';
-        }
-        $archivetable = new \tool_cleanupusers\table\users_table(
-            'tool_cleanupusers_toarchive_table',
-            $sql, $param, "suspend", 'manually suspended', $returnurl);
-
-        $archivetable->define_baseurl($PAGE->url);
-        $archivetable->out(20, false);
-        break;*/
-    default:
-        throw new coding_exception('invalid action');
-
+if ($action != \tool_cleanupusers\not_archive_filter_form::TO_BE_ARCHIVED) {
+    throw new coding_exception('invalid action');
 }
+
+// Update page URL
+$PAGE->set_url($returnurl);
+
+$subpluginname = "\\userstatus_" . $checker . "\\" . $checker;
+if (!class_exists($subpluginname)) {
+    core\notification::warning($subpluginname . ' does not exist');
+} else {
+    $userstatuschecker = new $subpluginname();
+    $PAGE->set_title(get_string('toarchiveby', 'tool_cleanupusers', $userstatuschecker->get_displayname()));
+    // echo $renderer->get_heading(get_string('toarchiveby', 'tool_cleanupusers', $userstatuschecker->get_displayname()));
+
+    $archivearray = $userstatuschecker->get_to_suspend();
+    if ($sqlfilter != null && $sqlfilter != '') {
+        $sqlfilter .= ' AND ' . helper::users_to_sql_filter($archivearray);
+    } else {
+        $sqlfilter = helper::users_to_sql_filter($archivearray);
+    }
+    $archivetable = new \tool_cleanupusers\table\users_table(
+        'tool_cleanupusers_toarchive_table',
+        $sqlfilter, $param, $userstatuschecker->get_name(), $returnurl);
+    $archivetable->define_baseurl($PAGE->url);
+    $archivetable->out(20, false);
+}
+
 
 echo $content;
 echo $OUTPUT->footer();

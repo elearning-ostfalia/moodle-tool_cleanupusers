@@ -23,6 +23,7 @@
  */
 
 use tool_cleanupusers\archiveduser;
+use tool_cleanupusers\helper;
 use tool_cleanupusers\not_archive_filter_form;
 use tool_cleanupusers\archive_filter_form;
 use tool_cleanupusers\plugininfo\userstatus;
@@ -197,64 +198,68 @@ class tool_cleanupusers_renderer extends plugin_renderer_base {
      * @param array $usersneverloggedin
      * @return string html
      */
-    public function render_preview_page($userstoreactivate, $userstosuspend, $usertodelete, $usersneverloggedin, $checker) {
-        global $DB;
-
-        $cleanupusers = $DB->get_records('tool_cleanupusers', ['archived' => 1]);
+    public function render_preview_page($userstoreactivate, $userstosuspend, $usertodelete,
+                                        $checker) {
+        global $PAGE;
+        $returnurl = new \moodle_url('/admin/tool/cleanupusers/pending.php');
+        $limit = 15;
 
         // Checks if one of the given arrays is empty to prevent rendering empty arrays.
         // If not empty renders the information needed.
-        if (empty($userstoreactivate)) {
-            $rendertoreactivate = [];
-        } else {
-            $rendertoreactivate = $this->information_user_reactivate($userstoreactivate, $cleanupusers);
-        }
-        if (empty($usertodelete)) {
-            $rendertodelete = [];
-        } else {
-            $rendertodelete = $this->information_user_delete($usertodelete, $cleanupusers);
-        }
-        if (empty($userstosuspend)) {
-            $rendertosuspend = [];
-        } else {
-            $rendertosuspend = $this->information_user_suspend($userstosuspend, $cleanupusers, $checker);
-        }
-
-        // Renders the information for each array in a separate html table.
+        // Renders the information for each array in a separate table.
         $output = '';
-        if (!empty($rendertoreactivate)) {
+        if (!empty($userstoreactivate)) {
             $url = new \moodle_url('/admin/tool/cleanupusers/archiveusers.php',
                 ['action' => archive_filter_form::TO_BE_REACTIVATED, 'checker' => $checker]);
+            $limitedarray = array_slice($userstoreactivate, 0, $limit, true);
+            $sqlfilter = helper::users_to_sql_filter($limitedarray);
 
-            $output .= $this->render_table_of_users($rendertoreactivate, [
-                get_string('willbereactivated', 'tool_cleanupusers'),
-                get_string('lastaccess', 'tool_cleanupusers'),
-                get_string('Archived', 'tool_cleanupusers'),
-                get_string('authmethod', 'tool_cleanupusers'),
-                get_string('Willbe', 'tool_cleanupusers')],
-                $checker, $url);
+            $archivetable = new \tool_cleanupusers\table\archive_table(
+                'tool_cleanupusers_pending_reactivate_table',
+                $sqlfilter, [], "reactivate", [], $returnurl);
+            $archivetable->define_baseurl($PAGE->url);
+
+            $output .= \html_writer::tag('h5', get_string('willbereactivated', 'tool_cleanupusers'));
+            $output .= $archivetable->get_content($limit);
+            if (count($userstoreactivate) > $limit) {
+                $output .= \html_writer::link($url, '... watch full table ');
+            }
         }
-        if (!empty($rendertosuspend)) {
+        if (!empty($userstosuspend)) {
             $url = new \moodle_url('/admin/tool/cleanupusers/toarchive.php',
                 ['action' => not_archive_filter_form::TO_BE_ARCHIVED, 'checker' => $checker]);
-            $output .= $this->render_table_of_users($rendertosuspend, [
-                get_string('willbesuspended', 'tool_cleanupusers'),
-                get_string('lastaccess', 'tool_cleanupusers'),
-                get_string('Archived', 'tool_cleanupusers'),
-                get_string('authmethod', 'tool_cleanupusers'),
-                get_string('Willbe', 'tool_cleanupusers')],
-                $checker, $url);
+            $limitedarray = array_slice($userstosuspend, 0, $limit, true);
+            $sqlfilter = helper::users_to_sql_filter($limitedarray);
+
+            $archivetable = new \tool_cleanupusers\table\users_table(
+                'tool_cleanupusers_pending_suspend_table',
+                $sqlfilter, [], $checker, $returnurl);
+            global $PAGE;
+            $archivetable->define_baseurl($PAGE->url);
+
+            $output .= \html_writer::tag('h5', get_string('willbesuspended', 'tool_cleanupusers'));
+            $output .= $archivetable->get_content($limit);
+            if (count($userstosuspend) > $limit) {
+                $output .= \html_writer::link($url, '... watch full table ');
+            }
         }
-        if (!empty($rendertodelete)) {
+        if (!empty($usertodelete)) {
             $url = new \moodle_url('/admin/tool/cleanupusers/archiveusers.php',
                 ['action' => archive_filter_form::TO_BE_DELETED, 'checker' => $checker]);
-            $output .= $this->render_table_of_users($rendertodelete, [
-                get_string('willbedeleted', 'tool_cleanupusers'),
-                get_string('lastaccess', 'tool_cleanupusers'),
-                get_string('Archived', 'tool_cleanupusers'),
-                get_string('authmethod', 'tool_cleanupusers'),
-                get_string('Willbe', 'tool_cleanupusers')],
-                $checker, $url);
+            $limitedarray = array_slice($usertodelete, 0, $limit, true);
+            $sqlfilter = helper::users_to_sql_filter($limitedarray, 'a');
+
+            $archivetable = new \tool_cleanupusers\table\archive_table(
+                'tool_cleanupusers_pending_delete_table',
+                $sqlfilter, [], "delete", [], $returnurl);
+            global $PAGE;
+            $archivetable->define_baseurl($PAGE->url);
+
+            $output .= \html_writer::tag('h5', get_string('willbedeleted', 'tool_cleanupusers'));
+            $output .= $archivetable->get_content($limit);
+            if (count($usertodelete) > $limit) {
+                $output .= \html_writer::link($url, '... watch full table ');
+            }
         }
 
         return $output;
@@ -272,177 +277,5 @@ class tool_cleanupusers_renderer extends plugin_renderer_base {
             return $this->heading(get_string('pluginname', 'tool_cleanupusers'));
         }
     }
-
-    /**
-     * Formats information for users that are identified by the sub-plugin for deletion.
-     * @param array $users array of objects of the user std_class
-     * @param array $cleanupusers all users that are currently archived by the plugin.
-     * @return array
-     */
-    private function information_user_delete($users, $cleanupusers) {
-        $resultarray = [];
-        foreach ($users as $key => $user) {
-            $userinformation = [];
-
-            if (!empty($user)) {
-                $userinformation = $this->set_user_information_for_table($user, $userinformation, $cleanupusers);
-                $userinformation['Willbe'] = get_string('shouldbedelted', 'tool_cleanupusers');
-                $url = new moodle_url('/admin/tool/cleanupusers/handleuser.php',
-                    ['userid' => $user->id, 'action' => 'delete',
-                        'returnurl' => '/admin/tool/cleanupusers/pending.php',
-                        'sesskey' => sesskey()]);
-                $userinformation['link'] = \html_writer::link(
-                    $url,
-                    '<red>' . $this->output->pix_icon(
-                        't/delete',
-                        get_string('deleteuser', 'tool_cleanupusers') . '</red>',
-                        'moodle',
-                        ['class' => "imggroup-" . $user->id]
-                    )
-                );
-            }
-            $resultarray[$key] = $userinformation;
-        }
-        return $resultarray;
-    }
-
-    /**
-     * Formats information for users that are identified by the sub-plugin for reactivation.
-     * @param array $users array of objects of the user std_class
-     * @param array $cleanupusers all users that are currently archived by the plugin.
-     * @return array
-     */
-    private function information_user_reactivate($users, $cleanupusers) {
-        $resultarray = [];
-        foreach ($users as $key => $user) {
-            $userinformation = [];
-
-            if (!empty($user)) {
-                $userinformation = $this->set_user_information_for_table($user, $userinformation, $cleanupusers);
-                $userinformation['Willbe'] = 'Reactivated';
-
-                $url = new moodle_url('/admin/tool/cleanupusers/handleuser.php',
-                    ['userid' => $user->id, 'action' => 'reactivate',
-                        'returnurl' => '/admin/tool/cleanupusers/pending.php',
-                        'sesskey' => sesskey()]);
-                $userinformation['link'] = \html_writer::link(
-                    $url,
-                    $this->output->pix_icon(
-                        't/show',
-                        get_string('deleteuser', 'tool_cleanupusers'),
-                        'moodle',
-                        ['class' => "imggroup-" . $user->id]
-                    )
-                );
-            }
-            $resultarray[$key] = $userinformation;
-        }
-        return $resultarray;
-    }
-
-    /**
-     * Saves relevant information for users that are identified by the sub-plugin for suspending.
-     * @param array $users array of objects of the user std_class
-     * @param array $cleanupusers all users that are currently archived by the plugin.
-     * @return array
-     */
-    private function information_user_suspend($users, $cleanupusers, $checker) {
-        $result = [];
-        foreach ($users as $key => $user) {
-            $userinformation = [];
-            if (!empty($user)) {
-                $userinformation = $this->set_user_information_for_table($user, $userinformation, $cleanupusers);
-
-                $userinformation['Willbe'] = get_string('willbe_archived', 'tool_cleanupusers');
-                $url = new moodle_url('/admin/tool/cleanupusers/handleuser.php',
-                    ['userid' => $user->id, 'action' => 'suspend', 'checker' => $checker,
-                        'returnurl' => '/admin/tool/cleanupusers/pending.php',
-                        'sesskey' => sesskey()]);
-
-                $userinformation['link'] = \html_writer::link(
-                    $url,
-                    $this->output->pix_icon(
-                        't/hide',
-                        get_string('hideuser', 'tool_cleanupusers'),
-                        'moodle',
-                        ['class' => "imggroup-" . $user->id]
-                    )
-                );
-            }
-            $result[$key] = $userinformation;
-        }
-        return $result;
-    }
-
-    /**
-     * Renders a html-table for an array of users.
-     * @param array $users
-     * @param array $tableheadings
-     * @return string html-table
-     */
-    private function render_table_of_users($users, $tableheadings, $checker, $url) {
-        $table = new html_table();
-        $table->head = $tableheadings;
-        $table->attributes['class'] = 'generaltable admintable cleanupusers';
-        $table->data = [];
-
-        $limit = 15;
-        foreach (array_slice($users, 0, $limit, true) as $key => $user) {
-            $table->data[$key] = $user;
-        }
-
-        if (count($users) > $limit) {
-            global $OUTPUT;
-            // $url = new \moodle_url('/admin/tool/cleanupusers/toarchive.php', ['checker' => $checker]);
-            $link = \html_writer::link(
-                $url, '(watch full table)'
-            );
-
-            $table->data['last'] = new archiveduser(
-                '... ' . $link, // '<i>... truncated!</i>',
-                '',
-                '',
-                '',
-                '',
-                '',
-                ''
-            );
-        }
-
-        $output = html_writer::table($table);
-
-/*        if (count($users) > $limit) {
-            $output .= '<b>Table is truncated!</b><br><br>';
-        } */
-        return $output;
-    }
-
-    /**
-     * @param mixed $user
-     * @param array $userinformation
-     * @param array $cleanupusers
-     * @return array
-     * @throws coding_exception
-     */
-    protected function set_user_information_for_table(mixed $user, array $userinformation, array $cleanupusers): array
-    {
-        $userinformation['username'] = $user->username;
-        if ($user->lastaccess > 0)
-            $userinformation['lastaccess'] = date('d.m.Y h:i:s', $user->lastaccess);
-        else
-            $userinformation['lastaccess'] = get_string('neverlogged', 'tool_cleanupusers');
-
-        $isarchivid = array_key_exists($user->id, $cleanupusers);
-        if (empty($isarchivid)) {
-            $userinformation['archived'] = get_string('No', 'tool_cleanupusers');
-        } else {
-            $userinformation['archived'] = get_string('Yes', 'tool_cleanupusers');
-        }
-        $userinformation['auth'] = $user->auth;
-
-        return $userinformation;
-    }
-
-
 }
 

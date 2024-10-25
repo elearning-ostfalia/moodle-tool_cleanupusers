@@ -42,55 +42,53 @@ $pagetitle = get_string('pluginname', 'tool_cleanupusers');
 $PAGE->set_title(get_string('pluginname', 'tool_cleanupusers'));
 // $PAGE->set_heading(get_string('pluginname', 'tool_cleanupusers'));
 $PAGE->set_pagelayout('admin');
+$PAGE->set_url(new moodle_url('/admin/tool/cleanupusers/pending.php'));
 
 $renderer = $PAGE->get_renderer('tool_cleanupusers');
 
 $content = '';
 echo $OUTPUT->header();
 //echo $renderer->get_heading();
-$content = '';
-
 
 $enabled = userstatus::get_enabled_plugins();
 
-// if (confirm_sesskey()) {
-    $content .= $OUTPUT->heading(get_string('pendingactions', 'tool_cleanupusers'), 2, 'main');
+$content = $OUTPUT->heading(get_string('pendingactions', 'tool_cleanupusers'), 2, 'main');
 
-    if (!$enabled or count($enabled) == 0) {
-        core\notification::warning("Note: no userstatus plugin enabled");
-    } else {
-        // Request arrays from the sub-plugin.
-        foreach ($enabled as $subplugin => $dir) {
-            if (empty($subplugin)) {
-                continue;
+if (!$enabled or count($enabled) == 0) {
+    core\notification::warning("Note: no userstatus plugin enabled");
+} else {
+    // Request arrays from the sub-plugin.
+    foreach ($enabled as $subplugin => $dir) {
+        if (empty($subplugin)) {
+            continue;
+        }
+
+        $mysubpluginname = "\\userstatus_" . $subplugin . "\\" . $subplugin;
+        if (!class_exists($mysubpluginname)) {
+            // core\notification::warning($subplugin . ' does not exist');
+            continue;
+        }
+
+        $userstatuschecker = new $mysubpluginname();
+
+        try {
+            $archivearray = $userstatuschecker->get_to_suspend();
+            $arraytodelete = $userstatuschecker->get_to_delete();
+            $arrayneverloggedin = [];
+            $arrayreactivate = $userstatuschecker->get_to_reactivate();
+
+            if (count($archivearray) > 0 || count($arraytodelete) > 0 || count($arrayreactivate)) {
+                $content .= $OUTPUT->heading($userstatuschecker->get_displayname(), 4, 'main');
+                $content .= $renderer->render_preview_page($arrayreactivate, $archivearray,
+                    $arraytodelete, $subplugin);
             }
-
-            $mysubpluginname = "\\userstatus_" . $subplugin . "\\" . $subplugin;
-            if (!class_exists($mysubpluginname)) {
-                // core\notification::warning($subplugin . ' does not exist');
-                continue;
-            }
-
-            $userstatuschecker = new $mysubpluginname();
-
-            try {
-                $archivearray = $userstatuschecker->get_to_suspend();
-                $arraytodelete = $userstatuschecker->get_to_delete();
-                $arrayneverloggedin = [];
-                $arrayreactivate = $userstatuschecker->get_to_reactivate();
-
-                if (count($archivearray) > 0 || count($arraytodelete) > 0 || count($arrayreactivate)) {
-                    $content .= $OUTPUT->heading($userstatuschecker->get_displayname(), 4, 'main');
-                    $content .= $renderer->render_preview_page($arrayreactivate, $archivearray,
-                        $arraytodelete, $arrayneverloggedin, $subplugin);
-                }
-            } catch (Exception $e) {
-                core\notification::warning($subplugin . ': '. $e->getMessage());
-                // throw $e;
-            }
+        } catch (Exception $e) {
+            core\notification::warning($subplugin . ': '. $e->getMessage());
+            // throw $e;
         }
     }
-// }
+}
+
 
 echo $content;
 echo $OUTPUT->footer();

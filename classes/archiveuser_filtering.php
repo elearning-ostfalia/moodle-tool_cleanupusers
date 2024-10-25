@@ -142,23 +142,4 @@ class archiveuser_filtering extends \user_filtering
         return parent::get_sql_filter($extra, $params);
     }
 
-    public static function users_to_sql_filter(array $userset, string $prefix = null) {
-        if (count($userset) == 0) {
-            return "FALSE";
-        }
-
-        // create SQL filter from id list
-        $idsasstring = '';
-        foreach ($userset as $user) {
-            $idsasstring .= $user->id . ',';
-        }
-        $idsasstring = rtrim($idsasstring, ',');
-        if (!empty($prefix)) {
-            return $prefix . '.id IN (' . $idsasstring . ')';
-        } else {
-            return 'id IN (' . $idsasstring . ')';
-
-        }
-    }
-
 }

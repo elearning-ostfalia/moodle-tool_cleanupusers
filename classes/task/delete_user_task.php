@@ -85,8 +85,7 @@ class delete_user_task extends scheduled_task {
             $admin = get_admin();
             // Number of users suspended or deleted.
             $messagetext =
-                "\r\n" . get_string('e-mail-deleted', 'tool_cleanupusers', $userdeleted)/* .
-                "\r\n" . get_string('e-mail-activated', 'tool_cleanupusers', $useractivated)*/;
+                "\r\n" . get_string('e-mail-deleted', 'tool_cleanupusers', $userdeleted);
 
             // No Problems occurred during the cron-job.
             if (empty($unabletoactivate) && empty($unabletoarchive) && empty($unabletodelete)) {
@@ -97,11 +96,7 @@ class delete_user_task extends scheduled_task {
                     'e-mail-problematic_delete',
                     'tool_cleanupusers',
                     count($unabletodelete)
-                ) /*. "\r\n\r\n" . get_string(
-                    'e-mail-problematic_reactivate',
-                    'tool_cleanupusers',
-                    count($unabletoactivate)
-                )*/;
+                );
             }
 
             // Email is send from the do not reply user.
@@ -116,53 +111,4 @@ class delete_user_task extends scheduled_task {
 
         return true;
     }
-
-    /**
-     * Deletes, suspends or reactivates an array of users.
-     *
-     * @param  array $userarray of users
-     * @param  string $intention of suspend, delete, reactivate
-     * @return array ['numbersuccess'] successfully changed users ['failures'] userids, who could not be changed.
-     * @throws \coding_exception
-     */
-//    private function change_user_deprovisionstatus($userarray, $intention, $checker) {
-        // Checks whether the intention is valid.
-/*        if (!in_array($intention, ['suspend', 'reactivate', 'delete'])) {
-            throw new \coding_exception('Invalid parameters in tool_cleanupusers.');
-        }
-*/
-    /*
-        // Number of successfully changed users.
-        $countersuccess = 0;
-
-        // Array of users who could not be changed.
-        $failures = [];
-
-        // Alternatively one could have written different function for each intention.
-        // However, this would have produced duplicated code.
-        // Therefore, checking the intention parameter repeatedly was preferred.
-        foreach ($userarray as $key => $user) {
-            if ($user->deleted == 0 && !is_siteadmin($user) && !isguestuser($user)) {
-                $changinguser = new archiveduser(
-                    $user->id,
-                    $user->suspended,
-                    $user->lastaccess,
-                    $user->username,
-                    $user->deleted,
-                    $user->auth,
-                    $checker
-                );
-                try {
-                    $changinguser->delete_me();
-                    $countersuccess++;
-                } catch (\Throwable $e) {
-                    $failures[$key] = $user->id;
-                }
-            }
-        }
-        $result = [];
-        $result['countersuccess'] = $countersuccess;
-        $result['failures'] = $failures;
-        return $result;
-    }*/
 }

@@ -42,80 +42,49 @@ $PAGE->set_url('/admin/tool/cleanupusers/handleuser.php');
 $PAGE->set_context(context_system::instance());
 
 $user = $DB->get_record('user', ['id' => $userid]);
-// require_capability('moodle/user:update', $PAGE->context);
+
 require_admin();
 require_sesskey();
 
-$url = $returnurl;
+
+$userarray = [];
 
 switch ($action) {
     // User should be suspended.
     case 'suspend':
-        // Sideadmins, the current $USER and user who are already suspended can not be handeled.
-        if (!is_siteadmin($user) && $user->deleted != 1 && $USER->id != $userid) {
-            $checker        = required_param('checker', PARAM_TEXT);
-            $deprovisionuser = new \tool_cleanupusers\archiveduser(
-                $userid,
-                $user->suspended,
-                $user->lastaccess,
-                $user->username,
-                $user->deleted,
-                $user->auth,
-                $checker
-            );
-            try {
-                $deprovisionuser->archive_me($checker);
-            } catch (\tool_cleanupusers\cleanupusers_exception $e) {
-                // Notice user could not be suspended.
-                notice(get_string('errormessagenoaction', 'tool_cleanupusers'), $url);
-            }
-            // User was successfully suspended.
-            notice(get_string('usersarchived', 'tool_cleanupusers', $user->username), $url);
-        } else {
-            // Notice user could not be suspended.
-            notice(get_string('errormessagenotsuspend', 'tool_cleanupusers'), $url);
+        $userarray[$userid] = $user;
+        $checker = required_param('checker', PARAM_TEXT);
+        $result = helper::change_user_deprovisionstatus($userarray, 'suspend', $checker);
+        if (!empty($result['failures']) || $result['countersuccess'] != 1) {
+            // Notice user could not be reactivated.
+            notice(get_string('errormessagenoaction', 'tool_cleanupusers'), $returnurl);
         }
+        // User was successfully suspended.
+        notice(get_string('usersarchived', 'tool_cleanupusers', $user->username), $returnurl);
         break;
     // User should be reactivated.
     case 'reactivate':
-        if (!is_siteadmin($user) && $user->suspended != 0 && $USER->id != $userid) {
-            $deprovisionuser = new \tool_cleanupusers\archiveduser(
-                $userid,
-                $user->suspended,
-                $user->lastaccess,
-                $user->username,
-                $user->deleted,
-                $user->auth,
-                ''
-            );
-            try {
-                $deprovisionuser->activate_me();
-            } catch (\tool_cleanupusers\cleanupusers_exception $e) {
-                // Notice user could not be reactivated.
-                notice(get_string('errormessagenoaction', 'tool_cleanupusers'), $url);
-            }
-            // User successfully reactivated.
-            $user = $DB->get_record('user', ['id' => $userid], '*', MUST_EXIST);
-            notice(get_string('usersreactivated', 'tool_cleanupusers', $user->username), $url);
-        } else {
+        $userarray[$userid] = $user;
+        $result = helper::change_user_deprovisionstatus($userarray, 'reactivate', '');
+        if (!empty($result['failures']) || $result['countersuccess'] != 1) {
             // Notice user could not be reactivated.
-            notice(get_string('errormessagenotactive', 'tool_cleanupusers'), $url);
+            notice(get_string('errormessagenoaction', 'tool_cleanupusers'), $returnurl);
         }
+        // User successfully reactivated.
+        $user = $DB->get_record('user', ['id' => $userid], '*', MUST_EXIST);
+        notice(get_string('usersreactivated', 'tool_cleanupusers', $user->username), $returnurl);
         break;
     // User should be deleted.
     case 'delete':
         if ($confirm) {
-            $archiveuser = $DB->get_record('tool_cleanupusers_archive', ['id' => $userid],
+            $userarray[$userid] = $DB->get_record('tool_cleanupusers_archive', ['id' => $userid],
                 '*', MUST_EXIST);
-            $userarray = [];
-            $userarray[$userid] = $archiveuser;
-
             $result = helper::change_user_deprovisionstatus($userarray, 'delete', '');
             if (!empty($result['failures']) || $result['countersuccess'] != 1) {
                 // Notice user could not be deleted.
                 notice(get_string('errormessagenoaction', 'tool_cleanupusers'), $returnurl);
             }
-            notice(get_string('usersdeleted', 'tool_cleanupusers', $archiveuser->username), $url);
+            notice(get_string('usersdeleted', 'tool_cleanupusers', $userarray[$userid]->username), $returnurl);
         } else {
             $yesurl = new moodle_url($PAGE->url, [
                 'confirm'=>1, 'sesskey'=>sesskey(), 'userid' => $userid, 'action' => $action, 'returnurl' => $returnurl
@@ -149,7 +118,7 @@ switch ($action) {
         break;
     // Action is not valid.
     default:
-        notice(get_string('errormessagenoaction', 'tool_cleanupusers'), $url);
+        notice(get_string('errormessagenoaction', 'tool_cleanupusers'), $returnurl);
         break;
 }
 exit();

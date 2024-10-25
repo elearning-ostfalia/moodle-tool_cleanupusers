@@ -75,7 +75,7 @@ class archive_user_task extends scheduled_task {
             // Private function is executed to suspend, delete and activate users.
             $archivearray = $userstatuschecker->get_to_suspend();
             $reactivatearray = $userstatuschecker->get_to_reactivate();
-            $arraytodelete = [];
+
             $suspendresult = helper::change_user_deprovisionstatus($archivearray, 'suspend', $subplugin);
             $unabletoarchive = $suspendresult['failures'];
             $userarchived = $suspendresult['countersuccess'];
@@ -84,26 +84,19 @@ class archive_user_task extends scheduled_task {
             $unabletoactivate = $result['failures'];
             $useractivated = $result['countersuccess'];
 
-            $userdeleted = []; // $deleteresult['countersuccess'];
-
             // Admin is informed about the cron-job and the amount of users that are affected.
 
             $admin = get_admin();
             // Number of users suspended or deleted.
             $messagetext = get_string('e-mail-archived', 'tool_cleanupusers', $userarchived) .
-//                "\r\n" . get_string('e-mail-deleted', 'tool_cleanupusers', $userdeleted) .
                 "\r\n" . get_string('e-mail-activated', 'tool_cleanupusers', $useractivated);
 
             // No Problems occured during the cron-job.
-            if (empty($unabletoactivate) && empty($unabletoarchive) && empty($unabletodelete)) {
+            if (empty($unabletoactivate) && empty($unabletoarchive)) {
                 $messagetext .= "\r\n\r\n" . get_string('e-mail-noproblem', 'tool_cleanupusers');
             } else {
                 // Extra information for problematic users.
-                $messagetext .= /*"\r\n\r\n" . get_string(
-                    'e-mail-problematic_delete',
-                    'tool_cleanupusers',
-                    count($unabletodelete)
-                ) . */ "\r\n\r\n" . get_string(
+                $messagetext .= "\r\n\r\n" . get_string(
                         'e-mail-problematic_suspend',
                         'tool_cleanupusers',
                         count($unabletoarchive)
@@ -120,7 +113,7 @@ class archive_user_task extends scheduled_task {
 
             // Triggers deprovisionusercronjob_completed event.
             $context = \context_system::instance();
-            $event = deprovisionusercronjob_completed::create_simple($context, $userarchived, $userdeleted);
+            $event = deprovisionusercronjob_completed::create_simple($context, $userarchived, []);
             $event->trigger();
         }
 

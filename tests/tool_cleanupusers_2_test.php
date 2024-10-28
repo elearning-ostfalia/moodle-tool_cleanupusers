@@ -41,10 +41,21 @@ use advanced_testcase;
 final class tool_cleanupusers_2_test extends cleanupusers_testcase {
     private $checker_login;
     private $checker_course;
+    private $mailsink;
+    private $eventsink;
+    private $timestamp;
 
     protected function setup() : void {
         $this->generator = advanced_testcase::getDataGenerator();
         $this->resetAfterTest(true);
+
+        // Set up mail configuration.
+        unset_config('noemailever');
+        $this->mailsink = $this->redirectEmails();
+
+        $this->timestamp = time();
+
+        $this->eventsink = $this->redirectEvents();
 
         // set enabled plugin for running task
         set_config(CONFIG_ENABLED, "neverloginchecker,nocoursechecker");
@@ -67,7 +78,8 @@ final class tool_cleanupusers_2_test extends cleanupusers_testcase {
     }
 
     public function test_csv_output() {
-        set_config(CONFIG_LOG_FOLDER, '/tmp/phpunit/cleanup_users', 'tool_cleanupusers');
+        $path = '/tmp/phpunit/cleanup_users';
+        set_config(CONFIG_LOG_FOLDER, $path, 'tool_cleanupusers');
 
         $user11 = $this->create_test_user('user11', ['timecreated' => LAST_MONTH, 'auth' => AUTH_METHOD]);
         $user12 = $this->create_test_user('user12', ['timecreated' => LAST_MONTH, 'auth' => AUTH_METHOD]);
@@ -86,11 +98,24 @@ final class tool_cleanupusers_2_test extends cleanupusers_testcase {
         $cronjob = new task\archive_user_task();
         $cronjob->execute();
 
-        // TODO:
         // check csv file
+        $csvContent = $this->readCsv($path);
+
+        $this->assertEquals(7, count($csvContent));
+        $this->assertTrue(array_key_exists($user11->id, $csvContent));
+        $this->assertTrue(array_key_exists($user12->id, $csvContent));
+        $this->assertTrue(array_key_exists($user13->id, $csvContent));
+
+        $this->assertTrue(array_key_exists($user21->id, $csvContent));
+        $this->assertTrue(array_key_exists($user22->id, $csvContent));
+        $this->assertTrue(array_key_exists($user23->id, $csvContent));
+        $this->assertTrue(array_key_exists($user24->id, $csvContent));
+
         // check mails
+        $this->checkMails(7);
+
         // check event
-        $this->assertFalse(1);
+        $this->checkEvents();
 
     }
 
@@ -221,6 +246,71 @@ final class tool_cleanupusers_2_test extends cleanupusers_testcase {
         $cronjob->execute();
 
         $this->assertEquals(0, count($this->get_archive()));
+    }
+
+    /**
+     * @param string $path
+     * @return void
+     */
+    private function readCsv(string $path): array
+    {
+        $handle = fopen($path . '/archived_users_' . date("d_m_Y") . '.csv', "r");
+        $this->assertNotFalse($handle);
+
+        $firstline = fgetcsv($handle, 1000, ";");
+        // var_dump($firstline);
+        $this->assertNotFalse($firstline);
+
+        $csvcontent = [];
+        while (($data = fgetcsv($handle, 1000, ";")) !== FALSE) {
+            $num = count($data);
+            // echo "<p> $num Felder in Zeile $row: <br /></p>\n";
+            //$row++;
+            $line = [];
+            for ($c = 0; $c < $num; $c++) {
+                //echo $data[$c] . "<br />\n";
+                $line[$firstline[$c]] = $data[$c];
+            }
+            $csvcontent[$line['id']] = $line;
+        }
+        fclose($handle);
+        return $csvcontent;
+    }
+
+    /**
+     * @return void
+     */
+    private function checkMails($number): void
+    {
+        $messages = $this->mailsink->get_messages();
+
+        $this->assertEquals(1, count($messages));
+        $msg = str_replace(["\r\n", "\r", "\n", "<br>", "</br>"], '', $messages[0]->body);
+
+        $this->assertStringContainsString("In the last cron-job $number users were archived.", $msg);
+        $this->assertStringContainsString('In the last cron-job 0 users were reactivated', $msg);
+        $this->assertStringContainsString('No problems occurred in plugin tool_cleanupusers in the last run.', $msg);
+    }
+
+    /**
+     * @return void
+     */
+    private function checkEvents(): void
+    {
+        $triggered = $this->eventsink->get_events();
+        $this->eventsink->close();
+        $found = false;
+        foreach ($triggered as $event) {
+            if ($event instanceof event\deprovisionusercronjob_completed) {
+                $this->assertTrue(true, 'Completion event triggered.');
+                $this->assertTrue($event->timecreated >= $this->timestamp, 'Completion event triggered correctly.');
+                $found = true;
+                break;
+            }
+        }
+        if (!$found) {
+            $this->fail('Completion event was not triggered.');
+        }
     }
 
 }

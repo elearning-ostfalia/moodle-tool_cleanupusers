@@ -181,10 +181,10 @@ abstract class userstatuschecker
     }
 
     protected function log($text) {
-        /*
-        file_put_contents($this->baseconfig->log_folder . "/debug_log_ldapchecker.log",
-            "\n[".date("d-M-Y - H:i ")."] $text " , FILE_APPEND);
-        */
+        if (!empty($this->baseconfig->log_folder)) {
+            file_put_contents($this->baseconfig->log_folder . "/debug_log_ldapchecker.log",
+                "\n[".date("d-M-Y - H:i ")."] $text " , FILE_APPEND);
+        }
     }
 
     protected function get_auth_sql($alias) : string {

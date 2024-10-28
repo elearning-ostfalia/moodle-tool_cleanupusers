@@ -58,6 +58,12 @@ if ($hassiteconfig) {
         PARAM_TEXT
     ));
 
+    // Log folder.
+    $settings->add(new admin_setting_configtext('userstatus_ldapchecker/log_folder',
+            get_string('sett_log_folder', 'tool_cleanupusers'),
+            get_string('sett_log_folder_description', 'tool_cleanupusers'),
+            '', PARAM_RAW_TRIMMED));
+
     $ADMIN->add('tool_cleanupusers', $settings);
 
     // Adds an entry for every sub-plugin with a settings.php.

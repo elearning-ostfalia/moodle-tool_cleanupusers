@@ -37,13 +37,6 @@ if ($hassiteconfig) {
         get_string('deletetime', 'userstatus_lastloginchecker'),
         get_string('timechecker_time_to_delete', 'userstatus_lastloginchecker'), 365, PARAM_INT));
 */
-    // Log folder.
-/*    $settings->add(new admin_setting_configtext('userstatus_ldapchecker/log_folder',
-        "Folder for log files ", // get_string('auth_ldap_bind_dn_key', 'auth_ldap'),
-        "Folder for log files (must exist and be accessible)", // get_string('auth_ldap_bind_dn', 'auth_ldap'),
-        '/var/log/httpd', PARAM_RAW_TRIMMED));
-*/
-
     // LDAP server settings.
     $settings->add(new admin_setting_heading('userstatus_ldapchecker/ldapserversettings',
         new lang_string('auth_ldap_server_settings', 'auth_ldap'), ''));

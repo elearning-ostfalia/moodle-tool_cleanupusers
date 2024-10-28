@@ -66,13 +66,42 @@ final class tool_cleanupusers_2_test extends cleanupusers_testcase {
         $this->checker_course = new \userstatus_nocoursechecker\nocoursechecker();
     }
 
+    public function test_csv_output() {
+        set_config(CONFIG_LOG_FOLDER, '/tmp/phpunit/cleanup_users', 'tool_cleanupusers');
+
+        $user11 = $this->create_test_user('user11', ['timecreated' => LAST_MONTH, 'auth' => AUTH_METHOD]);
+        $user12 = $this->create_test_user('user12', ['timecreated' => LAST_MONTH, 'auth' => AUTH_METHOD]);
+        $user13 = $this->create_test_user('user13', ['timecreated' => LAST_MONTH, 'auth' => AUTH_METHOD]);
+
+        $user21 = $this->create_test_user('user21', ['timecreated' => LAST_MONTH, 'auth' => AUTH_METHOD_2]);
+        $user22 = $this->create_test_user('user22', ['timecreated' => LAST_MONTH, 'auth' => AUTH_METHOD_2]);
+        $user23 = $this->create_test_user('user23', ['timecreated' => LAST_MONTH, 'auth' => AUTH_METHOD_2]);
+        $user24 = $this->create_test_user('user24', ['timecreated' => LAST_MONTH, 'lastaccess' => YESTERDAY, 'auth' => AUTH_METHOD_2]);
+
+        // ensure that both checkers will have a suspension set
+        $this->assertEquals(3, count($this->checker_login->get_to_suspend()));
+        $this->assertEquals(4, count($this->checker_course->get_to_suspend()));
+
+        // archive
+        $cronjob = new task\archive_user_task();
+        $cronjob->execute();
+
+        // TODO:
+        // check csv file
+        // check mails
+        // check event
+        $this->assertFalse(1);
+
+    }
+
+
     /**
      * Tests that only users are suspended by enabled plugins
      * @return void
      * @throws \coding_exception
      * @throws \moodle_exception
      */
-    public function test_suspend_only_by_enabled() {
+    public function test_suspend_only_users_from_enabled_plugins() {
         $user1 = $this->create_test_user('user1', ['timecreated' => LAST_MONTH, 'auth' => AUTH_METHOD]);
         $user2 = $this->create_test_user('user2', ['timecreated' => LAST_MONTH, 'auth' => AUTH_METHOD_2]);
 

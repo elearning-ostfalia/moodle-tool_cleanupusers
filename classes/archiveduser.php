@@ -123,6 +123,17 @@ class archiveduser {
 
             $transaction->allow_commit();
         }
+
+        $archiveduser = (array) $user;
+        if (!empty($user->lastaccess) && $user->lastaccess != 0) {
+            $archiveduser['lastaccess'] = date('d.m.Y h:i:s', $user->lastaccess);
+        } else {
+            $archiveduser['lastaccess'] = 'never logged in';
+        }
+
+        // extract a few attributes in order to save memory.
+        $wantedKeys = ['id', 'username', 'firstname', 'lastname', 'lastaccess', 'auth', 'suspended'];
+        return array_intersect_key($archiveduser, array_flip($wantedKeys));
     }
 
     /**

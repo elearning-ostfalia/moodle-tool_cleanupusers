@@ -168,6 +168,9 @@ class helper {
         // Array of users who could not be changed.
         $failures = [];
 
+        // Array of successfully archived users
+        $archivedusers = [];
+
         // Alternatively one could have written different function for each intention.
         // However, this would have produced duplicated code.
         // Therefore, checking the intention parameter repeatedly was preferred.
@@ -189,7 +192,8 @@ class helper {
                             if (empty($checker)) {
                                 throw new \coding_exception('checker name is missing');
                             }
-                            $changinguser->archive_me($checker);
+                            $archiveduser = $changinguser->archive_me($checker);
+                            array_push($archivedusers, $archiveduser);
                             break;
                         case 'reactivate':
                             $changinguser->activate_me();
@@ -208,6 +212,7 @@ class helper {
         $result = [];
         $result['countersuccess'] = $countersuccess;
         $result['failures'] = $failures;
+        $result['archivedusers'] = $archivedusers;
         return $result;
     }
 

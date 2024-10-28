@@ -31,6 +31,7 @@ defined('MOODLE_INTERNAL') || die();
 
 use tool_cleanupusers\cleanupusers_exception;
 // Needed for the default plugin.
+use tool_cleanupusers\helper;
 use userstatus_userstatuswwu\userstatuswwu;
 use tool_cleanupusers\archiveduser;
 use tool_cleanupusers\event\deprovisionusercronjob_completed;

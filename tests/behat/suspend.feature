@@ -185,7 +185,6 @@ Feature: Cleanup settings
     Then I should see "User '<userid>' has been archived"
 
     When I press "Continue"
-    # And I pause
     And I should see "Users to be archived by '<checker>'"
     And I should not see "<userid>"
 

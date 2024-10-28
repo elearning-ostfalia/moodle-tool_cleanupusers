@@ -29,6 +29,7 @@ define('CONFIG_ENABLED', 'userstatus_plugins_enabled');
 define('CONFIG_AUTH_METHOD', 'auth_method');
 define('CONFIG_DELETETIME', 'deletetime');
 define('CONFIG_SUSPENDTIME', 'suspendtime');
+define('CONFIG_LOG_FOLDER', 'log_folder');
 
 
 /**
@@ -182,6 +183,9 @@ abstract class userstatuschecker
 
     protected function log($text) {
         if (!empty($this->baseconfig->log_folder)) {
+            if(!file_exists($this->baseconfig->log_folder)){
+                mkdir($this->baseconfig->log_folder, 0777, true);
+            }
             file_put_contents($this->baseconfig->log_folder . "/debug_log_ldapchecker.log",
                 "\n[".date("d-M-Y - H:i ")."] $text " , FILE_APPEND);
         }
@@ -203,7 +207,7 @@ abstract class userstatuschecker
         global $DB;
 
         list($sql_condition, $param_condition) = $this->condition_suspend_sql();
-        $sql = "SELECT id, suspended, lastaccess, username, deleted, auth
+        $sql = "SELECT id, suspended, lastaccess, username, deleted, auth, firstname, lastname
                 FROM {user}
                 WHERE " . $this->get_auth_sql('') . "
                     AND deleted = 0
@@ -226,6 +230,9 @@ abstract class userstatuschecker
                     $user->auth,
                     $this->get_name()
                 );
+                // Add further attributes neede for export in csv file.
+                $suspenduser->firstname = $user->firstname;
+                $suspenduser->lastname = $user->lastname;
                 $tosuspend[$key] = $suspenduser;
                 $this->log("[get_to_suspend] " . $user->username . " marked");
             }

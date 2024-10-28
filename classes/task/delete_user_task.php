@@ -69,6 +69,9 @@ class delete_user_task extends scheduled_task {
             return true;
         }
 
+        $unabletodelete = [];
+        $userdeleted = 0;
+
         foreach ($pluginsenabled as $subplugin => $dir) {
 
             $mysubpluginname = "\\userstatus_" . $subplugin . "\\" . $subplugin;
@@ -77,37 +80,37 @@ class delete_user_task extends scheduled_task {
             // Private function is executed to suspend, delete and activate users.
             $arraytodelete = $userstatuschecker->get_to_delete();
             $deleteresult = helper::change_user_deprovisionstatus($arraytodelete, 'delete', $subplugin);
-            $unabletodelete = $deleteresult['failures'];
-            $userdeleted = $deleteresult['countersuccess'];
+            $unabletodelete = array_merge($unabletodelete, $deleteresult['failures']);
+            $userdeleted += $deleteresult['countersuccess'];
+        }
 
-            // Admin is informed about the cron-job and the amount of users that are affected.
+        // Admin is informed about the cron-job and the amount of users that are affected.
 
-            $admin = get_admin();
-            // Number of users suspended or deleted.
-            $messagetext =
-                "\r\n" . get_string('e-mail-deleted', 'tool_cleanupusers', $userdeleted);
+        $admin = get_admin();
+        // Number of users suspended or deleted.
+        $messagetext =
+            "\r\n" . get_string('e-mail-deleted', 'tool_cleanupusers', $userdeleted);
 
-            // No Problems occurred during the cron-job.
-            if (empty($unabletoactivate) && empty($unabletoarchive) && empty($unabletodelete)) {
-                $messagetext .= "\r\n\r\n" . get_string('e-mail-noproblem', 'tool_cleanupusers');
-            } else {
-                // Extra information for problematic users.
-                $messagetext .= "\r\n\r\n" . get_string(
+        // No Problems occurred during the cron-job.
+        if (empty($unabletoactivate) && empty($unabletoarchive) && empty($unabletodelete)) {
+            $messagetext .= "\r\n\r\n" . get_string('e-mail-noproblem', 'tool_cleanupusers');
+        } else {
+            // Extra information for problematic users.
+            $messagetext .= "\r\n\r\n" . get_string(
                     'e-mail-problematic_delete',
                     'tool_cleanupusers',
                     count($unabletodelete)
                 );
-            }
-
-            // Email is send from the do not reply user.
-            $sender = \core_user::get_noreply_user();
-            email_to_user($admin, $sender, 'Update Infos Cron Job tool_cleanupusers', $messagetext);
-
-            // Triggers deprovisionusercronjob_completed event.
-            $context = \context_system::instance();
-            $event = deprovisionusercronjob_completed::create_simple($context, [], $userdeleted);
-            $event->trigger();
         }
+
+        // Email is send from the do not reply user.
+        $sender = \core_user::get_noreply_user();
+        email_to_user($admin, $sender, 'Update Infos Cron Job tool_cleanupusers', $messagetext);
+
+        // Triggers deprovisionusercronjob_completed event.
+        $context = \context_system::instance();
+        $event = deprovisionusercronjob_completed::create_simple($context, [], $userdeleted);
+        $event->trigger();
 
         return true;
     }

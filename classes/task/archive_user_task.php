@@ -67,6 +67,13 @@ class archive_user_task extends scheduled_task {
             return true;
         }
 
+        $unabletoarchive = [];
+        $userarchived = 0;
+        $archievdusers = [];
+
+        $unabletoactivate = [];
+        $useractivated = 0;
+
         foreach ($pluginsenabled as $subplugin => $dir) {
 
             $mysubpluginname = "\\userstatus_" . $subplugin . "\\" . $subplugin;
@@ -77,47 +84,74 @@ class archive_user_task extends scheduled_task {
             $reactivatearray = $userstatuschecker->get_to_reactivate();
 
             $suspendresult = helper::change_user_deprovisionstatus($archivearray, 'suspend', $subplugin);
-            $unabletoarchive = $suspendresult['failures'];
-            $userarchived = $suspendresult['countersuccess'];
+            $unabletoarchive = array_merge($unabletoarchive, $suspendresult['failures']);
+            $userarchived += $suspendresult['countersuccess'];
+            $archievdusers = array_merge($archievdusers, $suspendresult['archivedusers']);
 
             $result = helper::change_user_deprovisionstatus($reactivatearray, 'reactivate', $subplugin);
-            $unabletoactivate = $result['failures'];
-            $useractivated = $result['countersuccess'];
-
-            // Admin is informed about the cron-job and the amount of users that are affected.
-
-            $admin = get_admin();
-            // Number of users suspended or deleted.
-            $messagetext = get_string('e-mail-archived', 'tool_cleanupusers', $userarchived) .
-                "\r\n" . get_string('e-mail-activated', 'tool_cleanupusers', $useractivated);
-
-            // No Problems occured during the cron-job.
-            if (empty($unabletoactivate) && empty($unabletoarchive)) {
-                $messagetext .= "\r\n\r\n" . get_string('e-mail-noproblem', 'tool_cleanupusers');
-            } else {
-                // Extra information for problematic users.
-                $messagetext .= "\r\n\r\n" . get_string(
-                        'e-mail-problematic_suspend',
-                        'tool_cleanupusers',
-                        count($unabletoarchive)
-                    ) . "\r\n\r\n" . get_string(
-                        'e-mail-problematic_reactivate',
-                        'tool_cleanupusers',
-                        count($unabletoactivate)
-                    );
-            }
-
-            // Email is send from the do not reply user.
-            $sender = \core_user::get_noreply_user();
-            email_to_user($admin, $sender, 'Update Infos Cron Job tool_cleanupusers', $messagetext);
-
-            // Triggers deprovisionusercronjob_completed event.
-            $context = \context_system::instance();
-            $event = deprovisionusercronjob_completed::create_simple($context, $userarchived, []);
-            $event->trigger();
+            $unabletoactivate = array_merge($unabletoactivate, $result['failures']);
+            $useractivated += $result['countersuccess'];
         }
+
+        // Admin is informed about the cron-job and the amount of users that are affected.
+        $admin = get_admin();
+        // Number of users suspended or deleted.
+        $messagetext = get_string('e-mail-archived', 'tool_cleanupusers', $userarchived) .
+            "\r\n" . get_string('e-mail-activated', 'tool_cleanupusers', $useractivated);
+
+        // No Problems occured during the cron-job.
+        if (empty($unabletoactivate) && empty($unabletoarchive)) {
+            $messagetext .= "\r\n\r\n" . get_string('e-mail-noproblem', 'tool_cleanupusers');
+        } else {
+            // Extra information for problematic users.
+            $messagetext .= "\r\n\r\n" . get_string(
+                    'e-mail-problematic_suspend',
+                    'tool_cleanupusers',
+                    count($unabletoarchive)
+                ) . "\r\n\r\n" . get_string(
+                    'e-mail-problematic_reactivate',
+                    'tool_cleanupusers',
+                    count($unabletoactivate)
+                );
+        }
+
+        // Email is send from the do not reply user.
+        $sender = \core_user::get_noreply_user();
+        email_to_user($admin, $sender, 'Update Infos Cron Job tool_cleanupusers', $messagetext);
+
+        // Triggers deprovisionusercronjob_completed event.
+        $context = \context_system::instance();
+        $event = deprovisionusercronjob_completed::create_simple($context, $userarchived, []);
+        $event->trigger();
+
+        // Log users archived in the last task
+        $this->write_csv($archievdusers);
 
         return true;
     }
 
+    private function write_csv($users){
+        if (empty($users)) {
+            return;
+        }
+
+        $baseconfig = get_config('tool_cleanupusers');
+        if (empty($baseconfig->log_folder)) {
+            return;
+        }
+
+        $path = $baseconfig->log_folder;
+        // $path = '/var/www/html/moodle/hrz-mdl/admin/tool/cleanupusers/logs';
+        if(!file_exists($path)){
+            mkdir($path, 0777, true);
+        }
+        $out = fopen($path.'/archived_users_'.date("d_m_Y").'.csv', 'w');
+
+        fputcsv($out, array_keys($users[0]), ';');
+        foreach ($users as $line) {
+            fputcsv($out, $line, ';');
+        }
+
+        fclose($out);
+    }
 }

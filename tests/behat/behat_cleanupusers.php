@@ -106,7 +106,7 @@ class behat_cleanupusers extends behat_base {
         // element might not be visible. So the window is maximized.
         $this->getSession()->getDriver()->maximizeWindow();
 
-        $this->execute('behat_general::i_click_on', ['.imggroup-' . $record->id, 'css']);
+        $this->execute('behat_general::i_click_on', ['.fa-floppy-o.imggroup-' . $record->id, 'css']);
     }
 
     /**

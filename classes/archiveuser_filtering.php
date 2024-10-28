@@ -59,7 +59,7 @@ class archiveuser_filtering extends \user_filtering
         if ($archive) {
             $this->checkerform = new archive_filter_form();
         } else {
-            $this->checkerform = new not_archive_filter_form($urlchecker);
+            $this->checkerform = new not_archive_filter_form();
         }
 
         if ($formdata = $this->checkerform->get_data()) {

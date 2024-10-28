@@ -49,23 +49,19 @@ class not_archive_filter_form extends moodleform {
 
     const DEFAULT_ACTION = self::TO_BE_ARCHIVED; // does not require plugin!
 
-    private $checker;
+    // private $checker;
 
     public function __construct($checker = '') {
-        if (empty($checker)) {
-            $this->checker = $this->get_default_checker();
-        } else {
-            $this->checker = $checker;
-        }
+        //$this->checker = $this->get_default_checker();
         parent::__construct();
     }
 
     public function get_default_checker() {
         // debugging("get_default_checker");
-        if (isset($this->checker)) {
+        /*if (isset($this->checker)) {
             // debugging("$this->checker " . $this->checker);
             return $this->checker;
-        }
+        }*/
         global $SESSION;
         if (!empty($SESSION->checker)) {
             // debugging("$SESSION->checker " . $SESSION->checker);

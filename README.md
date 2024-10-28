@@ -172,6 +172,7 @@ Aktionen ggf. auch für alle Nutzer aus dem Filter anwenden mit Nachfrage!
 * logging von ldap wieder einschalten
 * handleuser: Testen, dass ein Nutzer, der bearbeitet werden soll, auch tatsächlich dafür geeignet ist
   (Hacker-Angriffen vorbeugen)
+* Suspendtime für suspended (modification time)
 
 # Bugs
 * no course checker und manuell suspendieren => ist archiviert (OK), aber taucht nicht in der 

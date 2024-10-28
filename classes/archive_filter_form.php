@@ -50,30 +50,22 @@ class archive_filter_form extends moodleform {
 
     const DEFAULT_ACTION = self::ALL_USERS; // does not require plugin!
 
-    private $checker;
-    private $action;
+    //private $checker;
+    //private $action;
 
-    public function __construct($action = '', $checker = '')
+    public function __construct()
     {
-        if (empty($checker)) {
-            $this->checker = $this->get_default_checker();
-        } else {
-            $this->checker = $checker;
-        }
-        if (empty($action)) {
-            $this->action = $this->get_default_action();
-        } else {
-            $this->action = $action;
-        }
+        //$this->checker = $this->get_default_checker();
+        //$this->action = $this->get_default_action();
         parent::__construct();
     }
 
     public function get_default_checker() {
         // debugging("get_default_checker");
-        if (isset($this->checker)) {
+        /*if (isset($this->checker)) {
             // debugging("$this->checker " . $this->checker);
             return $this->checker;
-        }
+        }*/
         global $SESSION;
         if (!empty($SESSION->checker)) {
             // debugging("$SESSION->checker " . $SESSION->checker);
@@ -86,10 +78,10 @@ class archive_filter_form extends moodleform {
     }
 
     public function get_default_action() {
-        if (isset($this->action)) {
+        /*if (isset($this->action)) {
             // debugging("$this->checker " . $this->checker);
             return $this->action;
-        }
+        }*/
         global $SESSION;
         if (!empty($SESSION->action)) {
             // debugging("$SESSION->checker " . $SESSION->checker);

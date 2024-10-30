@@ -89,6 +89,8 @@ class ldapchecker extends userstatuschecker { // implements userstatusinterface 
                     $this->log("ldap server sent " . count($this->lookup) . " users");
                     global $SESSION;
                     $SESSION->cleanupusers_LDAP_cache = $this->lookup;
+                    // cache is valid for 10 minutes
+                    $SESSION->cleanupusers_LDAP_cache_ttl = time() + (60 * 10);
 
                 } else {
                     $this->log("ldap_bind failed");
@@ -110,8 +112,11 @@ class ldapchecker extends userstatuschecker { // implements userstatusinterface 
     private function is_initialised() : bool {
         global $SESSION;
         if (isset($SESSION->cleanupusers_LDAP_cache) && count($SESSION->cleanupusers_LDAP_cache) > 0) {
-            $this->lookup = $SESSION->cleanupusers_LDAP_cache;
-            return true;
+            if (isset($SESSION->cleanupusers_LDAP_cache_ttl) && $SESSION->cleanupusers_LDAP_cache_ttl > time()) {
+                debugging('use ldap cache');
+                $this->lookup = $SESSION->cleanupusers_LDAP_cache;
+                return true;
+            }
         }
 
         if (defined('PHPUNIT_COMPOSER_INSTALL')) {

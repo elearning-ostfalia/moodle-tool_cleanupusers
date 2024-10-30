@@ -118,7 +118,7 @@ class ldapchecker extends userstatuschecker { // implements userstatusinterface 
             global $SESSION;
             if (isset($SESSION->cleanupusers_LDAP_cache) && count($SESSION->cleanupusers_LDAP_cache) > 0) {
                 if (isset($SESSION->cleanupusers_LDAP_cache_ttl) && $SESSION->cleanupusers_LDAP_cache_ttl > time()) {
-                    debugging('use ldap cache');
+                    // debugging('use ldap cache');
                     $this->lookup = $SESSION->cleanupusers_LDAP_cache;
                     return true;
                 }

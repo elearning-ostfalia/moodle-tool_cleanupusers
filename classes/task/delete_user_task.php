@@ -77,6 +77,8 @@ class delete_user_task extends scheduled_task {
             $mysubpluginname = "\\userstatus_" . $subplugin . "\\" . $subplugin;
             $userstatuschecker = new $mysubpluginname();
 
+            $userstatuschecker->invalidate_cache();
+
             // Private function is executed to suspend, delete and activate users.
             $arraytodelete = $userstatuschecker->get_to_delete();
             $deleteresult = helper::change_user_deprovisionstatus($arraytodelete, 'delete', $subplugin);

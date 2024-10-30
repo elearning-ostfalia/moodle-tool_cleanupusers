@@ -64,41 +64,56 @@ class ldapchecker extends userstatuschecker { // implements userstatusinterface 
         if ($this->testing === false && !defined('PHPUNIT_COMPOSER_INSTALL')) {
 
             $ldap = ldap_connect($this->config->host_url) or die("Could not connect to $this->config->host_url");
+            try {
+                $bind = ldap_bind($ldap, $this->config->bind_dn, $this->config->bind_pw); // returns 1 if correct
 
-            $bind = ldap_bind($ldap, $this->config->bind_dn, $this->config->bind_pw); // returns 1 if correct
+                if($bind) {
+                    $this->log("ldap_bind successful");
 
-            if($bind) {
-                $this->log("ldap_bind successful");
+                    $contexts = $this->config->contexts;
 
-                $contexts = $this->config->contexts;
+                    $uid = $this->config->ldap_username_attribute;
+                    $attributes = [$uid];
+                    $filter = $this->config->search_filter; // '(cn=*)';
+                    $search = ldap_search($ldap, $contexts, $filter, $attributes) or die("Error in search Query: " . ldap_error($ldap));
+                    $result = ldap_get_entries($ldap, $search);
 
-                $uid = $this->config->ldap_username_attribute;
-                $attributes = [$uid];
-                $filter = $this->config->search_filter; // '(cn=*)';
-                $search = ldap_search($ldap, $contexts, $filter, $attributes) or die("Error in search Query: " . ldap_error($ldap));
-                $result = ldap_get_entries($ldap, $search);
-
-                foreach ($result as $user) {
-                    if(isset($user[$uid])) {
-                        foreach ($user[$uid] as $cn) {
-                            $this->lookup[$cn] = true;
+                    foreach ($result as $user) {
+                        if(isset($user[$uid])) {
+                            foreach ($user[$uid] as $cn) {
+                                $this->lookup[$cn] = true;
+                            }
                         }
                     }
+
+                    $this->log("ldap server sent " . count($this->lookup) . " users");
+                    global $SESSION;
+                    $SESSION->cleanupusers_LDAP_cache = $this->lookup;
+
+                } else {
+                    $this->log("ldap_bind failed");
+                    // fatal error!
+                    throw new exception("cannot connect to LDAP server");
                 }
-
-                $this->log("ldap server sent " . count($this->lookup) . " users");
-
-            } else {
-                $this->log("ldap_bind failed");
-                // fatal error!
-                throw new exception("cannot connect to LDAP server");
+            } finally {
+                // Close LDAP connection.
+                ldap_close($ldap);
             }
         }
-
     }
 
+    public function invalidate_cache() : void {
+        global $SESSION;
+        unset($SESSION->cleanupusers_LDAP_cache);
+    }
 
     private function is_initialised() : bool {
+        global $SESSION;
+        if (isset($SESSION->cleanupusers_LDAP_cache) && count($SESSION->cleanupusers_LDAP_cache) > 0) {
+            $this->lookup = $SESSION->cleanupusers_LDAP_cache;
+            return true;
+        }
+
         if (defined('PHPUNIT_COMPOSER_INSTALL')) {
             return true;
         }

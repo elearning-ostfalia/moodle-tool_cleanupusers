@@ -79,6 +79,8 @@ class archive_user_task extends scheduled_task {
             $mysubpluginname = "\\userstatus_" . $subplugin . "\\" . $subplugin;
             $userstatuschecker = new $mysubpluginname();
 
+            $userstatuschecker->invalidate_cache();
+
             // Private function is executed to suspend, delete and activate users.
             $archivearray = $userstatuschecker->get_to_suspend();
             $reactivatearray = $userstatuschecker->get_to_reactivate();

@@ -68,6 +68,8 @@ abstract class userstatuschecker
         return get_string('suspendtime', 'userstatus_' . $this->name);
     }
 
+    public function invalidate_cache() : void {
+    }
     /**
      * shortname for internal purposes
      * @return string

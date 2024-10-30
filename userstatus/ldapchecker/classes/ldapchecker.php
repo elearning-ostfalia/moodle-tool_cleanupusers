@@ -107,6 +107,7 @@ class ldapchecker extends userstatuschecker { // implements userstatusinterface 
     public function invalidate_cache() : void {
         global $SESSION;
         unset($SESSION->cleanupusers_LDAP_cache);
+        unset($SESSION->cleanupusers_LDAP_cache_ttl);
     }
 
     private function is_initialised() : bool {

@@ -111,19 +111,19 @@ class ldapchecker extends userstatuschecker { // implements userstatusinterface 
     }
 
     private function is_initialised() : bool {
-        global $SESSION;
-        if (isset($SESSION->cleanupusers_LDAP_cache) && count($SESSION->cleanupusers_LDAP_cache) > 0) {
-            if (isset($SESSION->cleanupusers_LDAP_cache_ttl) && $SESSION->cleanupusers_LDAP_cache_ttl > time()) {
-                debugging('use ldap cache');
-                $this->lookup = $SESSION->cleanupusers_LDAP_cache;
-                return true;
-            }
-        }
-
         if (defined('PHPUNIT_COMPOSER_INSTALL')) {
             return true;
         }
         if (count($this->lookup) == 0) {
+            global $SESSION;
+            if (isset($SESSION->cleanupusers_LDAP_cache) && count($SESSION->cleanupusers_LDAP_cache) > 0) {
+                if (isset($SESSION->cleanupusers_LDAP_cache_ttl) && $SESSION->cleanupusers_LDAP_cache_ttl > time()) {
+                    debugging('use ldap cache');
+                    $this->lookup = $SESSION->cleanupusers_LDAP_cache;
+                    return true;
+                }
+            }
+
             $this->init();
             if (count($this->lookup) == 0) {
                 return false;

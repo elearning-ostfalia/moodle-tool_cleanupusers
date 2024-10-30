@@ -60,47 +60,58 @@ class ldapchecker extends userstatuschecker { // implements userstatusinterface 
     }
 
     private function init() {
-        // Only connect to LDAP if we are not in testing case
-        if ($this->testing === false && !defined('PHPUNIT_COMPOSER_INSTALL')) {
+        if (defined('BEHAT_SITE_RUNNING')) {
+            // skip connecting to ldap in behat tests.
+            // Add fake user to array because empry LDAP result would result in failure.
+            $this->lookup['12345678'] = true;
+            return;
+        }
+        if ($this->testing || defined('PHPUNIT_COMPOSER_INSTALL')) {
+            // skip connecting to ldap in Phpunit tests.
+            return;
+        }
 
-            $ldap = ldap_connect($this->config->host_url) or die("Could not connect to $this->config->host_url");
-            try {
-                $bind = ldap_bind($ldap, $this->config->bind_dn, $this->config->bind_pw); // returns 1 if correct
+        $ldap = ldap_connect($this->config->host_url) or die("Could not connect to $this->config->host_url");
+        try {
+            $bind = ldap_bind($ldap, $this->config->bind_dn, $this->config->bind_pw); // returns 1 if correct
 
-                if($bind) {
-                    $this->log("ldap_bind successful");
+            if($bind) {
+                $this->log("ldap_bind successful");
 
-                    $contexts = $this->config->contexts;
+                $contexts = $this->config->contexts;
 
-                    $uid = $this->config->ldap_username_attribute;
-                    $attributes = [$uid];
-                    $filter = $this->config->search_filter; // '(cn=*)';
-                    $search = ldap_search($ldap, $contexts, $filter, $attributes) or die("Error in search Query: " . ldap_error($ldap));
-                    $result = ldap_get_entries($ldap, $search);
+                $uid = $this->config->ldap_username_attribute;
+                $attributes = [$uid];
+                $filter = $this->config->search_filter; // '(cn=*)';
+                $search = ldap_search($ldap, $contexts, $filter, $attributes) or die("Error in search Query: " . ldap_error($ldap));
+                $result = ldap_get_entries($ldap, $search);
 
-                    foreach ($result as $user) {
-                        if(isset($user[$uid])) {
-                            foreach ($user[$uid] as $cn) {
-                                $this->lookup[$cn] = true;
-                            }
+                foreach ($result as $user) {
+                    if(isset($user[$uid])) {
+                        foreach ($user[$uid] as $cn) {
+                            $this->lookup[$cn] = true;
                         }
                     }
-
-                    $this->log("ldap server sent " . count($this->lookup) . " users");
-                    global $SESSION;
-                    $SESSION->cleanupusers_LDAP_cache = $this->lookup;
-                    // cache is valid for 10 minutes
-                    $SESSION->cleanupusers_LDAP_cache_ttl = time() + (60 * 10);
-
-                } else {
-                    $this->log("ldap_bind failed");
-                    // fatal error!
-                    throw new exception("cannot connect to LDAP server");
                 }
-            } finally {
-                // Close LDAP connection.
-                ldap_close($ldap);
+
+                $this->log("ldap server sent " . count($this->lookup) . " users");
+
+                if (count($this->lookup) == 0) {
+                    throw new exception("empty result set from LDAP server");
+                }
+                global $SESSION;
+                $SESSION->cleanupusers_LDAP_cache = $this->lookup;
+                // cache is valid for 10 minutes
+                $SESSION->cleanupusers_LDAP_cache_ttl = time() + (60 * 10);
+
+            } else {
+                $this->log("ldap_bind failed");
+                // fatal error!
+                throw new exception("cannot connect to LDAP server");
             }
+        } finally {
+            // Close LDAP connection.
+            ldap_close($ldap);
         }
     }
 

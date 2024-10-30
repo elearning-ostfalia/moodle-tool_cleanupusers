@@ -13,7 +13,8 @@ Feature: Cleanup settings
       | user7    | Student   | Miller7   | 1                 | ## -12 days##  | 0  | 0                 |                        |
       | user8    | Student   | Miller8   | 1                 | ## -12 days##  | 0  | 0                 |                        |
       | user9    | Student   | Miller9   | 1                 | ## -12 days##  | ## -9 days##  | 1      | Suspended              |
-      | user0    | Student   | Miller10   | 1                | ## -15 days##  | 0  | 0                 | neverlogin AND nocouse |
+      | user0    | Student   | Miller10  | 1                | ## -15 days##  | 0  | 0                 | neverlogin AND nocouse |
+      | newadmin | New       | AdminUser | 1                | ## -15 days##  | 0  | 0                 | new admin |
 
     And the following "courses" exist:
       | fullname  | shortname  | category  | relativedatesmode  | startdate      | enddate     | visible |
@@ -36,7 +37,7 @@ Feature: Cleanup settings
     # Values are set per checker as otherwise only one value
     # with the same first column will be set (bug?)
     And the following config values are set as admin:
-      | userstatus_plugins_enabled | lastloginchecker,nocoursechecker,neverloginchecker,suspendedchecker  | |
+      | userstatus_plugins_enabled | lastloginchecker,nocoursechecker,neverloginchecker,suspendedchecker,ldapchecker  | |
       | auth_method | manual  | userstatus_nocoursechecker |
 #      | suspendtime | 20  | userstatus_nocoursechecker |
       | deletetime | 15  | userstatus_nocoursechecker |
@@ -172,6 +173,36 @@ Feature: Cleanup settings
     And I should see "user6"
     And I should see "user7"
     And I should see "user8"
+
+  @javascript
+  Scenario Outline: Do not suspend admin users
+    Given I log in as "admin"
+
+    # check if user is visible in suspend list (user is not yet an admin)
+    And I navigate to "Users > Clean up users > Users to be archived" in site administration
+    When I select "<checker>" checker on archiving page
+    Then I should see "<user>"
+
+    # make new user an admin
+    And I navigate to "Users > Permissions > Site administrators" in site administration
+    And I click on "//*[contains(text(), 'New AdminUser')]" "xpath_element"
+    And I press "Add"
+    And I press "Continue"
+
+    # check that new admin is not offered to be suspended
+    And I navigate to "Users > Clean up users > Users to be archived" in site administration
+    When I select "<checker>" checker on archiving page
+    Then I should not see "New AdminUser"
+    And I should not see "newadmin"
+    And I should not see "guest"
+
+    Examples:
+      | checker                  | user  |
+      | Suspended Checker        | user9 |
+      | Last Login Checker       | user1 |
+      | Never Login Checker      | newadmin |
+      | No active course Checker | newadmin |
+      | LDAP Checker             | newadmin |
 
   @javascript
   Scenario Outline: Manually suspend user (all checkers)

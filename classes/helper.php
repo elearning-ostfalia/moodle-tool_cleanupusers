@@ -156,7 +156,7 @@ class helper {
      * @return array ['numbersuccess'] successfully changed users ['failures'] userids, who could not be changed.
      * @throws \coding_exception
      */
-    static public function change_user_deprovisionstatus($userarray, $intention, $checker) {
+    static public function change_user_deprovisionstatus($userarray, $intention, $checker, $dryRun = false) {
         // Checks whether the intention is valid.
         if (!in_array($intention, ['suspend', 'reactivate', 'delete'])) {
             throw new \coding_exception('Invalid parameters in tool_cleanupusers.');
@@ -192,14 +192,18 @@ class helper {
                             if (empty($checker)) {
                                 throw new \coding_exception('checker name is missing');
                             }
-                            $archiveduser = $changinguser->archive_me($checker);
+                            $archiveduser = $changinguser->archive_me($checker, $dryRun);
                             array_push($archivedusers, $archiveduser);
                             break;
                         case 'reactivate':
-                            $changinguser->activate_me();
+                            if (!$dryRun) {
+                                $changinguser->activate_me();
+                            }
                             break;
                         case 'delete':
-                            $changinguser->delete_me();
+                            if (!$dryRun) {
+                                $changinguser->delete_me();
+                            }
                             break;
                         // No default since if-clause checks the intention parameter.
                     }
@@ -235,4 +239,49 @@ class helper {
         }
     }
 
+
+    /**
+     * performs the actual user archiving and reactivating
+     *
+     * @param array $pluginsenabled
+     * @return array
+     * @throws \coding_exception
+     */
+    static function archive_users($dryRun = false): array {
+        $unabletoarchive = [];
+        $userarchived = 0;
+        $archievdusers = [];
+
+        $unabletoactivate = [];
+        $useractivated = 0;
+
+        // wrong order!
+        // $pluginsenabled =  \core_plugin_manager::instance()->get_enabled_plugins("userstatus");
+        // correct order:
+        $pluginsenabled = \tool_cleanupusers\plugininfo\userstatus::get_enabled_plugins();
+
+        if ($pluginsenabled) {
+            foreach ($pluginsenabled as $subplugin => $dir) {
+
+                $mysubpluginname = "\\userstatus_" . $subplugin . "\\" . $subplugin;
+                $userstatuschecker = new $mysubpluginname();
+
+                $userstatuschecker->invalidate_cache();
+
+                // Private function is executed to suspend, delete and activate users.
+                $archivearray = $userstatuschecker->get_to_suspend();
+                $reactivatearray = $userstatuschecker->get_to_reactivate();
+
+                $suspendresult = helper::change_user_deprovisionstatus($archivearray, 'suspend', $subplugin, $dryRun);
+                $unabletoarchive = array_merge($unabletoarchive, $suspendresult['failures']);
+                $userarchived += $suspendresult['countersuccess'];
+                $archievdusers = array_merge($archievdusers, $suspendresult['archivedusers']);
+
+                $result = helper::change_user_deprovisionstatus($reactivatearray, 'reactivate', $subplugin, $dryRun);
+                $unabletoactivate = array_merge($unabletoactivate, $result['failures']);
+                $useractivated += $result['countersuccess'];
+            }
+        }
+        return array($unabletoarchive, $userarchived, $archievdusers, $unabletoactivate, $useractivated);
+    }
 }

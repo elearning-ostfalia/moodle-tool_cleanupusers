@@ -83,7 +83,7 @@ class archiveduser {
      * Throws an exception when the user is already suspended.
      * @throws cleanupusers_exception
      */
-    public function archive_me($checker) {
+    public function archive_me($checker, $dryRun) {
         global $DB;
         // Get the current user.
         $user = \core_user::get_user($this->id);
@@ -94,34 +94,36 @@ class archiveduser {
             throw new cleanupusers_exception("Failed to suspend " . $user->username .
                 " : username is not cleaned");
         } else {
-            $transaction = $DB->start_delegated_transaction();
+            if (!$dryRun) {
+                $transaction = $DB->start_delegated_transaction();
 
-            // We are already getting the shadowuser here to keep the original suspended status.
-            $shadowuser = clone $user;
-            // The user might be logged in, so we must kill his/her session.
-            $user->suspended = 1;
-            manager::kill_user_sessions($user->id);
-            user_update_user($user, false);
-            // Document time of editing user in Database.
-            // In case there is no entry in the tool table make a new one.
-            $timestamp = time();
-            if (!$DB->record_exists('tool_cleanupusers', ['id' => $user->id])) {
-                $DB->insert_record_raw('tool_cleanupusers', [
-                    'id' => $user->id,
-                    'archived' => 1,
-                    'timestamp' => $timestamp,
-                    'checker' => $checker], true, false, true);
-            }
-            // Insert copy of user in second DB and replace user in main table when entry was successful.
-            if ($DB->record_exists('tool_cleanupusers_archive', ['id' => $shadowuser->id])) {
-                $DB->delete_records('tool_cleanupusers_archive', ['id' => $shadowuser->id]);
-            }
-            $DB->insert_record_raw('tool_cleanupusers_archive', $shadowuser, true, false, true);
-            // Replaces the current user with a pseudo_user that has no reference.
-            $cloneuser = $this->give_suspended_pseudo_user($shadowuser->id, $timestamp);
-            user_update_user($cloneuser, false);
+                // We are already getting the shadowuser here to keep the original suspended status.
+                $shadowuser = clone $user;
+                // The user might be logged in, so we must kill his/her session.
+                $user->suspended = 1;
+                manager::kill_user_sessions($user->id);
+                user_update_user($user, false);
+                // Document time of editing user in Database.
+                // In case there is no entry in the tool table make a new one.
+                $timestamp = time();
+                if (!$DB->record_exists('tool_cleanupusers', ['id' => $user->id])) {
+                    $DB->insert_record_raw('tool_cleanupusers', [
+                        'id' => $user->id,
+                        'archived' => 1,
+                        'timestamp' => $timestamp,
+                        'checker' => $checker], true, false, true);
+                }
+                // Insert copy of user in second DB and replace user in main table when entry was successful.
+                if ($DB->record_exists('tool_cleanupusers_archive', ['id' => $shadowuser->id])) {
+                    $DB->delete_records('tool_cleanupusers_archive', ['id' => $shadowuser->id]);
+                }
+                $DB->insert_record_raw('tool_cleanupusers_archive', $shadowuser, true, false, true);
+                // Replaces the current user with a pseudo_user that has no reference.
+                $cloneuser = $this->give_suspended_pseudo_user($shadowuser->id, $timestamp);
+                user_update_user($cloneuser, false);
 
-            $transaction->allow_commit();
+                $transaction->allow_commit();
+            }
         }
 
         $archiveduser = (array) $user;

@@ -112,6 +112,8 @@ $string['all-archived-users'] = 'All archived users';
 $string['confirm-delete'] = 'Do you really want to delete user \'<b>{$a->firstname} {$a->lastname}</b>\' and related data.<br>
 All user data will be finally and completely deleted and cannot be restored later!';
 $string['confirm-delete-title'] = 'Completely delete user';
+$string['unknowndownloadfile'] = 'Unknown download file';
+$string['downloadarchivepreview'] = 'Download archive preview as';
 
 
 

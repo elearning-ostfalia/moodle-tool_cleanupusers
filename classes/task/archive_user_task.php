@@ -58,42 +58,8 @@ class archive_user_task extends scheduled_task {
      * @return true
      */
     public function execute() {
-        // wrong order!
-        // $pluginsenabled =  \core_plugin_manager::instance()->get_enabled_plugins("userstatus");
-        // correct order:
-        $pluginsenabled = \tool_cleanupusers\plugininfo\userstatus::get_enabled_plugins();
-        if (!$pluginsenabled) {
-            // Nothing to be done.
-            return true;
-        }
-
-        $unabletoarchive = [];
-        $userarchived = 0;
-        $archievdusers = [];
-
-        $unabletoactivate = [];
-        $useractivated = 0;
-
-        foreach ($pluginsenabled as $subplugin => $dir) {
-
-            $mysubpluginname = "\\userstatus_" . $subplugin . "\\" . $subplugin;
-            $userstatuschecker = new $mysubpluginname();
-
-            $userstatuschecker->invalidate_cache();
-
-            // Private function is executed to suspend, delete and activate users.
-            $archivearray = $userstatuschecker->get_to_suspend();
-            $reactivatearray = $userstatuschecker->get_to_reactivate();
-
-            $suspendresult = helper::change_user_deprovisionstatus($archivearray, 'suspend', $subplugin);
-            $unabletoarchive = array_merge($unabletoarchive, $suspendresult['failures']);
-            $userarchived += $suspendresult['countersuccess'];
-            $archievdusers = array_merge($archievdusers, $suspendresult['archivedusers']);
-
-            $result = helper::change_user_deprovisionstatus($reactivatearray, 'reactivate', $subplugin);
-            $unabletoactivate = array_merge($unabletoactivate, $result['failures']);
-            $useractivated += $result['countersuccess'];
-        }
+        list($unabletoarchive, $userarchived, $archievdusers, $unabletoactivate, $useractivated) =
+            helper::archive_users();
 
         // Admin is informed about the cron-job and the amount of users that are affected.
         $admin = get_admin();
@@ -143,7 +109,6 @@ class archive_user_task extends scheduled_task {
         }
 
         $path = $baseconfig->log_folder;
-        // $path = '/var/www/html/moodle/hrz-mdl/admin/tool/cleanupusers/logs';
         if(!file_exists($path)){
             mkdir($path, 0777, true);
         }

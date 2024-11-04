@@ -89,6 +89,9 @@ if (!$enabled or count($enabled) == 0) {
     }
 }
 
-
 echo $content;
+
+echo $OUTPUT->download_dataformat_selector(get_string('downloadarchivepreview', 'tool_cleanupusers'),
+    new moodle_url('/admin/tool/cleanupusers/download.php'), 'dataformat', ['type' => 'archive']);
+
 echo $OUTPUT->footer();

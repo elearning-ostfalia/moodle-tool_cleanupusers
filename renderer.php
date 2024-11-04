@@ -212,7 +212,7 @@ class tool_cleanupusers_renderer extends plugin_renderer_base {
             $url = new \moodle_url('/admin/tool/cleanupusers/archiveusers.php',
                 ['action' => archive_filter_form::TO_BE_REACTIVATED, 'checker' => $checker]);
             $limitedarray = array_slice($userstoreactivate, 0, $limit, true);
-            $sqlfilter = helper::users_to_sql_filter($limitedarray);
+            $sqlfilter = helper::users_to_sql_filter($limitedarray, 'a');
 
             $archivetable = new \tool_cleanupusers\table\archive_table(
                 'tool_cleanupusers_pending_reactivate_table',

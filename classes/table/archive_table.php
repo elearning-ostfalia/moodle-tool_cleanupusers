@@ -54,6 +54,7 @@ class archive_table extends \table_sql {
             'username'   => '',
             'fullname'   => get_string('fullname'),
             'lastaccess' => get_string('lastaccess', 'tool_cleanupusers'),
+            'timecreated' => get_string('timecreated', 'tool_cleanupusers'),
             'auth'       => get_string('authmethod', 'tool_cleanupusers'),
             'checker'    => 'checker',
             'timestamp'    => get_string('timestamp', 'tool_cleanupusers'),
@@ -75,7 +76,7 @@ class archive_table extends \table_sql {
             $this->set_sql($sql['fields'],
                     $sql['from'], $sql['where'] . ' and ' . $where, $param);
         } else {
-            $fields = 'a.id, a.username, a.lastaccess, a.auth, a.firstname, a.lastname, c.checker, c.timestamp, '.
+            $fields = 'a.id, a.username, a.lastaccess, a.timecreated, a.auth, a.firstname, a.lastname, c.checker, c.timestamp, '.
                 implode(', ', fields::get_name_fields());
             $this->set_sql($fields,
                 '{tool_cleanupusers_archive} a JOIN {tool_cleanupusers} c ON c.id = a.id',
@@ -125,6 +126,10 @@ class archive_table extends \table_sql {
 
     public function col_timestamp($user) {
         return date('d.m.Y h:i:s', $user->timestamp);
+    }
+
+    public function col_timecreated($user) {
+        return date('d.m.Y h:i:s', $user->timecreated);
     }
 
     public function col_lastaccess($user) {

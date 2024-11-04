@@ -94,4 +94,7 @@ echo $content;
 echo $OUTPUT->download_dataformat_selector(get_string('downloadarchivepreview', 'tool_cleanupusers'),
     new moodle_url('/admin/tool/cleanupusers/download.php'), 'dataformat', ['type' => 'archive']);
 
+echo $OUTPUT->download_dataformat_selector(get_string('downloaddeletepreview', 'tool_cleanupusers'),
+    new moodle_url('/admin/tool/cleanupusers/download.php'), 'dataformat', ['type' => 'delete']);
+
 echo $OUTPUT->footer();

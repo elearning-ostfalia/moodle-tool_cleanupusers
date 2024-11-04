@@ -161,6 +161,8 @@ Feature: Cleanup settings
     Then I should see "user3"
     And I should see "user4"
 
+    # And I pause
+
     When I select "No active course Checker" checker on archive page
     Then I should see "user5"
     And I should see "user6"

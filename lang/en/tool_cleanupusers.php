@@ -36,6 +36,7 @@ $string['achivedusers'] = 'Archived users';
 $string['todelete2'] = 'Users to be deleted';
 $string['todelete'] = 'Manage users to be deleted';
 $string['lastaccess'] = 'Last access';
+$string['timecreated'] = 'Registered at';
 $string['usersarchived'] = 'User \'{$a}\' has been archived';
 $string['Yes'] = 'Yes';
 $string['id'] = 'ID';
@@ -112,8 +113,11 @@ $string['all-archived-users'] = 'All archived users';
 $string['confirm-delete'] = 'Do you really want to delete user \'<b>{$a->firstname} {$a->lastname}</b>\' and related data.<br>
 All user data will be finally and completely deleted and cannot be restored later!';
 $string['confirm-delete-title'] = 'Completely delete user';
-$string['unknowndownloadfile'] = 'Unknown download file';
+$string['nodownload'] = 'There is nothing to be downloaded';
 $string['downloadarchivepreview'] = 'Download archive preview as';
+$string['downloaddeletepreview'] = 'Download delete preview as';
+$string['downloaddeletepreview'] = 'Download delete preview as';
+
 
 
 

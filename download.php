@@ -27,29 +27,44 @@ require_once(__DIR__ . '/../../../config.php');
 require_once($CFG->libdir . '/filelib.php');
 require_once($CFG->libdir . '/dataformatlib.php');
 
-$dataformat = optional_param('dataformat', '', PARAM_ALPHA);
+$dataformat = required_param('dataformat', PARAM_ALPHA);
+$type = required_param('type', PARAM_ALPHA);
 
 
 // Check permissions.
 require_admin();
 
-list($unabletoarchive, $userarchived, $archievdusers, $unabletoactivate, $useractivated) = \tool_cleanupusers\helper::archive_users(true);
+switch ($type) {
+    case "archive":
+        list($unabletoarchive, $userarchived, $users_to_be_downloaded, $unabletoactivate, $useractivated) =
+            \tool_cleanupusers\helper::archive_users(true);
+        break;
+    case "delete":
+        list($unabletodelete, $userdeleted, $users_to_be_downloaded) =
+            \tool_cleanupusers\helper::delete_users(true);
+        break;
+    default:
+        throw new moodle_exception("invalid download call");
+}
 
 $rows = new ArrayObject([]);
-foreach ($archievdusers as $row) {
+foreach ($users_to_be_downloaded as $row) {
     $rows->append($row);
 }
 
+if (count($rows) == 0) {
+    echo get_string('nodownload', 'tool_cleanupusers');
+} else {
+    $fields = array_keys($users_to_be_downloaded[0]);
 
-$fields = array_keys($archievdusers[0]);
+    \core\dataformat::download_data($type . '_preview', $dataformat, $fields, $rows->getIterator(), function(array $row) use ($dataformat) {
+        // HTML export content will need escaping.
+        if (strcasecmp($dataformat, 'html') === 0) {
+            $row = array_map(function($cell) {
+                return s($cell);
+            }, $row);
+        }
 
-\core\dataformat::download_data('archive_preview', $dataformat, $fields, $rows->getIterator(), function(array $row) use ($dataformat) {
-    // HTML export content will need escaping.
-    if (strcasecmp($dataformat, 'html') === 0) {
-        $row = array_map(function($cell) {
-            return s($cell);
-        }, $row);
-    }
-
-    return $row;
-});
+        return $row;
+    });
+}

@@ -171,6 +171,9 @@ class helper {
         // Array of successfully archived users
         $archivedusers = [];
 
+        // Array of successfully deleted users
+        $deletedusers = [];
+
         // Alternatively one could have written different function for each intention.
         // However, this would have produced duplicated code.
         // Therefore, checking the intention parameter repeatedly was preferred.
@@ -201,9 +204,8 @@ class helper {
                             }
                             break;
                         case 'delete':
-                            if (!$dryRun) {
-                                $changinguser->delete_me();
-                            }
+                            $deleteduser = $changinguser->delete_me($dryRun);
+                            array_push($deletedusers, $deleteduser);
                             break;
                         // No default since if-clause checks the intention parameter.
                     }
@@ -217,6 +219,7 @@ class helper {
         $result['countersuccess'] = $countersuccess;
         $result['failures'] = $failures;
         $result['archivedusers'] = $archivedusers;
+        $result['deletedusers'] = $deletedusers;
         return $result;
     }
 
@@ -239,9 +242,9 @@ class helper {
         }
     }
 
-
     /**
-     * performs the actual user archiving and reactivating
+     * performs the actual user archiving and reactivating with the option
+     * to perform a dry run
      *
      * @param array $pluginsenabled
      * @return array
@@ -284,4 +287,42 @@ class helper {
         }
         return array($unabletoarchive, $userarchived, $archievdusers, $unabletoactivate, $useractivated);
     }
+
+    /**
+     * performs the actual user archiving and reactivating with the option
+     * to perform a dry run
+     *
+     * @param array $pluginsenabled
+     * @return array
+     * @throws \coding_exception
+     */
+    static function delete_users($dryRun = false): array {
+        $unabletodelete = [];
+        $userdeleted = 0;
+        $deletedusers = [];
+
+        // wrong order!
+        // $pluginsenabled =  \core_plugin_manager::instance()->get_enabled_plugins("userstatus");
+        // correct order:
+        $pluginsenabled = \tool_cleanupusers\plugininfo\userstatus::get_enabled_plugins();
+
+        if ($pluginsenabled) {
+            foreach ($pluginsenabled as $subplugin => $dir) {
+
+                $mysubpluginname = "\\userstatus_" . $subplugin . "\\" . $subplugin;
+                $userstatuschecker = new $mysubpluginname();
+
+                $userstatuschecker->invalidate_cache();
+
+                // Private function is executed to suspend, delete and activate users.
+                $arraytodelete = $userstatuschecker->get_to_delete();
+                $deleteresult = helper::change_user_deprovisionstatus($arraytodelete, 'delete', $subplugin, $dryRun);
+                $unabletodelete = array_merge($unabletodelete, $deleteresult['failures']);
+                $deletedusers = array_merge($deletedusers, $deleteresult['deletedusers']);
+                $userdeleted += $deleteresult['countersuccess'];
+            }
+        }
+        return array($unabletodelete, $userdeleted, $deletedusers);
+    }
+
 }

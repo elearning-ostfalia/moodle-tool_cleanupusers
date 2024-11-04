@@ -83,7 +83,7 @@ class archiveduser {
      * Throws an exception when the user is already suspended.
      * @throws cleanupusers_exception
      */
-    public function archive_me($checker, $dryRun) {
+    public function archive_me($checker, $dryRun) : array {
         global $DB;
         // Get the current user.
         $user = \core_user::get_user($this->id);
@@ -126,16 +126,7 @@ class archiveduser {
             }
         }
 
-        $archiveduser = (array) $user;
-        if (!empty($user->lastaccess) && $user->lastaccess != 0) {
-            $archiveduser['lastaccess'] = date('d.m.Y h:i:s', $user->lastaccess);
-        } else {
-            $archiveduser['lastaccess'] = 'never logged in';
-        }
-
-        // extract a few attributes in order to save memory.
-        $wantedKeys = ['id', 'username', 'firstname', 'lastname', 'lastaccess', 'auth', 'suspended'];
-        return array_intersect_key($archiveduser, array_flip($wantedKeys));
+        return self::prepare_user_for_export($user);
     }
 
     /**
@@ -187,7 +178,7 @@ class archiveduser {
      *
      * @throws cleanupusers_exception
      */
-    public function delete_me() {
+    public function delete_me($dryRun) : array {
         global $DB;
         // Get the current user.
         $user = \core_user::get_user($this->id);
@@ -195,39 +186,45 @@ class archiveduser {
             // User was suspended manually.
             throw new cleanupusers_exception("Failed to delete " . $user->username .
                 " : user not suspended by the plugin");
-        } else {
-            // User was suspended by the plugin.
-            if (!$DB->record_exists('tool_cleanupusers_archive', ['id' => $user->id])) {
-                throw new cleanupusers_exception("Failed to delete " . $user->username .
-                    " : user suspended by the plugin has no entry in archive");
-            } else {
-                $transaction = $DB->start_delegated_transaction();
-
-                // Deletes the records in both plugin tables.
-                $DB->delete_records('tool_cleanupusers', ['id' => $user->id]);
-                $DB->delete_records('tool_cleanupusers_archive', ['id' => $user->id]);
-
-                // To secure that plugins that reference the user table do not fail create empty user with a hash as username.
-                $newusername = hash('md5', $user->username);
-                // Checks whether the username already exist (possible but unlikely).
-                // In the unlikely case that hash(username) exist in the table, while loop generates new username.
-                while ($DB->record_exists('user', ["username" => $newusername])) {
-                    $tempname = $newusername;
-                    $newusername = hash('md5', $user->username . $tempname);
-                }
-                $user->username = $newusername;
-                user_update_user($user, false);
-                manager::kill_user_sessions($user->id);
-                // Core Function has to be executed finally.
-                // It can not be executed earlier since moodle then prevents further operations on the user.
-                // The Function adds @unknownemail.invalid. and a timestamp to the username.
-                // It is secured, that the username is below 100 characters since sha256 produces 64 characters and the...
-                // additional string has only 32 characters.
-                user_delete_user($user);
-
-                $transaction->allow_commit();
-            }
         }
+        // User was suspended by the plugin.
+        if (!$DB->record_exists('tool_cleanupusers_archive', ['id' => $user->id])) {
+            throw new cleanupusers_exception("Failed to delete " . $user->username .
+                " : user suspended by the plugin has no entry in archive");
+        }
+
+        // read correct user data from archive data
+        $deleteduserdata = $DB->get_record('tool_cleanupusers_archive', array('id' => $this->id));
+
+        if (!$dryRun) {
+            $transaction = $DB->start_delegated_transaction();
+
+            // Deletes the records in both plugin tables.
+            $DB->delete_records('tool_cleanupusers', ['id' => $user->id]);
+            $DB->delete_records('tool_cleanupusers_archive', ['id' => $user->id]);
+
+            // To secure that plugins that reference the user table do not fail create empty user with a hash as username.
+            $newusername = hash('md5', $user->username);
+            // Checks whether the username already exist (possible but unlikely).
+            // In the unlikely case that hash(username) exist in the table, while loop generates new username.
+            while ($DB->record_exists('user', ["username" => $newusername])) {
+                $tempname = $newusername;
+                $newusername = hash('md5', $user->username . $tempname);
+            }
+            $user->username = $newusername;
+            user_update_user($user, false);
+            manager::kill_user_sessions($user->id);
+            // Core Function has to be executed finally.
+            // It can not be executed earlier since moodle then prevents further operations on the user.
+            // The Function adds @unknownemail.invalid. and a timestamp to the username.
+            // It is secured, that the username is below 100 characters since sha256 produces 64 characters and the...
+            // additional string has only 32 characters.
+            user_delete_user($user);
+
+            $transaction->allow_commit();
+        }
+
+        return self::prepare_user_for_export($deleteduserdata);
     }
 
     /**
@@ -274,5 +271,28 @@ class archiveduser {
         $cloneuser->moodlenetprofile = '';
 
         return $cloneuser;
+    }
+
+    /**
+     * @param bool|\stdClass $user
+     * @return array
+     */
+    protected static function prepare_user_for_export(\stdClass $user): array
+    {
+        $archiveduser = (array)$user;
+        if (!empty($user->lastaccess) && $user->lastaccess != 0) {
+            $archiveduser['lastaccess'] = date('d.m.Y h:i:s', $user->lastaccess);
+        } else {
+            $archiveduser['lastaccess'] = 'never logged in';
+        }
+        if (!empty($user->timecreated) && $user->timecreated != 0) {
+            $archiveduser['timecreated'] = date('d.m.Y h:i:s', $user->timecreated);
+        } else {
+            $archiveduser['timecreated'] = '???';
+        }
+
+        // extract a few attributes in order to save memory.
+        $wantedKeys = ['id', 'username', 'firstname', 'lastname', 'lastaccess', 'auth', 'suspended', 'timecreated'];
+        return array_intersect_key($archiveduser, array_flip($wantedKeys));
     }
 }

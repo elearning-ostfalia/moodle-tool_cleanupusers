@@ -49,7 +49,7 @@ class users_table extends \table_sql {
         $this->returnurl = $returnurl;
 
         // Define the list of columns to show.
-        $columns = ['id', 'username', 'fullname', 'lastaccess', 'auth', 'suspend'];
+        $columns = ['id', 'username', 'fullname', 'lastaccess', 'timecreated',  'auth', 'suspend'];
         $this->define_columns($columns);
 
         // Define the titles of columns to show in header.
@@ -60,10 +60,11 @@ class users_table extends \table_sql {
             $header,
             get_string('fullname'),
             get_string('lastaccess', 'tool_cleanupusers'),
+            get_string('timecreated', 'tool_cleanupusers'),
             get_string('authmethod', 'tool_cleanupusers'),
             ''];
         $this->define_headers($headers);
-        $this->set_sql('id, username, lastaccess, auth, suspended, ' .
+        $this->set_sql('id, username, lastaccess, auth, suspended, timecreated, ' .
             implode(', ', fields::get_name_fields()), '{user}', $sqlwhere, $param);
     }
 
@@ -72,6 +73,13 @@ class users_table extends \table_sql {
             return date('d.m.Y h:i:s', $user->lastaccess);
         else
             return get_string('neverlogged', 'tool_cleanupusers');
+    }
+
+    public function col_timecreated($user) {
+        if (!empty($user->timecreated))
+            return date('d.m.Y h:i:s', $user->timecreated);
+        var_dump($user->timecreated);
+        return '??';
     }
 
     public function col_suspend($user) {

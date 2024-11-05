@@ -115,8 +115,8 @@ All user data will be finally and completely deleted and cannot be restored late
 $string['confirm-delete-title'] = 'Completely delete user';
 $string['nodownload'] = 'There is nothing to be downloaded';
 $string['downloadarchivepreview'] = 'Download archive preview as';
-$string['downloaddeletepreview'] = 'Download delete preview as';
-$string['downloaddeletepreview'] = 'Download delete preview as';
+$string['downloaddeletepreview'] = 'Download deletion preview as';
+
 
 
 

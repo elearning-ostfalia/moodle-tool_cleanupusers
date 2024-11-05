@@ -87,6 +87,10 @@ Remarks :
 
 To check the technical implementation, look at `/lib/moodlelib.php`.
 
+## CLI
+
+There is a simple script for reactivating users by command line (reactivate.php).
+
 ## Sub-plugins
 
 The plugin requires at least one sub-plugin of the type `cleanupusers_userstatus` that returns users to be handled by the cronjob. 
@@ -95,10 +99,8 @@ users.
      
 If you implement your own subplugin it should be placed in `admin/tool/cleanupusers/userstatus`.
 
-### Timechecker
-The timechecker plugin suspends and deletes users depending on the last access of the user to the platform. 
-The site administrator can define custom time spans, as a default 90 days have to pass without a user logging in, until the 
-user is suspended and 365 days until the user is deleted.
+### Lastloginchecker
+The Lastloginchecker plugin suspends and deletes users depending on the last access of the user to the platform. 
 
 ### Suspendedchcker
 
@@ -168,8 +170,6 @@ Aktionen ggf. auch für alle Nutzer aus dem Filter anwenden mit Nachfrage!
 * Da für nocoursechecker keine sichere Latenzzeit realisiert werden kann, sollte noch die 
   Option cron/manuell bei den Suspend-Aktionen ergänzt werden. Der Wert muss dann in die
   Übersichtstabelle.
-* Anzeige des Zeitpunkts, wann Nutzer registriert wurde
-* logging von ldap wieder einschalten
 * handleuser: Testen, dass ein Nutzer, der bearbeitet werden soll, auch tatsächlich dafür geeignet ist
   (Hacker-Angriffen vorbeugen)
 * Suspendtime für suspended (modification time)
@@ -178,5 +178,4 @@ Aktionen ggf. auch für alle Nutzer aus dem Filter anwenden mit Nachfrage!
 * no course checker und manuell suspendieren => ist archiviert (OK), aber taucht nicht in der 
   Liste der zu löschenden Nutzer auf (obwohl kein Kurs zugeordnet)
 * no course checker: inaktive Einschreibungen berücksichtigen (Test!)
-* csv??? was passiert da und wann passiert da was?
 * 

@@ -17,9 +17,8 @@
 /**
  * CLI script for reactivating users on the command line.
  *
- * @package    core
- * @subpackage cli
- * @copyright  2018 Dmitrii Metelkin <dmitriim@catalyst-au.net>
+ * @package   tool_cleanupusers
+ * @copyright 2024 Ostfalia Hochschule fuer angewandte Wissenschaften
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 

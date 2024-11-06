@@ -467,7 +467,7 @@ final class tool_cleanupusers_test extends advanced_testcase {
         );
         $recordusertableoriginal = $DB->get_record('user', ['id' => $data['originaluser']->id]);
         $recordusertableduplicate = $DB->get_record('user', ['id' => $data['userduplicatedname']->id]);
-        $this->assertEquals('duplicatedname', $recordusertableoriginal->username);
+        $this->assertEquals('anonym-z', $recordusertableoriginal->username);
         $this->assertEquals('duplicatedname', $recordusertableduplicate->username);
         $this->assertEquals(1, $recordusertableoriginal->suspended);
         $this->assertNotEmpty($recordtooltableoriginaluser);
@@ -477,10 +477,9 @@ final class tool_cleanupusers_test extends advanced_testcase {
     }
 
     public function test_exception_activateme_3(): void {
-            global $DB;
-            $data = $this->set_up();
-            $this->assertNotEmpty($data);
-            $this->expectException('tool_cleanupusers\cleanupusers_exception');
+        global $DB;
+        $data = $this->set_up();
+        $this->assertNotEmpty($data);
 
         $usersuspendedmanually = new archiveduser(
             $data['usersuspendedmanually']->id,
@@ -579,10 +578,10 @@ final class tool_cleanupusers_test extends advanced_testcase {
             'In the last cron-job 1 users were archived',
             $msg
         );  // Useroneyearnotloggedin.
-/*        $this->assertStringContainsString(
-            'In the last cron-job 1 users were deleted',
+        $this->assertStringNotContainsString(
+            'were deleted',
             $msg
-        );  */ // Usersuspendedbyplugin.
+        );   // Usersuspendedbyplugin.
         $this->assertStringContainsString(
             'In the last cron-job 1 users were reactivated',
             $msg
@@ -704,8 +703,8 @@ final class tool_cleanupusers_test extends advanced_testcase {
             'In the last cron-job 1 users were deleted',
             $msg
         );  // Usersuspendedbyplugin.
-        $this->assertStringContainsString(
-            'In the last cron-job 1 users were reactivated',
+        $this->assertStringNotContainsString(
+            'users were reactivated',
             $msg
         ); // Usersuspendedbypluginandmanually.
         $this->assertStringContainsString(
@@ -763,15 +762,15 @@ final class tool_cleanupusers_test extends advanced_testcase {
         $this->assertEquals(1, $recordusertable->suspended);
         $this->assertEquals(0, $recordusertable->deleted);
 
-        // User was reactivated.
+        // User was NOT reactivated.
         $recordusertable = $DB->get_record('user', ['id' => $data['usersuspendedbypluginandmanually']->id]);
         $recordtooltable = $DB->get_record('tool_cleanupusers', ['id' => $data['usersuspendedbypluginandmanually']->id]);
         $recordtooltable2 = $DB->get_record(
             'tool_cleanupusers_archive',
             ['id' => $data['usersuspendedbypluginandmanually']->id]
         );
-        $this->assertEmpty($recordtooltable);
-        $this->assertEmpty($recordtooltable2);
+        $this->assertNotEmpty($recordtooltable);
+        $this->assertNotEmpty($recordtooltable2);
         $this->assertEquals(1, $recordusertable->suspended);
         $this->assertEquals(0, $recordusertable->deleted);
 

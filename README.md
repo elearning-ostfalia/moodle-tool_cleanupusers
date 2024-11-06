@@ -173,6 +173,9 @@ Aktionen ggf. auch für alle Nutzer aus dem Filter anwenden mit Nachfrage!
 * handleuser: Testen, dass ein Nutzer, der bearbeitet werden soll, auch tatsächlich dafür geeignet ist
   (Hacker-Angriffen vorbeugen)
 * Suspendtime für suspended (modification time)
+* Test: reaktivierte Nutzer sollten immer not suspended sein ??
+* Test: suspendierte Nutzer sollten immer suspended sein
+*
 
 # Bugs
 * no course checker und manuell suspendieren => ist archiviert (OK), aber taucht nicht in der 

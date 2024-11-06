@@ -157,6 +157,8 @@ class archiveduser {
 
                     // Both records exist, so we have a user which can be reactivated.
                     // If the user is in table replace data.
+                    // Ensure that reactivated user is not suspended anymore.
+                    // $shadowuser->suspended = 0; //????
                     user_update_user($shadowuser, false);
                     // Delete records from tool_cleanupusers and tool_cleanupusers_archive tables.
                     $DB->delete_records('tool_cleanupusers', ['id' => $user->id]);

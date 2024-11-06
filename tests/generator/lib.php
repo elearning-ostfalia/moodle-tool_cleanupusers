@@ -109,8 +109,12 @@ class tool_cleanupusers_generator extends testing_data_generator {
             true
         );
 
-        $userinconsistentsuspended = $generator->create_user(['username' => 'userinconsistentarchivedbyplugin',
-            'suspended' => '1', 'firstname' => 'Anonym', 'lastaccess' => $timestamponeyearago]);
+        $userinconsistentsuspended = $generator->create_user([
+            'username' => 'userinconsistentarchivedbyplugin',
+            'suspended' => '1',
+            'firstname' => 'Anonym',
+            'lastaccess' => $timestamponeyearago
+        ]);
         $userinconsistentsuspended->realusername = $userinconsistentsuspended->username;
         $DB->insert_record_raw(
             'tool_cleanupusers_archive',

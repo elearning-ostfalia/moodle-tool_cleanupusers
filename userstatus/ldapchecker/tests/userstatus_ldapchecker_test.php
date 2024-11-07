@@ -39,7 +39,7 @@ require_once(__DIR__.'/../../../tests/userstatus_base_test.php');
 #[CoversClass(\userstatus_ldapchecker\ldapchecker::class)]
 class userstatus_ldapchecker_test extends \tool_cleanupusers\userstatus_base_test {
 
-    protected function setup() : void {
+    protected function setup(): void {
         // set enabled plugin for running task
         set_config(CONFIG_ENABLED, "ldapchecker");
         set_config(CONFIG_AUTH_METHOD, AUTH_METHOD, 'userstatus_ldapchecker');
@@ -65,7 +65,7 @@ class userstatus_ldapchecker_test extends \tool_cleanupusers\userstatus_base_tes
         return new \userstatus_ldapchecker\ldapchecker(true);
     }
 
-    public function typical_scenario_for_reactivation() : ?\stdClass {
+    public function typical_scenario_for_reactivation(): ?\stdClass {
         $user = $this->create_test_user('username');
         $this->assertEqualsUsersArrays($this->checker->get_to_suspend(), $user);
 
@@ -77,7 +77,7 @@ class userstatus_ldapchecker_test extends \tool_cleanupusers\userstatus_base_tes
         return $user;
     }
 
-    public function typical_scenario_for_suspension() : \stdClass {
+    public function typical_scenario_for_suspension(): \stdClass {
         return $this->create_test_user('username');
     }
 

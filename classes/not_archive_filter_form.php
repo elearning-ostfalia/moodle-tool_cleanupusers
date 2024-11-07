@@ -41,9 +41,8 @@ use core_plugin_manager;
  * @copyright 2017 N. Herrmann
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-
 class not_archive_filter_form extends moodleform {
-    
+
     // const MANUALLY_SUSPENDED = 1;
     const TO_BE_ARCHIVED = 2;
 

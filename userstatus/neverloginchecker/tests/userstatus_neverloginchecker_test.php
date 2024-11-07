@@ -43,7 +43,7 @@ use advanced_testcase;
 #[CoversClass(\userstatus_neverloginchecker\neverloginchecker::class)]
 class userstatus_neverloginchecker_test extends \tool_cleanupusers\userstatus_base_test {
 
-    protected function setup() : void {
+    protected function setup(): void {
         // set enabled plugin for running task
         set_config(CONFIG_ENABLED, "neverloginchecker");
         set_config(CONFIG_AUTH_METHOD, AUTH_METHOD, 'userstatus_neverloginchecker');
@@ -58,7 +58,7 @@ class userstatus_neverloginchecker_test extends \tool_cleanupusers\userstatus_ba
         return new \userstatus_neverloginchecker\neverloginchecker();
     }
 
-    public function typical_scenario_for_reactivation() : ?\stdClass {
+    public function typical_scenario_for_reactivation(): ?\stdClass {
         $user = $this->create_test_user('username', ['timecreated' => ELEVENDAYSAGO]);
         $this->assertEqualsUsersArrays($this->checker->get_to_suspend(), $user);
 
@@ -73,7 +73,7 @@ class userstatus_neverloginchecker_test extends \tool_cleanupusers\userstatus_ba
         return $user;
     }
 
-    public function typical_scenario_for_suspension() : \stdClass {
+    public function typical_scenario_for_suspension(): \stdClass {
         return $this->create_test_user('username', ['timecreated' => ELEVENDAYSAGO]);
     }
 

@@ -41,7 +41,7 @@ use advanced_testcase;
 #[CoversClass(\userstatus_suspendedchecker\suspendedchecker::class)]
 final class userstatus_suspendedchecker_test extends \tool_cleanupusers\userstatus_base_test {
 
-    protected function setup() : void {
+    protected function setup(): void {
         $this->generator = advanced_testcase::getDataGenerator();
         $this->resetAfterTest(true);
 
@@ -57,7 +57,7 @@ final class userstatus_suspendedchecker_test extends \tool_cleanupusers\userstat
         return new suspendedchecker();
     }
 
-    public function typical_scenario_for_suspension() : \stdClass {
+    public function typical_scenario_for_suspension(): \stdClass {
         return $this->create_test_user('username', ['suspended' => 1]);
     }
 
@@ -68,7 +68,7 @@ final class userstatus_suspendedchecker_test extends \tool_cleanupusers\userstat
      * @return \stdClass
      * @throws \coding_exception
      */
-    public function typical_scenario_for_reactivation() : ?\stdClass {
+    public function typical_scenario_for_reactivation(): ?\stdClass {
         return null;
     }
 }

@@ -39,7 +39,7 @@ class neverloginchecker extends userstatuschecker {
         parent::__construct(self::class);
     }
 
-    public function condition_suspend_sql() : array {
+    public function condition_suspend_sql(): array {
         // lastaccess has a default value of 0!
         return [
             " lastaccess = 0 and timecreated < :timelimit" ,
@@ -53,7 +53,7 @@ class neverloginchecker extends userstatuschecker {
      * @param $tc
      * @return array
      */
-    public function condition_reactivate_sql($tca, $tc) : array {
+    public function condition_reactivate_sql($tca, $tc): array {
         return [
             "({$tca}.lastaccess != 0 or {$tca}.timecreated >= :timelimit)" ,
             [ 'timelimit'  => time() - $this->get_suspendtime_in_sec() ]

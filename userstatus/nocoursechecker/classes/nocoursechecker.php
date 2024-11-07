@@ -40,7 +40,7 @@ class nocoursechecker extends userstatuschecker {
         parent::__construct(self::class);
     }
 
-    public function shall_suspend($user) : bool {
+    public function shall_suspend($user): bool {
         $courses = enrol_get_all_users_courses($user->id, true, "startdate, enddate, visible");
 
         foreach ($courses as $course) {
@@ -83,12 +83,12 @@ class nocoursechecker extends userstatuschecker {
         return true;
     }
 
-    public function shall_reactivate($user) : bool {
+    public function shall_reactivate($user): bool {
         return !$this->shall_suspend($user);
     }
 
     /** does not use suspend time value */
-    public function needs_suspendtime() : bool {
+    public function needs_suspendtime(): bool {
         return false;
     }
 

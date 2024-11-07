@@ -46,7 +46,7 @@ class suspendedchecker extends userstatuschecker {
      * suspended flag will also be set!
      * @return array
      */
-    public function condition_suspend_sql() : array {
+    public function condition_suspend_sql(): array {
         return [" suspended = 1", []];
     }
 
@@ -56,7 +56,7 @@ class suspendedchecker extends userstatuschecker {
      * @param $tc
      * @return array
      */
-    public function condition_reactivate_sql($tca, $tc) : array {
+    public function condition_reactivate_sql($tca, $tc): array {
         return ["false" , []];
     }
 
@@ -65,7 +65,7 @@ class suspendedchecker extends userstatuschecker {
      * @param $user
      * @return bool
      */
-    public function shall_reactivate($user) : bool {
+    public function shall_reactivate($user): bool {
         throw new \coding_exception('unreachable code reached');
         // return false;
     }
@@ -83,7 +83,7 @@ class suspendedchecker extends userstatuschecker {
      * there is no suspendtime
      * @return bool
      */
-    public function needs_suspendtime() : bool {
+    public function needs_suspendtime(): bool {
         return false;
     }
 }

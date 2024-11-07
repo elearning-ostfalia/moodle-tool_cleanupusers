@@ -98,7 +98,14 @@ class archive_user_task extends scheduled_task {
         return true;
     }
 
-    private function write_csv($users){
+    /**
+     * Write users to csv file
+     *
+     * @param $users
+     * @return void
+     * @throws \dml_exception
+     */
+    private function write_csv($users) {
         if (empty($users)) {
             return;
         }
@@ -109,7 +116,7 @@ class archive_user_task extends scheduled_task {
         }
 
         $path = $baseconfig->log_folder;
-        if(!file_exists($path)){
+        if (!file_exists($path)) {
             mkdir($path, 0777, true);
         }
         $out = fopen($path.'/archived_users_'.date("d_m_Y").'.csv', 'w');

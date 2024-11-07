@@ -48,9 +48,9 @@ abstract class userstatus_base_test extends cleanupusers_testcase
         return $plugin;
     }
 
-    abstract public function typical_scenario_for_reactivation() : ?\stdClass;
+    abstract public function typical_scenario_for_reactivation(): ?\stdClass;
 
-    abstract public function typical_scenario_for_suspension() : \stdClass;
+    abstract public function typical_scenario_for_suspension(): \stdClass;
 
     abstract protected function create_checker();
 

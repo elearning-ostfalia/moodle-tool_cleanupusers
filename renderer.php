@@ -43,7 +43,7 @@ require_once(__DIR__ . '/classes/archive_filter_form.php');
  */
 class tool_cleanupusers_renderer extends plugin_renderer_base {
 
-    public function render_subplugin_table() : string {
+    public function render_subplugin_table(): string {
         global $OUTPUT, $DB, $CFG;
         // display strings
         $txt = get_strings(array('authenticationplugins',

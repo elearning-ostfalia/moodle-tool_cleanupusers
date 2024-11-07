@@ -38,8 +38,7 @@ define('CONFIG_LOG_FOLDER', 'log_folder');
  * @copyright  2016/17 N Herrmann, 2024 Ostfalia Hochschule fuer angewandte Wissenschaften
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-abstract class userstatuschecker
-{
+abstract class userstatuschecker {
     protected $baseconfig;
 
     protected $config;
@@ -50,8 +49,8 @@ abstract class userstatuschecker
 
         $this->baseconfig = get_config('tool_cleanupusers');
 
-        $class_parts = explode('\\', $name);
-        $name = end($class_parts);
+        $classparts = explode('\\', $name);
+        $name = end($classparts);
 
         $this->name = $name;
         $this->config = get_config('userstatus_' . $name);
@@ -63,11 +62,11 @@ abstract class userstatuschecker
      *
      * @return string
      */
-    public function get_condition_text() : string {
+    public function get_condition_text(): string {
         return get_string('condition', 'userstatus_' . $this->name);
     }
 
-    public function get_suspend_hint() : string {
+    public function get_suspend_hint(): string {
         return get_string('suspendtime', 'userstatus_' . $this->name);
     }
 
@@ -75,13 +74,13 @@ abstract class userstatuschecker
      * e.g. for use in LDAP to invalidate the cache when the task is executed
      * @return void
      */
-    public function invalidate_cache() : void {
+    public function invalidate_cache(): void {
     }
     /**
      * shortname for internal purposes
      * @return string
      */
-    public function get_name() : string {
+    public function get_name(): string {
         return $this->name;
     }
 
@@ -90,7 +89,7 @@ abstract class userstatuschecker
      * @return string
      * @throws \coding_exception
      */
-    public function get_displayname() : string {
+    public function get_displayname(): string {
         return get_string('pluginname', 'userstatus_' . $this->name);
     }
 
@@ -101,7 +100,7 @@ abstract class userstatuschecker
      * @param $user
      * @return true
      */
-    public function shall_suspend($user) : bool {
+    public function shall_suspend($user): bool {
         return true;
     }
 
@@ -111,7 +110,7 @@ abstract class userstatuschecker
      * @param $user
      * @return true
      */
-    public function shall_reactivate($user) : bool {
+    public function shall_reactivate($user): bool {
         return true;
     }
 
@@ -119,7 +118,7 @@ abstract class userstatuschecker
      * part of SQL where clause to perform the check for suspension
      * @return array
      */
-    public function condition_suspend_sql() : array {
+    public function condition_suspend_sql(): array {
         return ["" , null];
     }
 
@@ -136,10 +135,11 @@ abstract class userstatuschecker
      * returns the authentication method for all users being handled by this plugin
      * @return string
      */
-    public function get_authentication_method() :string {
+    public function get_authentication_method(): string {
 
-        if (!isset($this->config) || !isset($this->config->{CONFIG_AUTH_METHOD}))
+        if (!isset($this->config) || !isset($this->config->{CONFIG_AUTH_METHOD})) {
             return '';
+        }
         return $this->config->{CONFIG_AUTH_METHOD};
     }
 
@@ -147,14 +147,14 @@ abstract class userstatuschecker
      * whether or not the suspendtime field is needed
      * @return bool
      */
-    public function needs_suspendtime() : bool {
+    public function needs_suspendtime(): bool {
         return true;
     }
     /**
      * returns the period after suspension before deletion [days]
      * @return string
      */
-    public function get_deletetime() : float {
+    public function get_deletetime(): float {
         if (!isset($this->config->{CONFIG_DELETETIME}) || ($this->config->{CONFIG_DELETETIME} == null)) {
             // initial state
             return 365;
@@ -162,7 +162,7 @@ abstract class userstatuschecker
         return $this->config->{CONFIG_DELETETIME};
     }
 
-    public function get_suspendtime() : float {
+    public function get_suspendtime(): float {
         if (!isset($this->config->{CONFIG_SUSPENDTIME}) || ($this->config->{CONFIG_SUSPENDTIME} == null)) {
             // initial state
             return 365;
@@ -170,11 +170,11 @@ abstract class userstatuschecker
         return $this->config->{CONFIG_SUSPENDTIME};
     }
 
-    public function get_deletetime_in_sec() : int {
+    public function get_deletetime_in_sec(): int {
         return $this->get_deletetime() * 86400;
     }
 
-    public function get_suspendtime_in_sec() : int {
+    public function get_suspendtime_in_sec(): int {
         return $this->get_suspendtime() * 86400;
     }
 
@@ -183,7 +183,7 @@ abstract class userstatuschecker
      * he or she has never logged in
      * @return bool
      */
-    public function delete_if_never_logged_in_on_suspendtime() : bool {
+    public function delete_if_never_logged_in_on_suspendtime(): bool {
         if (!isset($this->config->{CONFIG_NEVER_LOGGED_IN}) || ($this->config->{CONFIG_NEVER_LOGGED_IN} == null)) {
             return false;
         }
@@ -192,17 +192,18 @@ abstract class userstatuschecker
 
     protected function log($text) {
         if (!empty($this->baseconfig->log_folder)) {
-            if(!file_exists($this->baseconfig->log_folder)){
+            if (!file_exists($this->baseconfig->log_folder)) {
                 mkdir($this->baseconfig->log_folder, 0777, true);
             }
-            file_put_contents($this->baseconfig->log_folder . "/debug_log_ldapchecker.log",
+            file_put_contents($this->baseconfig->log_folder . "/checker.log",
                 "\n[".date("d-M-Y - H:i ")."] $text " , FILE_APPEND);
         }
     }
 
-    protected function get_auth_sql($alias) : string {
-        if (empty($this->get_authentication_method()))
+    protected function get_auth_sql($alias): string {
+        if (empty($this->get_authentication_method())) {
             return ' true ';
+        }
         // In case there are more authentication methods selected
         // the sql string will be e.g.
         // "(u.auth = 'email' or u.auth = 'ldap')"
@@ -222,7 +223,7 @@ abstract class userstatuschecker
     public function get_to_suspend() {
         global $DB;
 
-        list($sql_condition, $param_condition) = $this->condition_suspend_sql();
+        list($sqlcondition, $paramcondition) = $this->condition_suspend_sql();
         // Select users who are not yet deleted, not yet archived and match condition for sub-plugin.
         $sql = "SELECT id, suspended, lastaccess, username, deleted, auth, firstname, lastname
                 FROM {user}
@@ -230,10 +231,10 @@ abstract class userstatuschecker
                     AND deleted = 0
                     AND id not in (select id from {tool_cleanupusers})";
 
-        if (!empty($sql_condition)) {
-            $sql .= " AND " . $sql_condition;
+        if (!empty($sqlcondition)) {
+            $sql .= " AND " . $sqlcondition;
         }
-        $users = $DB->get_records_sql($sql, $param_condition);
+        $users = $DB->get_records_sql($sql, $paramcondition);
 
         $tosuspend = [];
         foreach ($users as $key => $user) {
@@ -255,7 +256,7 @@ abstract class userstatuschecker
             }
         }
 
-        if (empty($sql_condition) && (count($users) == count($tosuspend)) && (count($users) > 10)) {
+        if (empty($sqlcondition) && (count($users) == count($tosuspend)) && (count($users) > 10)) {
             // Check if number of users to suspend equals number of users matching
             // the authentication method filter
             global $DB;
@@ -279,7 +280,7 @@ abstract class userstatuschecker
      */
     public function get_to_delete() {
         if ($this->get_deletetime() >= 0) {
-            $condition = '(tc.timestamp < '. time() - $this->get_deletetime_in_sec().')';
+            $condition = '(tc.timestamp < '. (time() - $this->get_deletetime_in_sec()) .')';
         }
 
         if ($this->delete_if_never_logged_in_on_suspendtime()) {
@@ -296,10 +297,10 @@ abstract class userstatuschecker
         global $DB;
         // Full join means that only users will be handled who are already
         // suspended with the cleanupusers plugin
-        $sql = 'SELECT tca.id, tca.suspended, tca.lastaccess, tca.username, tca.deleted, tca.auth 
-                FROM {tool_cleanupusers_archive} tca  
+        $sql = 'SELECT tca.id, tca.suspended, tca.lastaccess, tca.username, tca.deleted, tca.auth
+                FROM {tool_cleanupusers_archive} tca
                 JOIN {tool_cleanupusers} tc ON tc.id = tca.id and tc.checker = :checker
-                JOIN {user} u ON u.id = tc.id and u.suspended = 1 and u.deleted = 0        
+                JOIN {user} u ON u.id = tc.id and u.suspended = 1 and u.deleted = 0
                 WHERE ' . $condition;
         $users = $DB->get_records_sql($sql, ["checker" => $this->name]);
 
@@ -336,7 +337,7 @@ abstract class userstatuschecker
     public function get_to_reactivate() {
         global $DB;
 
-        list($sql_condition, $param_condition) = $this->condition_reactivate_sql('tca', 'tc');
+        list($sqlcondition, $paramcondition) = $this->condition_reactivate_sql('tca', 'tc');
         $sql = "SELECT tca.id, tca.suspended, tca.lastaccess, tca.username, tca.deleted, tca.auth
                 FROM {user} u
                 JOIN {tool_cleanupusers_archive} tca ON u.id = tca.id
@@ -346,14 +347,14 @@ abstract class userstatuschecker
                     AND u.deleted = 0
                     AND tca.username NOT IN
                         (SELECT username FROM {user} WHERE username IS NOT NULL)";
-        if (!empty($sql_condition)) {
-            $sql .= " AND " . $sql_condition;
+        if (!empty($sqlcondition)) {
+            $sql .= " AND " . $sqlcondition;
         }
         $params = [
-            "checker" => $this->name
+            "checker" => $this->name,
         ];
-        if (is_array($param_condition)) {
-            $params = array_merge($params, $param_condition);
+        if (is_array($paramcondition)) {
+            $params = array_merge($params, $paramcondition);
         }
         $users = $DB->get_records_sql($sql, $params);
 

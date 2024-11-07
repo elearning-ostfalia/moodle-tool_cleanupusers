@@ -30,16 +30,25 @@ require_once($CFG->dirroot . '/user/filters/lib.php');
 require_once(__DIR__ . '/not_archive_filter_form.php');
 require_once(__DIR__ . '/archive_filter_form.php');
 
-class archiveuser_filtering extends \user_filtering
-{
+/**
+ * filter form for tables
+ *
+ * @package   tool_cleanupusers
+ * @copyright 2024 Ostfalia Hochschule fuer angewandte Wissenschaften
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+class archiveuser_filtering extends \user_filtering {
+
+    /**
+     * filter form
+     * @var archive_filter_form|not_archive_filter_form
+     */
     protected $checkerform;
-    protected $archive;
 
     public function __construct($archive, $urlaction, $urlchecker) {
         global $SESSION;
         parent::__construct();
 
-        $this->archive = $archive;
         // if (isset($urlaction) || (isset($SESSION->archive) && $SESSION->archive != $archive)) {
         if (isset($SESSION->archive) && $SESSION->archive != $archive) {
             // Invalidate session variables in case of switching form or
@@ -82,15 +91,15 @@ class archiveuser_filtering extends \user_filtering
             } else {
                 if (isset($SESSION->checker)) {
                     // set default values from session
-                    $default_values = [];
-                    $default_values['subplugin'] = $SESSION->checker;
-                    // $default_values['checker'] = $SESSION->checker;
+                    $defaultvalues = [];
+                    $defaultvalues['subplugin'] = $SESSION->checker;
+                    // $defaultvalues['checker'] = $SESSION->checker;
                     if (isset($SESSION->action)) {
-                        $default_values['action'] = $SESSION->action;
+                        $defaultvalues['action'] = $SESSION->action;
                     }
                     // debugging("setdata from SESSION");
-                    // var_dump($default_values);
-                    $this->checkerform->set_data($default_values);
+                    // var_dump($defaultvalues);
+                    $this->checkerform->set_data($defaultvalues);
                 }
             }
         }
@@ -121,8 +130,8 @@ class archiveuser_filtering extends \user_filtering
     }
 
     public function get_full_sql_filter($withchecker = false) {
-        $extra='';
-        $params=null;
+        $extra = '';
+        $params = null;
         if ($withchecker) {
             global $SESSION;
             if (!empty($SESSION->checker)) {
@@ -134,5 +143,4 @@ class archiveuser_filtering extends \user_filtering
         }
         return parent::get_sql_filter($extra, $params);
     }
-
 }

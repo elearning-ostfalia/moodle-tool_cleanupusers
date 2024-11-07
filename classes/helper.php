@@ -14,7 +14,6 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-
 namespace tool_cleanupusers;
 
 use tool_cleanupusers\plugininfo\userstatus;
@@ -57,8 +56,7 @@ class helper {
      * @throws coding_exception
      * @throws dml_exception
      */
-    static function render_auth_editable($plugin, mixed $newvaluetext, mixed $newvalue1): \core\output\inplace_editable
-    {
+    public static function render_auth_editable($plugin, mixed $newvaluetext, mixed $newvalue1): \core\output\inplace_editable {
         $auths = get_enabled_auth_plugins();
         $templ = new \core\output\inplace_editable(
             'tool_cleanupusers',
@@ -83,8 +81,7 @@ class helper {
      * @throws coding_exception
      * @throws dml_exception
      */
-    static function render_deletetime_editable($plugin, mixed $newvalue): \core\output\inplace_editable
-    {
+    public static function render_deletetime_editable($plugin, mixed $newvalue): \core\output\inplace_editable {
         return new \core\output\inplace_editable(
             'tool_cleanupusers',
             'deletetime',
@@ -104,8 +101,7 @@ class helper {
      * @throws coding_exception
      * @throws dml_exception
      */
-    static function render_suspendtime_editable(string $pluginname, mixed $timetosuspend): \core\output\inplace_editable
-    {
+    public static function render_suspendtime_editable(string $pluginname, mixed $timetosuspend): \core\output\inplace_editable {
         $mysubpluginname = "\\userstatus_" . $pluginname . "\\" . $pluginname;
         $userstatuschecker = new $mysubpluginname();
 
@@ -128,8 +124,7 @@ class helper {
      * @throws coding_exception
      * @throws dml_exception
      */
-    static function render_no_login_editiable($plugin, mixed $newvalue1): \core\output\inplace_editable
-    {
+    public static function render_no_login_editiable($plugin, mixed $newvalue1): \core\output\inplace_editable {
         // Prepare the element for the output:
         $keylist = [];
         $keylist[0] = get_string('suspend', 'tool_cleanupusers');
@@ -156,7 +151,7 @@ class helper {
      * @return array ['numbersuccess'] successfully changed users ['failures'] userids, who could not be changed.
      * @throws \coding_exception
      */
-    static public function change_user_deprovisionstatus($userarray, $intention, $checker, $dryRun = false) {
+    public static function change_user_deprovisionstatus($userarray, $intention, $checker, $dryrun = false) {
         // Checks whether the intention is valid.
         if (!in_array($intention, ['suspend', 'reactivate', 'delete'])) {
             throw new \coding_exception('Invalid parameters in tool_cleanupusers.');
@@ -195,16 +190,16 @@ class helper {
                             if (empty($checker)) {
                                 throw new \coding_exception('checker name is missing');
                             }
-                            $archiveduser = $changinguser->archive_me($checker, $dryRun);
+                            $archiveduser = $changinguser->archive_me($checker, $dryrun);
                             array_push($archivedusers, $archiveduser);
                             break;
                         case 'reactivate':
-                            if (!$dryRun) {
+                            if (!$dryrun) {
                                 $changinguser->activate_me();
                             }
                             break;
                         case 'delete':
-                            $deleteduser = $changinguser->delete_me($dryRun);
+                            $deleteduser = $changinguser->delete_me($dryrun);
                             array_push($deletedusers, $deleteduser);
                             break;
                         // No default since if-clause checks the intention parameter.
@@ -223,8 +218,7 @@ class helper {
         return $result;
     }
 
-    public static function users_to_sql_filter(array $userset, string $prefix = null)
-    {
+    public static function users_to_sql_filter(array $userset, string $prefix = null) {
         if (count($userset) == 0) {
             return "FALSE";
         }
@@ -250,7 +244,7 @@ class helper {
      * @return array
      * @throws \coding_exception
      */
-    static function archive_users($dryRun = false): array {
+    public static function archive_users($dryrun = false): array {
         $unabletoarchive = [];
         $userarchived = 0;
         $archievdusers = [];
@@ -275,12 +269,12 @@ class helper {
                 $archivearray = $userstatuschecker->get_to_suspend();
                 $reactivatearray = $userstatuschecker->get_to_reactivate();
 
-                $suspendresult = helper::change_user_deprovisionstatus($archivearray, 'suspend', $subplugin, $dryRun);
+                $suspendresult = self::change_user_deprovisionstatus($archivearray, 'suspend', $subplugin, $dryrun);
                 $unabletoarchive = array_merge($unabletoarchive, $suspendresult['failures']);
                 $userarchived += $suspendresult['countersuccess'];
                 $archievdusers = array_merge($archievdusers, $suspendresult['archivedusers']);
 
-                $result = helper::change_user_deprovisionstatus($reactivatearray, 'reactivate', $subplugin, $dryRun);
+                $result = self::change_user_deprovisionstatus($reactivatearray, 'reactivate', $subplugin, $dryrun);
                 $unabletoactivate = array_merge($unabletoactivate, $result['failures']);
                 $useractivated += $result['countersuccess'];
             }
@@ -296,7 +290,7 @@ class helper {
      * @return array
      * @throws \coding_exception
      */
-    static function delete_users($dryRun = false): array {
+    public static function delete_users($dryrun = false): array {
         $unabletodelete = [];
         $userdeleted = 0;
         $deletedusers = [];
@@ -316,7 +310,7 @@ class helper {
 
                 // Private function is executed to suspend, delete and activate users.
                 $arraytodelete = $userstatuschecker->get_to_delete();
-                $deleteresult = helper::change_user_deprovisionstatus($arraytodelete, 'delete', $subplugin, $dryRun);
+                $deleteresult = self::change_user_deprovisionstatus($arraytodelete, 'delete', $subplugin, $dryrun);
                 $unabletodelete = array_merge($unabletodelete, $deleteresult['failures']);
                 $deletedusers = array_merge($deletedusers, $deleteresult['deletedusers']);
                 $userdeleted += $deleteresult['countersuccess'];
@@ -324,5 +318,4 @@ class helper {
         }
         return array($unabletodelete, $userdeleted, $deletedusers);
     }
-
 }

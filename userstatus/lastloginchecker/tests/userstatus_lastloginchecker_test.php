@@ -39,7 +39,7 @@ use advanced_testcase;
  */
 final class userstatus_lastloginchecker_test extends \tool_cleanupusers\userstatus_base_test {
 
-    protected function setup() : void {
+    protected function setup(): void {
         $this->generator = advanced_testcase::getDataGenerator();
         $this->resetAfterTest(true);
 
@@ -75,7 +75,7 @@ final class userstatus_lastloginchecker_test extends \tool_cleanupusers\userstat
         return new \userstatus_lastloginchecker\lastloginchecker();
     }
 
-    public function typical_scenario_for_reactivation() : ?\stdClass {
+    public function typical_scenario_for_reactivation(): ?\stdClass {
         $user = $this->create_test_user('username', ['lastaccess' => ELEVENDAYSAGO]);
         $this->assertEquals(0, $user->suspended);
         $this->assertEqualsUsersArrays($this->checker->get_to_suspend(), $user);
@@ -91,7 +91,7 @@ final class userstatus_lastloginchecker_test extends \tool_cleanupusers\userstat
         return $user;
     }
 
-    public function typical_scenario_for_suspension() : \stdClass {
+    public function typical_scenario_for_suspension(): \stdClass {
         return $this->create_test_user('username', ['lastaccess' => ELEVENDAYSAGO]);
     }
 

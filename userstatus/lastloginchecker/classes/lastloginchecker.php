@@ -40,7 +40,7 @@ class lastloginchecker extends userstatuschecker {
         parent::__construct(self::class);
     }
 
-    public function condition_suspend_sql() : array {
+    public function condition_suspend_sql(): array {
         // Attribute 'lastaccess' has a default value of 0, so this must be checked.
         return [
             " lastaccess != 0 AND lastaccess < :timelimit" ,
@@ -48,7 +48,7 @@ class lastloginchecker extends userstatuschecker {
         ];
     }
 
-    public function condition_reactivate_sql($tca, $tc) : array {
+    public function condition_reactivate_sql($tca, $tc): array {
         return [
             "{$tca}.lastaccess >= :timelimit" ,
             [ 'timelimit'  => time() - $this->get_suspendtime_in_sec() ]

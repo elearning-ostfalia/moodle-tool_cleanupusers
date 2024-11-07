@@ -13,6 +13,7 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
 /**
  * Class archive user.
  *
@@ -83,18 +84,19 @@ class archiveduser {
      * Throws an exception when the user is already suspended.
      * @throws cleanupusers_exception
      */
-    public function archive_me($checker, $dryRun) : array {
+    public function archive_me($checker, $dryrun): array {
         global $DB;
         // Get the current user.
         $user = \core_user::get_user($this->id);
 /*        if ($user->suspended == 1) {
             throw new cleanupusers_exception("Failed to suspend " . $user->username .
                 " : user is already suspended");
-        } else */ if (!($user->username == \core_user::clean_field($user->username, 'username'))) {
+        } else */
+        if (!($user->username == \core_user::clean_field($user->username, 'username'))) {
             throw new cleanupusers_exception("Failed to suspend " . $user->username .
                 " : username is not cleaned");
         } else {
-            if (!$dryRun) {
+            if (!$dryrun) {
                 $transaction = $DB->start_delegated_transaction();
 
                 // We are already getting the shadowuser here to keep the original suspended status.
@@ -180,7 +182,7 @@ class archiveduser {
      *
      * @throws cleanupusers_exception
      */
-    public function delete_me($dryRun) : array {
+    public function delete_me($dryrun): array {
         global $DB;
         // Get the current user.
         $user = \core_user::get_user($this->id);
@@ -198,7 +200,7 @@ class archiveduser {
         // read correct user data from archive data
         $deleteduserdata = $DB->get_record('tool_cleanupusers_archive', array('id' => $this->id));
 
-        if (!$dryRun) {
+        if (!$dryrun) {
             $transaction = $DB->start_delegated_transaction();
 
             // Deletes the records in both plugin tables.
@@ -279,8 +281,7 @@ class archiveduser {
      * @param bool|\stdClass $user
      * @return array
      */
-    protected static function prepare_user_for_export(\stdClass $user): array
-    {
+    protected static function prepare_user_for_export(\stdClass $user): array {
         $archiveduser = (array)$user;
         if (!empty($user->lastaccess) && $user->lastaccess != 0) {
             $archiveduser['lastaccess'] = date('d.m.Y h:i:s', $user->lastaccess);
@@ -294,7 +295,7 @@ class archiveduser {
         }
 
         // extract a few attributes in order to save memory.
-        $wantedKeys = ['id', 'username', 'firstname', 'lastname', 'lastaccess', 'auth', 'suspended', 'timecreated'];
-        return array_intersect_key($archiveduser, array_flip($wantedKeys));
+        $wantedkeys = ['id', 'username', 'firstname', 'lastname', 'lastaccess', 'auth', 'suspended', 'timecreated'];
+        return array_intersect_key($archiveduser, array_flip($wantedkeys));
     }
 }

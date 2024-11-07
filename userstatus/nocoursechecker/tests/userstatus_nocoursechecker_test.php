@@ -44,7 +44,7 @@ use advanced_testcase;
 #[CoversClass(\userstatus_nocoursechecker\nocoursechecker::class)]
 final class userstatus_nocoursechecker_test extends \tool_cleanupusers\userstatus_base_test {
 
-    protected function setup() : void {
+    protected function setup(): void {
         $this->generator = advanced_testcase::getDataGenerator();
         $this->resetAfterTest(true);
         // set enabled plugin for running task
@@ -64,7 +64,7 @@ final class userstatus_nocoursechecker_test extends \tool_cleanupusers\userstatu
      * @throws dml_exception
      * @throws moodle_exception
      */
-    public function typical_scenario_for_reactivation() : ?\stdClass {
+    public function typical_scenario_for_reactivation(): ?\stdClass {
         $invisible_course = $this->generator->create_course(['startdate' => YESTERDAY, 'visible' => false]);
         $user = $this->create_user_and_enrol('username', $invisible_course);
 
@@ -80,7 +80,7 @@ final class userstatus_nocoursechecker_test extends \tool_cleanupusers\userstatu
         return $user;
     }
 
-    public function typical_scenario_for_suspension() : \stdClass {
+    public function typical_scenario_for_suspension(): \stdClass {
         return $this->create_user_and_enrol('username');
     }
 
@@ -122,6 +122,22 @@ final class userstatus_nocoursechecker_test extends \tool_cleanupusers\userstatu
     // ---------------------------------------------
     // Suspend: scenarios handled by this plugin
     // ---------------------------------------------
+    public function test_active_course_enrolment_disabled_suspend() {
+        $active_course = $this->generator->create_course(['startdate' => YESTERDAY, 'enddate' => TOMORROW, 'visible' => true]);
+
+        // Active enrolment => do not suspend.
+        $user1 = $this->create_test_user('username1');
+        $this->generator->enrol_user($user1->id, $active_course->id, null, 'manual',
+            0, 0, ENROL_USER_ACTIVE);
+        $this->assertEquals(0, count($this->checker->get_to_suspend()));
+
+        // Suspended enrolment => do suspend.
+        $user2 = $this->create_test_user('username2');
+        $this->generator->enrol_user($user2->id, $active_course->id, null, 'manual',
+            0, 0, ENROL_USER_SUSPENDED);
+        $this->assertEqualsUsersArrays($this->checker->get_to_suspend(), $user2);
+    }
+
     public function test_no_course_suspend() {
         $user = $this->create_user_and_enrol('username');
         $this->assertEqualsUsersArrays($this->checker->get_to_suspend(), $user);

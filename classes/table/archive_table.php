@@ -13,11 +13,13 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
 /**
+ *
  * Create a custom sql_table for the tool_cleanupusers
  *
  * @package   tool_cleanupusers
- * @copyright 2019 Justus Dieckmann
+ * @copyright 2019 Justus Dieckmann, Ostfalia Hochschule fuer angewandte Wissenschaften
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -31,7 +33,7 @@ use core_user\fields;
  * Create a class for a custom sql_table for the tool_cleanupusers
  *
  * @package   tool_cleanupusers
- * @copyright 2019 Justus Dieckmann
+ * @copyright 2019 Justus Dieckmann, Ostfalia Hochschule fuer angewandte Wissenschaften
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class archive_table extends \table_sql {
@@ -57,9 +59,8 @@ class archive_table extends \table_sql {
             'timecreated' => get_string('timecreated', 'tool_cleanupusers'),
             'auth'       => get_string('authmethod', 'tool_cleanupusers'),
             'checker'    => 'checker',
-            'timestamp'    => get_string('timestamp', 'tool_cleanupusers'),
-            $intention   => '' /*get_string($intention=='reactivate'?'willbesuspended':'willbedeleted',
-                'tool_cleanupusers')*/
+            'timestamp'  => get_string('timestamp', 'tool_cleanupusers'),
+            $intention   => '',
         ];
 
         $this->define_columns(array_keys($columns));
@@ -90,7 +91,7 @@ class archive_table extends \table_sql {
             'sesskey' => sesskey(),
             'userid' => $user->id,
             'action' => 'reactivate',
-            'returnurl' => $this->returnurl
+            'returnurl' => $this->returnurl,
         ]);
         return \html_writer::link(
             $url,
@@ -109,7 +110,7 @@ class archive_table extends \table_sql {
             'userid' => $user->id,
             'action' => 'delete',
             'checker' => $user->checker,
-            'returnurl' => $this->returnurl
+            'returnurl' => $this->returnurl,
         ]);
 
         global $OUTPUT;
@@ -133,10 +134,11 @@ class archive_table extends \table_sql {
     }
 
     public function col_lastaccess($user) {
-        if ($user->lastaccess > 0)
+        if ($user->lastaccess > 0) {
             return date('d.m.Y h:i:s', $user->lastaccess);
-        else
+        } else {
             return get_string('neverlogged', 'tool_cleanupusers');
+        }
     }
 
     /**

@@ -161,15 +161,9 @@ Aktionen ggf. auch für alle Nutzer aus dem Filter anwenden mit Nachfrage!
 
 # TODO:
 
-  Problem: Vor dem Löschen muss noch getestet werden, ob die Nutzer nicht doch
-  reaktiviert werden müssen und dazu muss der jeweilige Checker befragt werden.
-* Tests
 * Soll der Zeitstempel des Archivierens so gesetzt werden, als wenn das Archivieren auch zu
   dem Zeitpunkt stattgefunden hat, wenn es hätte stattfinden können?
   (Ziel: Wenn das Plugin installiert wird, müssen ja alte Nutzerdaten abgearbeitet werden)
-* Da für nocoursechecker keine sichere Latenzzeit realisiert werden kann, sollte noch die 
-  Option cron/manuell bei den Suspend-Aktionen ergänzt werden. Der Wert muss dann in die
-  Übersichtstabelle.
 * handleuser: Testen, dass ein Nutzer, der bearbeitet werden soll, auch tatsächlich dafür geeignet ist
   (Hacker-Angriffen vorbeugen)
 * Suspendtime für suspended (modification time)
@@ -180,5 +174,3 @@ Aktionen ggf. auch für alle Nutzer aus dem Filter anwenden mit Nachfrage!
 # Bugs
 * no course checker und manuell suspendieren => ist archiviert (OK), aber taucht nicht in der 
   Liste der zu löschenden Nutzer auf (obwohl kein Kurs zugeordnet)
-* no course checker: inaktive Einschreibungen berücksichtigen (Test!)
-* 

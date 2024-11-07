@@ -13,6 +13,7 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
 /**
  * Create a custom sql_table for the tool_cleanupusers
  *
@@ -69,16 +70,17 @@ class users_table extends \table_sql {
     }
 
     public function col_lastaccess($user) {
-        if ($user->lastaccess > 0)
+        if ($user->lastaccess > 0) {
             return date('d.m.Y h:i:s', $user->lastaccess);
-        else
+        } else {
             return get_string('neverlogged', 'tool_cleanupusers');
+        }
     }
 
     public function col_timecreated($user) {
-        if (!empty($user->timecreated))
+        if (!empty($user->timecreated)) {
             return date('d.m.Y h:i:s', $user->timecreated);
-        var_dump($user->timecreated);
+        }
         return '??';
     }
 
@@ -87,7 +89,7 @@ class users_table extends \table_sql {
             'userid' => $user->id,
             'sesskey' => sesskey(),
             'action' => 'suspend', 'checker' => $this->checker,
-            'returnurl' => $this->returnurl
+            'returnurl' => $this->returnurl,
         ]);
         global $OUTPUT;
         if ($user->suspended) {

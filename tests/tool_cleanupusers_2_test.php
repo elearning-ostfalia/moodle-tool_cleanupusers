@@ -45,7 +45,7 @@ final class tool_cleanupusers_2_test extends cleanupusers_testcase {
     private $eventsink;
     private $timestamp;
 
-    protected function setup() : void {
+    protected function setup(): void {
         $this->generator = advanced_testcase::getDataGenerator();
         $this->resetAfterTest(true);
 

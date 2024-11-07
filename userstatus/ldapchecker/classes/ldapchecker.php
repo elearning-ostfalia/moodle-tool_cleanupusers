@@ -111,7 +111,7 @@ class ldapchecker extends userstatuschecker {
         }
     }
 
-    public function invalidate_cache() : void {
+    public function invalidate_cache(): void {
         global $SESSION;
         unset($SESSION->cleanupusers_LDAP_cache);
         unset($SESSION->cleanupusers_LDAP_cache_ttl);
@@ -148,7 +148,7 @@ class ldapchecker extends userstatuschecker {
      *
      * @return array
      */
-    public function condition_suspend_sql() : array {
+    public function condition_suspend_sql(): array {
         return ["" , null];
     }
 
@@ -156,20 +156,20 @@ class ldapchecker extends userstatuschecker {
      * @throws \moodle_exception
      * @throws exception
      */
-    public function shall_suspend($user) : bool {
+    public function shall_suspend($user): bool {
         // check initialisation state (todo: should not be checked for every user!)
         $this->init();
         // var_dump($this->lookup);
         return (!array_key_exists($user->username, $this->lookup));
     }
 
-    public function shall_reactivate($user) : bool {
+    public function shall_reactivate($user): bool {
         return !$this->shall_suspend($user);
     }
 
 
     /** does not use suspend time value */
-    public function needs_suspendtime() : bool {
+    public function needs_suspendtime(): bool {
         return false;
     }
 

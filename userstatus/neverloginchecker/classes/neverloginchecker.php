@@ -28,23 +28,23 @@ use tool_cleanupusers\userstatusinterface;
 use tool_cleanupusers\userstatuschecker;
 
 /**
- * Class that checks the status of different users depending on the time they did not signed in.
+ * Class that checks if a users has never signed
  *
- * @package    userstatus_neverloginchecker
- * @copyright  2016/17 N Herrmann
+ * @package   tool_cleanupusers
+ * @copyright 2024 Ostfalia Hochschule fuer angewandte Wissenschaften
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class neverloginchecker extends userstatuschecker {
-    /**
-     * This constructor sets timesuspend and timedelete from days to seconds.
-     */
     public function __construct() {
         parent::__construct(self::class);
     }
 
     public function condition_suspend_sql() : array {
-        return [" lastaccess = 0 and timecreated < :timelimit" ,
-            [ 'timelimit'  => time() - $this->get_suspendtime_in_sec() ]];
+        // lastaccess has a default value of 0!
+        return [
+            " lastaccess = 0 and timecreated < :timelimit" ,
+            [ 'timelimit'  => time() - $this->get_suspendtime_in_sec() ]
+        ];
     }
 
     /**
@@ -54,8 +54,10 @@ class neverloginchecker extends userstatuschecker {
      * @return array
      */
     public function condition_reactivate_sql($tca, $tc) : array {
-        return ["({$tca}.lastaccess != 0 or {$tca}.timecreated >= :timelimit)" ,
-            [ 'timelimit'  => time() - $this->get_suspendtime_in_sec() ]];
+        return [
+            "({$tca}.lastaccess != 0 or {$tca}.timecreated >= :timelimit)" ,
+            [ 'timelimit'  => time() - $this->get_suspendtime_in_sec() ]
+        ];
     }
 
 }

@@ -70,6 +70,10 @@ class suspendedchecker extends userstatuschecker {
         // return false;
     }
 
+    /**
+     * Users who are manually suspended cannot be reactivated by external circumstances
+     * @return array
+     */
     public function get_to_reactivate() {
         return [];
     }

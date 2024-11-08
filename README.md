@@ -159,8 +159,8 @@ Actions
   (Ziel: Wenn das Plugin installiert wird, müssen ja alte Nutzerdaten abgearbeitet werden)
 * handleuser: Testen, dass ein Nutzer, der bearbeitet werden soll, auch tatsächlich dafür geeignet ist
   (Hacker-Angriffen vorbeugen)
-* Test: reaktivierte Nutzer sollten immer not suspended sein ??
-
+* Reaktivierte Nutzer haben beim Reaktivieren denselben Status wie vorher (sind also ggf. immer noch suspended!!)
+  Ist das sinnvoll???? Testfall: test_already_suspended_suspend
 
 # Bugs
 * no course checker und manuell suspendieren => ist archiviert (OK), aber taucht nicht in der 

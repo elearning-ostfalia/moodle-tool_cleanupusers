@@ -142,6 +142,21 @@ abstract class userstatus_base_test extends cleanupusers_testcase
 
         $this->assertEqualsUsersArrays($this->checker->get_to_suspend(), $user);
         $this->assertEquals(0, count($this->checker->get_to_reactivate()));
+
+        // Check if user is suspended if he is reactivated
+        $userarray = [];
+        $userarray[$user->id] = $user;
+        $result = helper::change_user_deprovisionstatus($userarray, 'reactivate', '');
+
+        global $DB;
+        $record = $DB->get_record('user', ['id' => $user->id]);
+        $this->assertEquals($user->username, $record->username);
+        $this->assertEquals($user->firstname, $record->firstname);
+        $this->assertEquals($user->lastname, $record->lastname);
+        $this->assertEquals($user->auth, $record->auth); // not modified
+        $this->assertEquals(1, $record->suspended);
+        $this->assertEquals($user->lastaccess, $record->lastaccess);
+        $this->assertEquals($user->timecreated, $record->timecreated);
     }
 
     public function test_already_deleted_not_suspend() {

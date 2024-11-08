@@ -41,7 +41,7 @@ $confirm    = optional_param('confirm', false, PARAM_BOOL);
 $PAGE->set_url('/admin/tool/cleanupusers/handleuser.php');
 $PAGE->set_context(context_system::instance());
 
-$user = $DB->get_record('user', ['id' => $userid]);
+$user = $DB->get_record('user', ['id' => $userid], '*', MUST_EXIST);
 
 require_admin();
 require_sesskey();

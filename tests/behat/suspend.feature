@@ -251,7 +251,7 @@ Feature: Cleanup settings
       | No active course Checker | user5   |
 
   @javascript
-  Scenario: Preview cleanup users
+  Scenario: Preview cleanup users 1
     Given I log in as "admin"
 
     # make new user an admin

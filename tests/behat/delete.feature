@@ -52,11 +52,49 @@ Feature: Cleanup settings
       | deletetime | 100  | userstatus_suspendedchecker |
 
   @javascript
+  Scenario: Preview cleanup users 2
+    Given I log in as "admin"
+    # archive all users ready for archive
+    And I run the scheduled task "\tool_cleanupusers\task\archive_user_task"
+    And simulate that "101" days have passed since archiving of "user1"
+
+    When I navigate to "Users > Clean up users > Pending cleanup actions" in site administration
+
+    And I should see "user1"
+
+    # Check if user is visible ob export
+    And I set the field with xpath "(//select[@name='dataformat'])[2]" to "HTML table"
+    And I click on "(//button[contains(text(), 'Download')])[2]" "xpath_element"
+    And I should see "user1"
+    And I press the "back" button in the browser
+
+    # delete in preview page
+    When I delete "user1"
+    Then "Completely delete user" "dialogue" should exist
+    And I should see "Do you really want to delete"
+    And I should see "Teacher Miller1"
+
+    When I click on "Cancel" "button" in the "Completely delete user" "dialogue"
+    Then I should see "user1"
+
+    When I delete "user1"
+    Then "Completely delete user" "dialogue" should exist
+    And I should see "Teacher Miller1"
+
+    When I press "Delete"
+    Then I should see "User 'user1' has been deleted."
+
+    When I press "Continue"
+
+
+  @javascript
   Scenario: Manually delete user (preselected by lastloginchecker)
     Given I log in as "admin"
     # archive all users ready for archive
     And I run the scheduled task "\tool_cleanupusers\task\archive_user_task"
     And simulate that "101" days have passed since archiving of "user1"
+
+
     And I navigate to "Users > Clean up users > Archived users" in site administration
     And I navigate to "Users to be deleted" archive page
     And I select "Last Login Checker" checker on archive page

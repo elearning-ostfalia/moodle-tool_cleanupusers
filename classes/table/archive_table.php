@@ -122,7 +122,7 @@ class archive_table extends \table_sql {
         ]);
 
         global $OUTPUT;
-        return \html_writer::link(
+        return $this->col_reactivate($user) . '&emsp;' . \html_writer::link(
             $url,
             $OUTPUT->pix_icon(
                 't/delete',

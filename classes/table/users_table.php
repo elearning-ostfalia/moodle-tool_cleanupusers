@@ -108,7 +108,7 @@ class users_table extends \table_sql {
                     get_string('archiveuser', 'tool_cleanupusers'),
                     'moodle',
                     ['class' => "imggroup-" . $user->id]
-                ) . '/ ' .
+                ) . '&hairsp;/&hairsp;' .
                 \html_writer::link(
                 $url,
                 $OUTPUT->pix_icon(
@@ -126,7 +126,7 @@ class users_table extends \table_sql {
                 get_string('hideuser', 'tool_cleanupusers'),
                 'moodle',
                 ['class' => "imggroup-" . $user->id]
-            ) . '/ ' .
+            ) . '&hairsp;/&hairsp;' .
             $OUTPUT->pix_icon(
                 'e/save',
                 get_string('hideuser', 'tool_cleanupusers'),
@@ -155,7 +155,6 @@ class users_table extends \table_sql {
     public function col_fullname($user) {
         if ($user->suspended) {
             return $this->display_usersuspended($user, parent::col_fullname($user));
-//            return $this->display_usersuspended($user, fullname($user));
         }
         return parent::col_fullname($user);
     }

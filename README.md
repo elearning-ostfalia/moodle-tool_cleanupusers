@@ -157,13 +157,7 @@ Actions
 * Soll der Zeitstempel des Archivierens so gesetzt werden, als wenn das Archivieren auch zu
   dem Zeitpunkt stattgefunden hat, wenn es hätte stattfinden können?
   (Ziel: Wenn das Plugin installiert wird, müssen ja alte Nutzerdaten abgearbeitet werden)
-* handleuser: Testen, dass ein Nutzer, der bearbeitet werden soll, auch tatsächlich dafür geeignet ist
-  (Hacker-Angriffen vorbeugen)
 * Reaktivierte Nutzer haben beim Reaktivieren denselben Status wie vorher (sind also ggf. immer noch suspended!!)
   Ist das sinnvoll???? Testfall: test_already_suspended_suspend
 
-- in der Liste 'to be deleted' noch das Reaktivieren anbieten???
 
-# Bugs
-* no course checker und manuell suspendieren => ist archiviert (OK), aber taucht nicht in der 
-  Liste der zu löschenden Nutzer auf (obwohl kein Kurs zugeordnet) ????

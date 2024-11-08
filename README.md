@@ -163,7 +163,6 @@ Actions
   Ist das sinnvoll???? Testfall: test_already_suspended_suspend
 
 - in der Liste 'to be deleted' noch das Reaktivieren anbieten???
-- evtl. die Nutzer, die schon suspendiert sind, anders darstellen (ohne Links zum Profil! )
 
 # Bugs
 * no course checker und manuell suspendieren => ist archiviert (OK), aber taucht nicht in der 

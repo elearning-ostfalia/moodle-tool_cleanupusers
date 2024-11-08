@@ -72,17 +72,24 @@ class users_table extends \table_sql {
 
     public function col_lastaccess($user) {
         if ($user->lastaccess > 0) {
-            return date('d.m.Y h:i:s', $user->lastaccess);
+            return $this->display_usersuspended($user, date('d.m.Y h:i:s', $user->lastaccess));
         } else {
-            return get_string('neverlogged', 'tool_cleanupusers');
+            return $this->display_usersuspended($user, get_string('never'));
         }
     }
 
     public function col_timecreated($user) {
         if (!empty($user->timecreated)) {
-            return date('d.m.Y h:i:s', $user->timecreated);
+            return $this->display_usersuspended($user, date('d.m.Y h:i:s', $user->timecreated));
         }
         return '??';
+    }
+
+    private function display_usersuspended($user, $value) {
+        if ($user->suspended) {
+            return \html_writer::tag('span', $value, array('class'=>'usersuspended'));
+        }
+        return $value;
     }
 
     public function col_suspend($user) {
@@ -101,7 +108,7 @@ class users_table extends \table_sql {
                     get_string('archiveuser', 'tool_cleanupusers'),
                     'moodle',
                     ['class' => "imggroup-" . $user->id]
-                ) .
+                ) . '/ ' .
                 \html_writer::link(
                 $url,
                 $OUTPUT->pix_icon(
@@ -119,7 +126,7 @@ class users_table extends \table_sql {
                 get_string('hideuser', 'tool_cleanupusers'),
                 'moodle',
                 ['class' => "imggroup-" . $user->id]
-            ) .
+            ) . '/ ' .
             $OUTPUT->pix_icon(
                 'e/save',
                 get_string('hideuser', 'tool_cleanupusers'),
@@ -127,6 +134,30 @@ class users_table extends \table_sql {
                 ['class' => "imggroup-" . $user->id]
             )
         );
+    }
+
+    public function col_id($user) {
+        return $this->display_usersuspended($user, $user->id);
+    }
+
+    public function col_username($user) {
+        return $this->display_usersuspended($user, $user->username);
+    }
+
+    public function col_auth($user) {
+        return $this->display_usersuspended($user, $user->auth);
+    }
+
+    public function col_timestamp($user) {
+        return $this->display_usersuspended($user, date('d.m.Y h:i:s', $user->timestamp));
+    }
+
+    public function col_fullname($user) {
+        if ($user->suspended) {
+            return $this->display_usersuspended($user, parent::col_fullname($user));
+//            return $this->display_usersuspended($user, fullname($user));
+        }
+        return parent::col_fullname($user);
     }
 
     /**

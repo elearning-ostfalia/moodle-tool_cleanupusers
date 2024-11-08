@@ -86,6 +86,13 @@ class archive_table extends \table_sql {
         }
     }
 
+    private function display_usersuspended($value) {
+        return \html_writer::tag('span', $value, array('class'=>'usersuspended'));
+    }
+    public function col_fullname($user) {
+        return $this->display_usersuspended(fullname($user));
+    }
+
     public function col_reactivate($user) {
         global $OUTPUT;
         $url = new \moodle_url('/admin/tool/cleanupusers/handleuser.php', [
@@ -126,19 +133,31 @@ class archive_table extends \table_sql {
         );
     }
 
+    public function col_id($user) {
+        return $this->display_usersuspended($user->id);
+    }
+
+    public function col_username($user) {
+        return $this->display_usersuspended($user->username);
+    }
+
+    public function col_auth($user) {
+        return $this->display_usersuspended($user->auth);
+    }
+
     public function col_timestamp($user) {
-        return date('d.m.Y h:i:s', $user->timestamp);
+        return $this->display_usersuspended(date('d.m.Y h:i:s', $user->timestamp));
     }
 
     public function col_timecreated($user) {
-        return date('d.m.Y h:i:s', $user->timecreated);
+        return $this->display_usersuspended(date('d.m.Y h:i:s', $user->timecreated));
     }
 
     public function col_lastaccess($user) {
         if ($user->lastaccess > 0) {
-            return date('d.m.Y h:i:s', $user->lastaccess);
+            return $this->display_usersuspended(date('d.m.Y h:i:s', $user->lastaccess));
         } else {
-            return get_string('neverlogged', 'tool_cleanupusers');
+            return $this->display_usersuspended(get_string('never'));
         }
     }
 

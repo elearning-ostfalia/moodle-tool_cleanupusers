@@ -121,7 +121,7 @@ class behat_cleanupusers extends behat_base {
         $record = $DB->get_record('tool_cleanupusers_archive', ['username' => $username], 'id',
             MUST_EXIST);
 
-        $this->execute('behat_general::i_click_on', ['.imggroup-' . $record->id, 'css']);
+        $this->execute('behat_general::i_click_on', ['.fa-trash.imggroup-' . $record->id, 'css']);
     }
 
     /**

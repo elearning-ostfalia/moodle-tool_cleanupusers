@@ -89,7 +89,7 @@ switch ($userfilter->get_action()) {
                 }
                 // var_dump($sqlfilter);
                 $archivetable = new \tool_cleanupusers\table\archive_table('tool_cleanupusers_toarchive_table',
-                    $sqlfilter, $paramfilter, "reactivate", [], $returnurl);
+                    $sqlfilter, $paramfilter, "reactivate", [], $returnurl, $checker);
             } catch (Exception $e) {
                 core\notification::warning($checker . ': ' . $e->getMessage());
             }
@@ -114,7 +114,7 @@ switch ($userfilter->get_action()) {
                 }
                 // var_dump($sqlfilter);
                 $archivetable = new \tool_cleanupusers\table\archive_table('tool_cleanupusers_todelete_table',
-                    $sqlfilter, $paramfilter, "delete", [], $returnurl);
+                    $sqlfilter, $paramfilter, "delete", [], $returnurl, $checker);
             } catch (Exception $e) {
                 core\notification::warning($checker . ': ' . $e->getMessage());
             }
@@ -123,7 +123,7 @@ switch ($userfilter->get_action()) {
     case archive_filter_form::ALL_USERS:
         // only user filter will be applied
         $archivetable = new \tool_cleanupusers\table\archive_table('tool_cleanupusers_toarchive_table',
-            $sqlfilter, $paramfilter, "reactivate", [], $returnurl);
+            $sqlfilter, $paramfilter, "reactivate", [], $returnurl, $checker);
 
         break;
     default:

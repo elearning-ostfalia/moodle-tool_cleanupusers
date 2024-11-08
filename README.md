@@ -164,4 +164,4 @@ Actions
 
 # Bugs
 * no course checker und manuell suspendieren => ist archiviert (OK), aber taucht nicht in der 
-  Liste der zu löschenden Nutzer auf (obwohl kein Kurs zugeordnet)
+  Liste der zu löschenden Nutzer auf (obwohl kein Kurs zugeordnet) ????

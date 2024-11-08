@@ -249,3 +249,92 @@ Feature: Cleanup settings
       | Last Login Checker       | user1   |
       | Never Login Checker      | user3   |
       | No active course Checker | user5   |
+
+  @javascript
+  Scenario: Preview cleanup users
+    Given I log in as "admin"
+
+    # make new user an admin
+    And I navigate to "Users > Permissions > Site administrators" in site administration
+    And I click on "//*[contains(text(), 'New AdminUser')]" "xpath_element"
+    And I press "Add"
+    And I press "Continue"
+
+    When I navigate to "Users > Clean up users > Pending cleanup actions" in site administration
+
+    And I should see "user1" in the "users_lastloginchecker" "table"
+    And I should not see "user2" in the "users_lastloginchecker" "table"
+    And I should not see "user3" in the "users_lastloginchecker" "table"
+    And I should not see "user4" in the "users_lastloginchecker" "table"
+    And I should not see "user5" in the "users_lastloginchecker" "table"
+    And I should not see "user6" in the "users_lastloginchecker" "table"
+    And I should not see "user7" in the "users_lastloginchecker" "table"
+    And I should not see "user8" in the "users_lastloginchecker" "table"
+    And I should not see "user0" in the "users_lastloginchecker" "table"
+    And I should not see "newadmin" in the "users_lastloginchecker" "table"
+
+    And I should see "user5" in the "users_nocoursechecker" "table"
+    And I should see "user6" in the "users_nocoursechecker" "table"
+    And I should see "user7" in the "users_nocoursechecker" "table"
+    And I should see "user8" in the "users_nocoursechecker" "table"
+    And I should see "user0" in the "users_nocoursechecker" "table"
+    And I should not see "user1" in the "users_nocoursechecker" "table"
+    And I should not see "user2" in the "users_nocoursechecker" "table"
+    And I should not see "user3" in the "users_nocoursechecker" "table"
+    And I should not see "user4" in the "users_nocoursechecker" "table"
+    And I should not see "newadmin" in the "users_nocoursechecker" "table"
+
+    And I should see "user3" in the "users_neverloginchecker" "table"
+    And I should see "user4" in the "users_neverloginchecker" "table"
+    And I should see "user0" in the "users_neverloginchecker" "table"
+    And I should not see "user1" in the "users_neverloginchecker" "table"
+    And I should not see "user2" in the "users_neverloginchecker" "table"
+    And I should not see "user5" in the "users_neverloginchecker" "table"
+    And I should not see "user6" in the "users_neverloginchecker" "table"
+    And I should not see "user7" in the "users_neverloginchecker" "table"
+    And I should not see "user8" in the "users_neverloginchecker" "table"
+    And I should not see "user8" in the "users_neverloginchecker" "table"
+    And I should not see "newadmin" in the "users_neverloginchecker" "table"
+
+    And I should see "user9" in the "users_suspendedchecker" "table"
+    And I should not see "user1" in the "users_suspendedchecker" "table"
+    And I should not see "user2" in the "users_suspendedchecker" "table"
+    And I should not see "user5" in the "users_suspendedchecker" "table"
+    And I should not see "user6" in the "users_suspendedchecker" "table"
+    And I should not see "user7" in the "users_suspendedchecker" "table"
+    And I should not see "user8" in the "users_suspendedchecker" "table"
+    And I should not see "user0" in the "users_suspendedchecker" "table"
+    And I should not see "newadmin" in the "users_suspendedchecker" "table"
+
+    And I should see "user1" in the "users_ldapchecker" "table"
+    And I should see "user2" in the "users_ldapchecker" "table"
+    And I should see "user5" in the "users_ldapchecker" "table"
+    And I should see "user6" in the "users_ldapchecker" "table"
+    And I should see "user7" in the "users_ldapchecker" "table"
+    And I should see "user8" in the "users_ldapchecker" "table"
+    And I should see "user9" in the "users_ldapchecker" "table"
+    And I should see "user0" in the "users_ldapchecker" "table"
+    And I should not see "newadmin" in the "users_ldapchecker" "table"
+
+    And I should not see "Users who will be deleted"
+    And I should not see "Users who will be reactivated"
+
+    # export users to be archived as HTML table
+    And I select "HTML table" from the "dataformat" singleselect
+    # empty export for archive
+    And I click on "(//button[contains(text(), 'Download')])[2]" "xpath_element"
+    And I should see "There is nothing to be downloaded"
+    And I press the "back" button in the browser
+
+    # almost all users to be suspended
+    And I click on "(//button[contains(text(), 'Download')])[1]" "xpath_element"
+
+    And I should see "user1"
+    And I should see "user2"
+    And I should see "user3"
+    And I should see "user4"
+    And I should see "user5"
+    And I should see "user6"
+    And I should see "user7"
+    And I should see "user8"
+    And I should see "user0"

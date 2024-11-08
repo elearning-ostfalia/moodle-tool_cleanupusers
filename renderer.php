@@ -216,7 +216,7 @@ class tool_cleanupusers_renderer extends plugin_renderer_base {
 
             $archivetable = new \tool_cleanupusers\table\archive_table(
                 'tool_cleanupusers_pending_reactivate_table',
-                $sqlfilter, [], "reactivate", [], $returnurl);
+                $sqlfilter, [], "reactivate", [], $returnurl, $checker);
             $output .= $this->output_table($archivetable, $limit, $userstoreactivate,
                 get_string('willbereactivated', 'tool_cleanupusers'), $url);
         }
@@ -226,7 +226,7 @@ class tool_cleanupusers_renderer extends plugin_renderer_base {
             $limitedarray = array_slice($userstosuspend, 0, $limit, true);
             $archivetable = new \tool_cleanupusers\table\users_table(
                 'tool_cleanupusers_pending_suspend_table',
-                helper::users_to_sql_filter($limitedarray), [], $checker, $returnurl);
+                helper::users_to_sql_filter($limitedarray), [], $checker, $returnurl, $checker);
             $output .= $this->output_table($archivetable, $limit, $userstosuspend,
                 get_string('willbesuspended', 'tool_cleanupusers'), $url);
         }
@@ -238,7 +238,7 @@ class tool_cleanupusers_renderer extends plugin_renderer_base {
 
             $archivetable = new \tool_cleanupusers\table\archive_table(
                 'tool_cleanupusers_pending_delete_table',
-                $sqlfilter, [], "delete", [], $returnurl);
+                $sqlfilter, [], "delete", [], $returnurl, $checker);
             $output .= $this->output_table($archivetable, $limit, $usertodelete,
                 get_string('willbedeleted', 'tool_cleanupusers'), $url);
         }
@@ -276,7 +276,8 @@ class tool_cleanupusers_renderer extends plugin_renderer_base {
         $output = \html_writer::tag('h5', $title);
         $output .= $archivetable->get_content($limit);
         if (count($userarray) > $limit) {
-            $output .= \html_writer::link($url, '... watch full table ');
+            $output .= \html_writer::link($url,
+                    '... ' . get_string('showcompletetable', 'tool_cleanupusers'));
         }
         return $output;
     }

@@ -49,7 +49,8 @@ switch ($type) {
 
 $rows = new ArrayObject([]);
 foreach ($users_to_be_downloaded as $row) {
-    $rows->append($row);
+    $rows[$row['id']] = $row;
+    // $rows->append($row);
 }
 
 if (count($rows) == 0) {

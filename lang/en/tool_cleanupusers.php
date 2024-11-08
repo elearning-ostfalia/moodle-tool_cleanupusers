@@ -45,7 +45,7 @@ $string['Archived'] = 'Archived';
 $string['Willbe'] = 'Will be';
 $string['Neverloggedin'] = 'Users that never logged in';
 $string['willbereactivated'] = 'Users who will be reactivated';
-$string['willbesuspended'] = 'Users who will be suspended resp. archived';
+$string['willbesuspended'] = 'Users who will be archived (suspended)';
 $string['willbedeleted'] = 'Users who will be deleted';
 $string['usersdeleted'] = 'User \'{$a}\' has been deleted.';
 $string['usersreactivated'] = 'User \'{$a}\' has been reactivated.';
@@ -116,6 +116,7 @@ $string['confirm-delete-title'] = 'Completely delete user';
 $string['nodownload'] = 'There is nothing to be downloaded';
 $string['downloadarchivepreview'] = 'Download archive preview as';
 $string['downloaddeletepreview'] = 'Download deletion preview as';
+$string['showcompletetable'] = 'show complete table';
 
 
 

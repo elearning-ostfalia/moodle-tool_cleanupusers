@@ -46,14 +46,14 @@ class archive_table extends \table_sql {
      * @param String $sqlwhere
      * @param array $param
      */
-    public function __construct($uniqueid, $sqlwhere, $param, $intention, $sql, $returnurl) {
+    public function __construct($uniqueid, $sqlwhere, $param, $intention, $sql, $returnurl, $checker) {
         parent::__construct($uniqueid);
 
         $this->returnurl = $returnurl;
         // Define the list of columns to show.
         $columns = [
             'id'         => get_string('id', 'tool_cleanupusers'),
-            'username'   => '',
+            'username'   => get_string('username'),
             'fullname'   => get_string('fullname'),
             'lastaccess' => get_string('lastaccess', 'tool_cleanupusers'),
             'timecreated' => get_string('timecreated', 'tool_cleanupusers'),
@@ -65,6 +65,7 @@ class archive_table extends \table_sql {
 
         $this->define_columns(array_keys($columns));
         $this->define_headers(array_values($columns));
+        $this->set_attribute('id', 'archive_' . $checker . '_' . $intention);
 
         if ($sqlwhere != null && $sqlwhere != '') {
             $where = $sqlwhere;

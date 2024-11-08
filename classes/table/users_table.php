@@ -52,13 +52,14 @@ class users_table extends \table_sql {
         // Define the list of columns to show.
         $columns = ['id', 'username', 'fullname', 'lastaccess', 'timecreated',  'auth', 'suspend'];
         $this->define_columns($columns);
+        $this->set_attribute('id', 'users_' . $checker);
 
         // Define the titles of columns to show in header.
-        $header = get_string('willbesuspended', 'tool_cleanupusers');
+        // $header = get_string('willbesuspended', 'tool_cleanupusers');
 
         $headers = [
             get_string('id', 'tool_cleanupusers'),
-            $header,
+            get_string('username'), // $header,
             get_string('fullname'),
             get_string('lastaccess', 'tool_cleanupusers'),
             get_string('timecreated', 'tool_cleanupusers'),

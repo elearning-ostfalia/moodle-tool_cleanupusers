@@ -47,7 +47,10 @@ class suspendedchecker extends userstatuschecker {
      * @return array
      */
     public function condition_suspend_sql(): array {
-        return [" suspended = 1", []];
+        return [
+            " suspended = 1 and timemodified < :timelimit ",
+            [ 'timelimit'  => time() - $this->get_suspendtime_in_sec() ]
+        ];
     }
 
     /**
@@ -83,7 +86,20 @@ class suspendedchecker extends userstatuschecker {
      * there is no suspendtime
      * @return bool
      */
-    public function needs_suspendtime(): bool {
+/*    public function needs_suspendtime(): bool {
         return false;
+    }*/
+
+    /**
+     * Check time since user was modified for the last time
+     * @return float
+     *
+     */
+    public function get_suspendtime(): float {
+        if (!isset($this->config->{CONFIG_SUSPENDTIME}) || ($this->config->{CONFIG_SUSPENDTIME} == null)) {
+            // initial state
+            return 30;
+        }
+        return $this->config->{CONFIG_SUSPENDTIME};
     }
 }

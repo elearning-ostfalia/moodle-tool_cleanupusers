@@ -23,5 +23,7 @@
 
 $string['pluginname'] = 'Suspended Checker';
 $string['condition'] = 'User is suspended manually (by admin)';
-// $string['suspendtime'] = '';
+$string['suspendtime'] = 'Number of days that have passed since the user data was last changed 
+(expect suspension to be tha last action)';
+
 

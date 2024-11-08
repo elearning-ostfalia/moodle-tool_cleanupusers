@@ -49,6 +49,7 @@ final class userstatus_suspendedchecker_test extends \tool_cleanupusers\userstat
         set_config(CONFIG_ENABLED, "suspendedchecker");
         set_config(CONFIG_AUTH_METHOD, AUTH_METHOD, 'userstatus_suspendedchecker');
         set_config(CONFIG_DELETETIME, 365, 'userstatus_suspendedchecker');
+        set_config(CONFIG_SUSPENDTIME, 10, 'userstatus_suspendedchecker');
 
         $this->checker = new suspendedchecker();
     }
@@ -58,10 +59,32 @@ final class userstatus_suspendedchecker_test extends \tool_cleanupusers\userstat
     }
 
     public function typical_scenario_for_suspension(): \stdClass {
-        return $this->create_test_user('username', ['suspended' => 1]);
+        $user = $this->create_test_user('username',  ['suspended' => 1]);
+        // timemodified cannot be set on creation as it is overriden!
+        global $DB;
+        $user->timemodified = ELEVENDAYSAGO;
+        $DB->update_record('user', $user);
+        return $user;
     }
 
     /**
+     * do not suspend if timelimit is not yet reached.
+     * @return void
+     * @throws \dml_exception
+     */
+    public function test_already_deleted_not_suspend() {
+        $user = $this->create_test_user('username',  ['suspended' => 1]);
+        // timemodified cannot be set on creation as it is overriden!
+        global $DB;
+        $user->timemodified = NINEDAYSAGO;
+        $DB->update_record('user', $user);
+        $this->assertEquals(0, count($this->checker->get_to_suspend()));
+    }
+
+
+
+
+        /**
      * User cannot be reactivated by external circumstances. He or she must be reactivated
      * manually
      *

@@ -131,10 +131,8 @@ Copied from https://github.com/eLearning-TUDarmstadt/moodle-cleanupusers_ldapche
 
  Actions
 
-* archive (unabhängig vom Filter)
+* archive
    
-Aktionen ggf. auch für alle Nutzer aus dem Filter anwenden mit Nachfrage!
-
 ## Archived users
 
 Filter
@@ -143,21 +141,16 @@ Filter
 2. to be deleted by [checker]
 3. all
 
-
 Actions
 
-* reactivate (immer)
-* delete (nur wenn im delete-Filter)
+* reactivate (to be reactivated view or all)
+* delete (to be deleted view)
 
-(ggf. Anzeige, wann gelöscht wird)
+## Preview (pending)
 
-Aktionen ggf. auch für alle Nutzer aus dem Filter anwenden mit Nachfrage!
-
-## Vorschau, über anstehende Aktionen (index)
-
-   * reactivated => Link zu "Archived users" mit passendem Filter
-   * suspended => Link zu "Users to be archived" mit passendem Filter
-   * deleted => Link zu "Users to be archived" mit passendem Filter
+   * reactivated
+   * suspended
+   * deleted
 
 # TODO:
 
@@ -166,10 +159,8 @@ Aktionen ggf. auch für alle Nutzer aus dem Filter anwenden mit Nachfrage!
   (Ziel: Wenn das Plugin installiert wird, müssen ja alte Nutzerdaten abgearbeitet werden)
 * handleuser: Testen, dass ein Nutzer, der bearbeitet werden soll, auch tatsächlich dafür geeignet ist
   (Hacker-Angriffen vorbeugen)
-* Suspendtime für suspended (modification time)
 * Test: reaktivierte Nutzer sollten immer not suspended sein ??
-* Test: suspendierte Nutzer sollten immer suspended sein
-*
+
 
 # Bugs
 * no course checker und manuell suspendieren => ist archiviert (OK), aber taucht nicht in der 

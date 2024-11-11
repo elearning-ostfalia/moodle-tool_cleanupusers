@@ -13,6 +13,7 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
 /**
  * Suspend, delete or reactivate user. This is called when sideadmin changes user from the cleanupusers
  *
@@ -87,7 +88,7 @@ switch ($action) {
             notice(get_string('usersdeleted', 'tool_cleanupusers', $userarray[$userid]->username), $returnurl);
         } else {
             $yesurl = new moodle_url($PAGE->url, [
-                'confirm'=>1, 'sesskey'=>sesskey(), 'userid' => $userid, 'action' => $action, 'returnurl' => $returnurl
+                'confirm' => 1, 'sesskey' => sesskey(), 'userid' => $userid, 'action' => $action, 'returnurl' => $returnurl,
             ]);
             $archiveuser = $DB->get_record('tool_cleanupusers_archive', ['id' => $userid],
                 '*', MUST_EXIST);
@@ -97,11 +98,9 @@ switch ($action) {
             $title = get_string('confirm-delete-title', 'tool_cleanupusers');
             $PAGE->set_title($title);
             $PAGE->navbar->add($title);
-// $PAGE->navbar->add($fullname);
 
             global $OUTPUT;
             echo $OUTPUT->header();
-// echo $OUTPUT->heading($fullname);
             $displayoptions = ['confirmtitle' => $title];
             $confirmbutton = new single_button(
                 $yesurl,

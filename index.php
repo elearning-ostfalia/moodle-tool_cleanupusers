@@ -52,8 +52,6 @@ echo $OUTPUT->header();
 echo $renderer->get_heading();
 $content = '';
 
-
-////////////////////////////////////////////////////////////////////////////////
 // process actions
 $enabled = userstatus::get_enabled_plugins();
 if (!empty($action) && confirm_sesskey()) {
@@ -76,7 +74,7 @@ if (!empty($action) && confirm_sesskey()) {
             $enabled = array_flip(array_keys($enabled));
             $current = $enabled[$userstatus];
             if ($current == count($enabled) - 1) {
-                break; //already at the end
+                break; // already at the end.
             }
             $enabled = array_flip($enabled);
             $enabled[$current] = $enabled[$current + 1];
@@ -91,7 +89,7 @@ if (!empty($action) && confirm_sesskey()) {
             $enabled = array_flip(array_keys($enabled));
             $current = $enabled[$userstatus];
             if ($current == 0) {
-                break; //already at the top
+                break; // already at the top
             }
             $enabled = array_flip($enabled);
             $enabled[$current] = $enabled[$current - 1];
@@ -101,14 +99,12 @@ if (!empty($action) && confirm_sesskey()) {
         default:
             break;
     }
-    // unset($enabled);
     // reload
     $enabled = userstatus::get_enabled_plugins();
 }
 
 
-////////////////////////////////////////////////////////////////////////////////
-// process actions rnd
+// process actions end
 
 $content .= $renderer->render_subplugin_table();
 

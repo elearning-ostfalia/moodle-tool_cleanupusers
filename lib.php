@@ -14,6 +14,14 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
+/**
+ * handler for inplace editabled
+ *
+ * @package tool_cleanupusers
+ * @copyright 2024 Ostfalia
+ * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+
 defined('MOODLE_INTERNAL') || die;
 
 require_once($CFG->libdir . '/classes/output/inplace_editable.php');
@@ -54,7 +62,7 @@ function tool_cleanupusers_inplace_editable($itemtype, $plugin, $newvalue1) {
 
         if (is_array($newvaluearray)) {
             $displayvalues = [];
-            foreach ($newvaluearray as $index ) {
+            foreach ($newvaluearray as $index) {
                 $displayvalues[] = $auths[$index];
             }
             $newvaluetext = implode(',', $displayvalues);

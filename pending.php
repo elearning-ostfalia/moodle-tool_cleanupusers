@@ -48,13 +48,12 @@ $renderer = $PAGE->get_renderer('tool_cleanupusers');
 
 $content = '';
 echo $OUTPUT->header();
-//echo $renderer->get_heading();
 
 $enabled = userstatus::get_enabled_plugins();
 
 $content = $OUTPUT->heading(get_string('pendingactions', 'tool_cleanupusers'), 2, 'main');
 
-if (!$enabled or count($enabled) == 0) {
+if (!$enabled || count($enabled) == 0) {
     core\notification::warning("Note: no userstatus plugin enabled");
 } else {
     // Request arrays from the sub-plugin.

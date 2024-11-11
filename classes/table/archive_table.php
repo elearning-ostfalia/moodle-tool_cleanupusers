@@ -87,7 +87,7 @@ class archive_table extends \table_sql {
     }
 
     private function display_usersuspended($value) {
-        return \html_writer::tag('span', $value, array('class'=>'usersuspended'));
+        return \html_writer::tag('span', $value, array('class' => 'usersuspended'));
     }
     public function col_fullname($user) {
         return $this->display_usersuspended(fullname($user));

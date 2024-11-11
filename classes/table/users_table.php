@@ -87,7 +87,7 @@ class users_table extends \table_sql {
 
     private function display_usersuspended($user, $value) {
         if ($user->suspended) {
-            return \html_writer::tag('span', $value, array('class'=>'usersuspended'));
+            return \html_writer::tag('span', $value, array('class' => 'usersuspended'));
         }
         return $value;
     }

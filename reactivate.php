@@ -50,7 +50,7 @@ list($options, $unrecognised) = cli_get_params([
     'showsql' => false,
     'showdebugging' => false,
 ], [
-    'h' => 'help'
+    'h' => 'help',
 ]);
 
 if ($unrecognised) {
@@ -96,8 +96,7 @@ if ($options['show-all']) {
  * @return
  * @throws coding_exception
  */
-function reactivate(string $id, mixed $record): void
-{
+function reactivate(string $id, mixed $record): void {
     cli_writeln('Reactivating: ' . $id);
     $userarray[$id] = $record;
     $progress = new progress_trace_buffer(new text_progress_trace(), true);
@@ -130,7 +129,7 @@ if ($options['users']) {
         foreach ($users as $id) {
             $record = $DB->get_record('tool_cleanupusers_archive', ['id' => $id],
                 'id, username, firstname, lastname, suspended, lastaccess, auth, deleted');
-            if ($record === FALSE) {
+            if ($record === false) {
                 cli_writeln('Unknown user: ' . $id);
             } else {
                 if ($options['run']) {

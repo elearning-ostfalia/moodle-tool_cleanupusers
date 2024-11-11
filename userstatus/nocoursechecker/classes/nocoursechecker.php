@@ -18,7 +18,7 @@
  * Sub-plugin nocoursechecker.
  *
  * @package    userstatus_nocoursechecker
- * * @copyright  2024 Ostfalia
+ * @copyright  2024 Ostfalia
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 namespace userstatus_nocoursechecker;

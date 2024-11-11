@@ -23,7 +23,6 @@
  */
 
 require_once(__DIR__ . '/../../../config.php');
-//require_once(dirname(__FILE__) . '/locallib.php');
 require_once($CFG->libdir . '/filelib.php');
 require_once($CFG->libdir . '/dataformatlib.php');
 
@@ -36,11 +35,11 @@ require_admin();
 
 switch ($type) {
     case "archive":
-        list($unabletoarchive, $userarchived, $users_to_be_downloaded, $unabletoactivate, $useractivated) =
+        list($unabletoarchive, $userarchived, $downloadusers, $unabletoactivate, $useractivated) =
             \tool_cleanupusers\helper::archive_users(true);
         break;
     case "delete":
-        list($unabletodelete, $userdeleted, $users_to_be_downloaded) =
+        list($unabletodelete, $userdeleted, $downloadusers) =
             \tool_cleanupusers\helper::delete_users(true);
         break;
     default:
@@ -48,7 +47,7 @@ switch ($type) {
 }
 
 $rows = new ArrayObject([]);
-foreach ($users_to_be_downloaded as $row) {
+foreach ($downloadusers as $row) {
     $rows[$row['id']] = $row;
     // $rows->append($row);
 }
@@ -56,7 +55,7 @@ foreach ($users_to_be_downloaded as $row) {
 if (count($rows) == 0) {
     echo get_string('nodownload', 'tool_cleanupusers');
 } else {
-    $fields = array_keys($users_to_be_downloaded[0]);
+    $fields = array_keys($downloadusers[0]);
 
     \core\dataformat::download_data($type . '_preview', $dataformat, $fields, $rows->getIterator(), function(array $row) use ($dataformat) {
         // HTML export content will need escaping.

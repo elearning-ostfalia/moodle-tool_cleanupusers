@@ -109,7 +109,7 @@ function xmldb_tool_cleanupusers_upgrade($oldversion) {
         $table = new xmldb_table('tool_cleanupusers');
         $field = new xmldb_field('checker', XMLDB_TYPE_CHAR, '255', null, null, null, null, 'timestamp');
 
-        // Conditionally launch add field moodlenetprofile.
+        // Add checker column to table tool_cleanupusers.
         if (!$dbman->field_exists($table, $field)) {
             $dbman->add_field($table, $field);
 
@@ -136,6 +136,7 @@ function xmldb_tool_cleanupusers_upgrade($oldversion) {
     }
 
     if ($oldversion < 2024102200) {
+        // Rename timechecker to lastloginchecker
         $subpluginold = 'timechecker';
         $subpluginnew = 'lastloginchecker';
 
@@ -143,6 +144,27 @@ function xmldb_tool_cleanupusers_upgrade($oldversion) {
         if (!$DB->execute("UPDATE {tool_cleanupusers} SET checker = :subpluginnew where checker = :subpluginold ",
             ['subpluginnew' => $subpluginnew, 'subpluginold' => $subpluginold])) {
             echo 'Failed to update timechecker name in database table {tool_cleanupusers} <br>' . PHP_EOL;
+        }
+
+        // Copy configuration values from timechecker to lastloginchecker.
+        $value = get_config('userstatus_timechecker', 'suspendtime');
+        if (isset($value)) {
+             set_config('suspendtime', $value, 'userstatus_lastloginchecker');
+        }
+
+        $value = get_config('userstatus_timechecker', 'deletetime');
+        if (isset($value)) {
+            set_config('deletetime', $value, 'userstatus_lastloginchecker');
+        }
+
+        // Rename general settings (remove ending settings from plugin).
+        $value = get_config('tool_cleanupusers_settings', 'suspendusername');
+        if (isset($value)) {
+            set_config('suspendusername', $value, 'tool_cleanupusers');
+        }
+        $value = get_config('tool_cleanupusers_settings', 'suspendfirstname');
+        if (isset($value)) {
+            set_config('suspendfirstname', $value, 'tool_cleanupusers');
         }
 
         // Cleanupusers savepoint reached.

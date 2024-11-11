@@ -24,6 +24,7 @@
 
 use tool_cleanupusers\archiveuser_filtering;
 use tool_cleanupusers\helper;
+use tool_cleanupusers\plugininfo\userstatus;
 
 global $CFG, $PAGE, $OUTPUT;
 
@@ -42,12 +43,6 @@ require_admin();
 admin_externalpage_setup('cleanupusers');
 
 
-// $pagetitle = get_string('toarchive', 'tool_cleanupusers', $checker);
-
-// $PAGE->set_title(get_string('toarchive', 'tool_cleanupusers'));
-
-
-// $PAGE->set_heading(get_string('toarchive', 'tool_cleanupusers', $checker));
 $PAGE->set_pagelayout('admin');
 $PAGE->set_url(new moodle_url('/admin/tool/cleanupusers/toarchive.php'), ['checker' => $checker]);
 
@@ -55,6 +50,12 @@ $renderer = $PAGE->get_renderer('tool_cleanupusers');
 
 $content = '';
 echo $OUTPUT->header();
+
+if (count(userstatus::get_enabled_plugins()) == 0) {
+    \core\notification::warning("Note: no userstatus plugin enabled");
+    echo $OUTPUT->footer();
+    return;
+}
 
 
 $userfilter = new \tool_cleanupusers\archiveuser_filtering(false, $action, $checker);
@@ -79,7 +80,6 @@ if (!class_exists($subpluginname)) {
 } else {
     $userstatuschecker = new $subpluginname();
     $PAGE->set_title(get_string('toarchiveby', 'tool_cleanupusers', $userstatuschecker->get_displayname()));
-    // echo $renderer->get_heading(get_string('toarchiveby', 'tool_cleanupusers', $userstatuschecker->get_displayname()));
 
     $archivearray = $userstatuschecker->get_to_suspend();
     if ($sqlfilter != null && $sqlfilter != '') {

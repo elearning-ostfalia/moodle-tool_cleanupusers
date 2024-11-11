@@ -58,6 +58,10 @@ class not_archive_filter_form extends moodleform {
             return $SESSION->checker;
         } else {
             $plugins = userstatus::get_enabled_plugins();
+            if (count($plugins) == 0) {
+                // return false;
+                throw new \moodle_exception('no subplugin enabled');
+            }
             return reset($plugins);
         }
     }
@@ -69,6 +73,10 @@ class not_archive_filter_form extends moodleform {
         $mform = $this->_form;
         // Gets all enabled plugins of type userstatus.
         $plugins = \tool_cleanupusers\helper::get_enabled_checkers_with_displayname();
+        if (count($plugins) == 0) {
+            \core\notification::warning("Note: no userstatus plugin enabled");
+            return;
+        }
 
         $pluginslinks = [];
         foreach ($plugins as $plugin => $name) {

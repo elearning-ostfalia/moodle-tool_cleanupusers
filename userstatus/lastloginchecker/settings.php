@@ -13,17 +13,26 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
 /**
- * This file contains language strings used in the lastloginchecker sub-plugin.
- *
- * @package userstatus_lastloginchecker
- * @copyright 2016 N Herrmann
+ * Settings.php
+ * @package   userstatus_lastloginchecker
+ * @copyright 2016/17 N Herrmann/2024 Ostfalia
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-$string['pluginname'] = 'Last Login Checker';
-$string['condition'] = 'User has not logged in for a long time';
-$string['suspendtime'] = 'Number of days without log in until a user is suspended';
-$string['suspendteachers'] = 'Also suspend teachers';
-$string['suspendteachers_info'] = 'If not set, all users who are NOT enrolled in ANY course as a teacher will be suspended. In other words, anyone who is registered as a teacher anywhere will not be suspended. Otherwise (if set), teachers are also suspended.';
+defined('MOODLE_INTERNAL') || die();
 
+// Included in admin/tool/cleanupusers/classes/plugininfo/userstatus.php, therefore, need to include global variables.
+global $CFG, $PAGE;
+
+if ($hassiteconfig) {
+    $yesno = array(
+            new lang_string('no'),
+            new lang_string('yes'),
+    );
+    $settings->add(new admin_setting_configselect('userstatus_lastloginchecker/suspendteachers',
+        get_string('suspendteachers', 'userstatus_lastloginchecker'),
+        get_string('suspendteachers_info', 'userstatus_lastloginchecker'), 0 , $yesno));
+
+}

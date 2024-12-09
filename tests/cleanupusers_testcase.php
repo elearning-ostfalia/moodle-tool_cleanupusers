@@ -84,10 +84,10 @@ abstract class cleanupusers_testcase extends \advanced_testcase
             $extra_attributes));
     }
 
-    protected function create_user_and_enrol($username, $course = null) {
+    protected function create_user_and_enrol($username, $course = null, $role = 'student') {
         $user = $this->create_test_user($username);
         if ($course != null) {
-            $this->generator->enrol_user($user->id, $course->id);
+            $this->generator->enrol_user($user->id, $course->id, $role);
         }
         return $user;
     }

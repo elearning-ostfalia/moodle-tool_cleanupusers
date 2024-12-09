@@ -109,12 +109,31 @@ final class userstatus_lastloginchecker_test extends \tool_cleanupusers\userstat
         $this->assertEquals(0, count($this->checker->get_to_suspend()));
     }
 
-    // ---------------------------------------------
-    // Suspend: scenarios handled by this plugin
-    // ---------------------------------------------
     public function test_11_days_ago_suspend() {
         $user = $this->create_test_user('username', ['lastaccess' => ELEVENDAYSAGO]);
         $this->assertEqualsUsersArrays($this->checker->get_to_suspend(), $user);
+    }
+
+    // ---------------------------------------------
+    // Suspend: scenarios handled by this plugin
+    // ---------------------------------------------
+    public function test_11_days_ago_and_student_suspend() {
+        $course = $this->generator->create_course();
+        $user = $this->create_user_and_enrol('username', $course, 'student');
+        global $DB;
+        $user->lastaccess = ELEVENDAYSAGO;
+        $DB->update_record('user', $user);
+
+        $this->assertEqualsUsersArrays($this->checker->get_to_suspend(), $user);
+    }
+
+    public function test_11_days_ago_and_teacher_no_suspend() {
+        $course = $this->generator->create_course();
+        $user = $this->create_user_and_enrol('username', $course, 'teacher');
+        global $DB;
+        $user->lastaccess = ELEVENDAYSAGO;
+        $DB->update_record('user', $user);
+        $this->assertEquals(0, count($this->checker->get_to_suspend()));
     }
 
     public function test_9_days_ago_change_suspend_time_suspend() {

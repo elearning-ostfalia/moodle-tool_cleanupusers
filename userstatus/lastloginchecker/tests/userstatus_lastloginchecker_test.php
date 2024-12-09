@@ -129,7 +129,7 @@ final class userstatus_lastloginchecker_test extends \tool_cleanupusers\userstat
 
     public function test_11_days_ago_and_teacher_no_suspend() {
         $course = $this->generator->create_course();
-        $user = $this->create_user_and_enrol('username', $course, 'teacher');
+        $user = $this->create_user_and_enrol('username', $course, 'editingteacher');
         global $DB;
         $user->lastaccess = ELEVENDAYSAGO;
         $DB->update_record('user', $user);

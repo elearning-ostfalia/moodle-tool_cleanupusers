@@ -59,7 +59,7 @@ class lastloginchecker extends userstatuschecker {
         // Get all courses the user is enrolled into
         $courses = enrol_get_all_users_courses($user->id, true, "id");
         // Get all teacher roles
-        $roleids = array_keys(get_archetype_roles('teacher'));
+        $roleids = array_keys(get_archetype_roles('editingteacher'));
 
         foreach ($courses as $course) {
             foreach($roleids as $roleid) {

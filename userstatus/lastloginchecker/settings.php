@@ -29,6 +29,7 @@ global $CFG, $PAGE;
 require_once($CFG->libdir . '/adminlib.php');
 
 if ($hassiteconfig) {
+    /*
     $yesno = array(
             new lang_string('no'),
             new lang_string('yes'),
@@ -36,9 +37,7 @@ if ($hassiteconfig) {
     $settings->add(new admin_setting_configselect('userstatus_lastloginchecker/suspendteachers',
         get_string('suspendteachers', 'userstatus_lastloginchecker'),
         get_string('suspendteachers_info', 'userstatus_lastloginchecker'), 0 , $yesno));
-
-    // new CFG variable ???
-    // TODO: Das muss noch ausgewertet werden!!
+*/
     $settings->add(new admin_setting_pickroles('cleanuplastloginroles',
             new lang_string('keeproles', 'userstatus_lastloginchecker'),
             new lang_string('keeproles_info', 'userstatus_lastloginchecker'),

@@ -60,8 +60,9 @@ class lastloginchecker extends userstatuschecker {
         $courses = enrol_get_all_users_courses($user->id, true, "id");
         // Get all teacher roles
         global $CFG;
-        //var_dump($CFG->cleanuplastloginroles);
-        $roleids = array_keys(get_archetype_roles('editingteacher'));
+        // var_dump($CFG->cleanuplastloginroles);
+        $roleids = explode(',', $CFG->cleanuplastloginroles);
+        // $roleids = array_keys(get_archetype_roles('editingteacher'));
 
         foreach ($courses as $course) {
             foreach($roleids as $roleid) {

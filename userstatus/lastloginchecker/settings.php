@@ -26,6 +26,18 @@ defined('MOODLE_INTERNAL') || die();
 // Included in admin/tool/cleanupusers/classes/plugininfo/userstatus.php, therefore, need to include global variables.
 global $CFG, $PAGE;
 
+class admin_setting_cleanuproles extends admin_setting_pickroles {
+    /**
+     * Calls parent::__construct with specific arguments
+     */
+    public function __construct() {
+        parent::__construct('cleanuplastloginroles',
+                get_string('keeproles', 'userstatus_lastloginchecker'),
+                get_string('keeproles_info', 'userstatus_lastloginchecker'),
+                array('editingteacher'));
+    }
+}
+
 if ($hassiteconfig) {
     $yesno = array(
             new lang_string('no'),
@@ -35,4 +47,7 @@ if ($hassiteconfig) {
         get_string('suspendteachers', 'userstatus_lastloginchecker'),
         get_string('suspendteachers_info', 'userstatus_lastloginchecker'), 0 , $yesno));
 
+    // new CFG variable ???
+    // TODO: Das muss noch ausgewertet werden!!
+    $settings->add(new admin_setting_cleanuproles());
 }

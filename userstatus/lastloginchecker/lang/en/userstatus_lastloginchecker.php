@@ -27,3 +27,5 @@ $string['suspendtime'] = 'Number of days without log in until a user is suspende
 $string['suspendteachers'] = 'Also suspend teachers';
 $string['suspendteachers_info'] = 'If not set, all users who are NOT enrolled in ANY course as a teacher will be suspended. In other words, anyone who is registered as a teacher anywhere will not be suspended. Otherwise (if set), teachers are also suspended.';
 
+$string['keeproles'] = 'Do not suspend users with roles';
+$string['keeproles_info'] = 'Users who are enrolled with the selected roles will not be suspended by last login checker.';

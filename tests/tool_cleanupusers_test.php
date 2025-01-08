@@ -92,7 +92,7 @@ final class tool_cleanupusers_test extends advanced_testcase {
             $data['user']->auth
         );
 
-        $user->archive_me("checker1", true);
+        $user->archive_me("checker1", true, time());
         $recordtooltable = $DB->get_record('tool_cleanupusers', ['id' => $data['user']->id]);
         $recordshadowtable = $DB->get_record('tool_cleanupusers_archive', ['id' => $data['user']->id]);
         $recordusertable = $DB->get_record('user', ['id' => $data['user']->id]);
@@ -100,7 +100,7 @@ final class tool_cleanupusers_test extends advanced_testcase {
         $this->assertEquals(FALSE, $recordtooltable);
         $this->assertEquals(0, $recordusertable->suspended);
 
-        $user->archive_me("checker1", false);
+        $user->archive_me("checker1", false, time());
         $recordtooltable = $DB->get_record('tool_cleanupusers', ['id' => $data['user']->id]);
         $recordshadowtable = $DB->get_record('tool_cleanupusers_archive', ['id' => $data['user']->id]);
         $recordusertable = $DB->get_record('user', ['id' => $data['user']->id]);

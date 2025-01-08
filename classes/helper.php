@@ -190,7 +190,18 @@ class helper {
                             if (empty($checker)) {
                                 throw new \coding_exception('checker name is missing');
                             }
-                            $archiveduser = $changinguser->archive_me($checker, $dryrun);
+                            $timestamp = time();
+                            if (isset($user->lastaccess) && $user->lastaccess > 0) {
+                                $backdate = get_config('tool_cleanupusers', 'backdate');
+                                $extra = get_config('tool_cleanupusers', 'backdating_extra');
+                                if ($backdate && $extra > 0) {
+                                    $timestamp = $user->lastaccess + ($extra * DAYSECS);
+                                    if ($timestamp > time()) {
+                                        $timestamp = time();
+                                    }
+                                }
+                            }
+                            $archiveduser = $changinguser->archive_me($checker, $dryrun, $timestamp);
                             array_push($archivedusers, $archiveduser);
                             break;
                         case 'reactivate':

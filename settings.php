@@ -59,20 +59,20 @@ if ($hassiteconfig) {
     ));
 
     // Setting to enable/disable backdating.
-    $settings->add(new admin_setting_configcheckbox('tool_cleanupusers/backdating',
-        get_string('sett_backdating', 'tool_cleanupusers'),
-        get_string('sett_backdating_description', 'tool_cleanupusers'),
+    $settings->add(new admin_setting_configcheckbox('tool_cleanupusers/backdate',
+        get_string('sett_backdate', 'tool_cleanupusers'),
+        get_string('sett_backdate_description', 'tool_cleanupusers'),
         0
     ));
     $settings->add(new admin_setting_configtext(
         'tool_cleanupusers/backdating_extra',
-        get_string('sett_backdating_extra', 'tool_cleanupusers'),
-        get_string('sett_backdating_extra_description', 'tool_cleanupusers'),
+        get_string('sett_backdate_extra', 'tool_cleanupusers'),
+        get_string('sett_backdate_extra_description', 'tool_cleanupusers'),
         '',
         PARAM_INT
     ));
     $settings->hide_if('tool_cleanupusers/backdating_extra',
-        'tool_cleanupusers/backdating', 'neq', '1');
+        'tool_cleanupusers/backdate', 'neq', '1');
 
     // Log folder.
     $settings->add(new admin_setting_configtext('userstatus_ldapchecker/log_folder',

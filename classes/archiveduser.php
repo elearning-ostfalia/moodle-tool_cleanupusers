@@ -84,7 +84,7 @@ class archiveduser {
      * Throws an exception when the user is already suspended.
      * @throws cleanupusers_exception
      */
-    public function archive_me($checker, $dryrun): array {
+    public function archive_me($checker, $dryrun, $timestamp): array {
         global $DB;
         // Get the current user.
         $user = \core_user::get_user($this->id);
@@ -103,11 +103,11 @@ class archiveduser {
                 $shadowuser = clone $user;
                 // The user might be logged in, so we must kill his/her session.
                 $user->suspended = 1;
-                manager::destroy_user_sessions($user->id, null);
+                manager::destroy_user_sessions($user->id);
                 user_update_user($user, false);
                 // Document time of editing user in Database.
                 // In case there is no entry in the tool table make a new one.
-                $timestamp = time();
+                // $timestamp = time();
                 if (!$DB->record_exists('tool_cleanupusers', ['id' => $user->id])) {
                     $DB->insert_record_raw('tool_cleanupusers', [
                         'id' => $user->id,
@@ -136,7 +136,7 @@ class archiveduser {
      * Therefore, deletes the entry in the tool_cleanupusers table and throws an exception when no entry is available.
      * @throws cleanupusers_exception
      */
-    public function activate_me() {
+    public function activate_me() : void {
         global $DB;
         // Get the current user.
         $user = \core_user::get_user($this->id);

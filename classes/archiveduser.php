@@ -103,7 +103,13 @@ class archiveduser {
                 $shadowuser = clone $user;
                 // The user might be logged in, so we must kill his/her session.
                 $user->suspended = 1;
-                manager::destroy_user_sessions($user->id);
+                global $CFG;
+                if ($CFG->version > 2024100700) {
+                    // from Moodle 4.5 use destroy instead of kill
+                    manager::destroy_user_sessions($user->id);
+                } else {
+                    manager::kill_user_sessions($user->id);
+                }
                 user_update_user($user, false);
                 // Document time of editing user in Database.
                 // In case there is no entry in the tool table make a new one.
@@ -217,7 +223,13 @@ class archiveduser {
             }
             $user->username = $newusername;
             user_update_user($user, false);
-            manager::kill_user_sessions($user->id);
+            global $CFG;
+            if ($CFG->version > 2024100700) {
+                // from Moodle 4.5 use destroy instead of kill
+                manager::destroy_user_sessions($user->id);
+            } else {
+                manager::kill_user_sessions($user->id);
+            }
             // Core Function has to be executed finally.
             // It can not be executed earlier since moodle then prevents further operations on the user.
             // The Function adds @unknownemail.invalid. and a timestamp to the username.

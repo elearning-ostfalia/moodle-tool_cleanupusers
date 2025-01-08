@@ -103,7 +103,7 @@ class archiveduser {
                 $shadowuser = clone $user;
                 // The user might be logged in, so we must kill his/her session.
                 $user->suspended = 1;
-                manager::kill_user_sessions($user->id);
+                manager::destroy_user_sessions($user->id, null);
                 user_update_user($user, false);
                 // Document time of editing user in Database.
                 // In case there is no entry in the tool table make a new one.

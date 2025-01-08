@@ -67,6 +67,16 @@ $string['sett_suspendlastname'] = 'Lastname for suspended';
 $string['sett_suspendlastname_description'] = 'Choose a lastname for suspended users';
 $string['sett_log_folder'] = 'Folder for log files';
 $string['sett_log_folder_description'] = 'If a value has been set, the folder must exist and be writable!';
+$string['sett_backdating'] = 'Backdating the suspension date';
+$string['sett_backdating_description'] = 'Backdating the time at which a user is suspended to the user\'s
+last login date plus a safety margin period.<br> 
+If the safety margin means that the suspension time would be in the future, 
+then the current time is used. <br>
+Suspension time = MIN (now, last login + safety margin period)<br>
+This setting is useful if the plugin is subsequently added to an existing installation 
+in order to remove users from the system more quickly.';
+$string['sett_backdating_extra'] = 'Backdating safety margin (in days)';
+$string['sett_backdating_extra_description'] = 'Number of days added to the last login to determine the time of suspension retrospectively ';
 $string['sett_title'] = 'Common cleanup users settings';
 $string['suspendfirstname'] = 'Anonym';
 $string['suspendusername'] = 'anonym';

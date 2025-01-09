@@ -14,6 +14,7 @@ Feature: Cleanup settings
       | user8    | Student   | Miller8   | 1                 | ## -12 days##  | 0  | 0                 |                        |
       | user9    | Student   | Miller9   | 1                 | ## -12 days##  | ## -9 days##  | 1      | Suspended              |
       | user0    | Student   | Miller10  | 1                | ## -15 days##  | 0  | 0                 | neverlogin AND nocouse |
+      | user_t   | Teacher   | Miller1   | 1                 | ## -320 days## | ## -11 days ## | 0     | Last Login             |
       | newadmin | New       | AdminUser | 1                | ## -15 days##  | 0  | 0                 | new admin |
 
     And the following "courses" exist:
@@ -27,7 +28,11 @@ Feature: Cleanup settings
 
     And the following "course enrolments" exist:
       | user     | course | role           |
-      | user1    | CA1     | editingteacher |
+      | user1    | CA1     | student |
+      # user1 as student is handled by lastlogin checker
+      # in order to see handling with different role
+      # user_t is added (same attribute but teacher role)
+      | user_t    | CA1     | editingteacher |
       | user2    | CA2     | student |
       | user3    | CA3     | editingteacher |
       | user4    | CA4     | student |
@@ -53,6 +58,8 @@ Feature: Cleanup settings
       | auth_method | manual  | userstatus_suspendedchecker |
       | suspendtime | 0  | userstatus_suspendedchecker |
       | deletetime | 100  | userstatus_suspendedchecker |
+
+
 
   @javascript
   Scenario Outline: Two checkers match (manually archived)
@@ -114,6 +121,7 @@ Feature: Cleanup settings
     And I navigate to "Users > Clean up users > Users to be archived" in site administration
     And I select "Last Login Checker" checker on archiving page
     And I should see "user1"
+    And I should not see "user_t"
     And I should not see "user2"
     And I should not see "user3"
     And I should not see "user4"
@@ -128,6 +136,7 @@ Feature: Cleanup settings
     And I should see "user3"
     And I should see "user4"
     And I should not see "user1"
+    And I should not see "user_t"
     And I should not see "user2"
     And I should not see "user5"
     And I should not see "user6"
@@ -142,6 +151,7 @@ Feature: Cleanup settings
     And I should see "user7"
     And I should see "user8"
     And I should not see "user1"
+    And I should not see "user_t"
     And I should not see "user2"
     And I should not see "user3"
     And I should not see "user4"
@@ -150,7 +160,6 @@ Feature: Cleanup settings
     And I run the scheduled task "\tool_cleanupusers\task\archive_user_task"
 
     # And I navigate to "Users > Clean up users > Pending cleanup actions" in site administration
-
     And I navigate to "Users > Clean up users > Users to be archived" in site administration
     And I select "Last Login Checker" checker on archiving page
     And I should see "Nothing to display"
@@ -165,8 +174,8 @@ Feature: Cleanup settings
     And I should see "Nothing to display"
 
     And I navigate to "Users > Clean up users > Archived users" in site administration
-
     And I should see "user1"
+    And I should see "user_t"
     And I should see "user3"
     And I should see "user4"
     And I should see "user5"
@@ -262,7 +271,9 @@ Feature: Cleanup settings
 
     When I navigate to "Users > Clean up users > Pending cleanup actions" in site administration
 
+    And I should not see "user_t" in the "users_lastloginchecker" "table"
     And I should see "user1" in the "users_lastloginchecker" "table"
+    And I should not see "user_t" in the "users_lastloginchecker" "table"
     And I should not see "user2" in the "users_lastloginchecker" "table"
     And I should not see "user3" in the "users_lastloginchecker" "table"
     And I should not see "user4" in the "users_lastloginchecker" "table"
@@ -279,6 +290,7 @@ Feature: Cleanup settings
     And I should see "user8" in the "users_nocoursechecker" "table"
     And I should see "user0" in the "users_nocoursechecker" "table"
     And I should not see "user1" in the "users_nocoursechecker" "table"
+    And I should not see "user_t" in the "users_nocoursechecker" "table"
     And I should not see "user2" in the "users_nocoursechecker" "table"
     And I should not see "user3" in the "users_nocoursechecker" "table"
     And I should not see "user4" in the "users_nocoursechecker" "table"
@@ -288,6 +300,7 @@ Feature: Cleanup settings
     And I should see "user4" in the "users_neverloginchecker" "table"
     And I should see "user0" in the "users_neverloginchecker" "table"
     And I should not see "user1" in the "users_neverloginchecker" "table"
+    And I should not see "user_t" in the "users_neverloginchecker" "table"
     And I should not see "user2" in the "users_neverloginchecker" "table"
     And I should not see "user5" in the "users_neverloginchecker" "table"
     And I should not see "user6" in the "users_neverloginchecker" "table"
@@ -298,6 +311,7 @@ Feature: Cleanup settings
 
     And I should see "user9" in the "users_suspendedchecker" "table"
     And I should not see "user1" in the "users_suspendedchecker" "table"
+    And I should not see "user_t" in the "users_suspendedchecker" "table"
     And I should not see "user2" in the "users_suspendedchecker" "table"
     And I should not see "user5" in the "users_suspendedchecker" "table"
     And I should not see "user6" in the "users_suspendedchecker" "table"
@@ -307,6 +321,7 @@ Feature: Cleanup settings
     And I should not see "newadmin" in the "users_suspendedchecker" "table"
 
     And I should see "user1" in the "users_ldapchecker" "table"
+    And I should see "user_t" in the "users_ldapchecker" "table"
     And I should see "user2" in the "users_ldapchecker" "table"
     And I should see "user5" in the "users_ldapchecker" "table"
     And I should see "user6" in the "users_ldapchecker" "table"
@@ -314,6 +329,7 @@ Feature: Cleanup settings
     And I should see "user8" in the "users_ldapchecker" "table"
     And I should see "user9" in the "users_ldapchecker" "table"
     And I should see "user0" in the "users_ldapchecker" "table"
+    And I should see "user_t" in the "users_ldapchecker" "table"
     And I should not see "newadmin" in the "users_ldapchecker" "table"
 
     And I should not see "Users who will be deleted"
@@ -330,6 +346,7 @@ Feature: Cleanup settings
     And I click on "(//button[contains(text(), 'Download')])[1]" "xpath_element"
 
     And I should see "user1"
+    And I should see "user_t"
     And I should see "user2"
     And I should see "user3"
     And I should see "user4"

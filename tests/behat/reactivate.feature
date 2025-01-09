@@ -5,6 +5,7 @@ Feature: Cleanup settings
     Given the following "users" exist:
       | username | firstname | lastname  | relativedatesmode | timecreated    | lastaccess | suspended |
       | user1    | Teacher   | Miller1   | 1                 | ## -320 days## | ## -11 days ## | 0     |
+      | user_t   | Teacher   | Miller1   | 1                 | ## -320 days## | ## -11 days ## | 0     |
       | user2    | Teaching  | Miller2   | 1                 | ## -32 days##  | ## -9 days## | 0       |
       | user3    | Student   | Miller3   | 1                 | ## -15 days##  | 0  | 0                 |
       | user4    | Student   | Miller4   | 1                 | ## -14 days##  | 0  | 0                 |
@@ -25,7 +26,8 @@ Feature: Cleanup settings
 
     And the following "course enrolments" exist:
       | user     | course | role           |
-      | user1    | CA1     | editingteacher |
+      | user1    | CA1     | student |
+      | user_t   | CA1     | editingteacher |
       | user2    | CA2     | student |
       | user3    | CA3     | editingteacher |
       | user4    | CA4     | student |
@@ -120,6 +122,7 @@ Feature: Cleanup settings
     And I navigate to "Users > Clean up users > Archived users" in site administration
     And I should see "All archived users"
     And I should see "user1"
+    And I should not see "user_t"
     And I should see "user3"
     And I should see "user4"
     And I should see "user5"

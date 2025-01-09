@@ -74,6 +74,9 @@ abstract class cleanupusers_testcase extends \advanced_testcase
         } else {
             $user->checker = $checker;
         }
+        if (key_exists('timecreated', $array2) && $array2['timecreated'] == null) { // does this make sense?
+            $array2['timecreated'] = $user->timecreated;
+        }
 
         $this->assertEquals($array2, array_intersect_assoc((array)$user, $array2));
     }

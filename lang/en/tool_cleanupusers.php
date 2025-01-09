@@ -72,7 +72,8 @@ $string['sett_backdate_description'] = 'Backdate the time at which a user is sus
 last login date plus a safety margin period.<br>
 If the safety margin means that the suspension time would be in the future, 
 then the current time is used. <br>
-Suspension time = MIN (now, last login + safety margin period)<br>
+last login available: Suspension time = MIN (now, last login + safety margin period)<br>
+otherwise: Suspension time = MIN (now, creation timestamp + safety margin period)<br>
 This setting is useful if the plugin is subsequently added to an existing installation 
 in order to remove users from the system more quickly.';
 $string['sett_backdate_extra'] = 'Backdating safety margin (in days)';

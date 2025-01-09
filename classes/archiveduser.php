@@ -57,24 +57,32 @@ class archiveduser {
     /** @var int user authentication method */
     public $auth;
 
-    /** @var int user authentication method */
+    /** @var string userstatus checker */
     public $checker;
+
+    /** @var int timecreated, temporary value */
+    public $timecreated;
 
     /**
      * Archiveduser constructor.
-     * @param int $id
-     * @param int $suspended
-     * @param int $lastaccess
-     * @param string $username
-     * @param int $deleted
+     * @param $id
+     * @param $suspended
+     * @param $lastaccess
+     * @param $username
+     * @param $deleted
+     * @param $auth
+     * @param $timecreated is only required for suspension and backdate
+     * @param $checker
      */
-    public function __construct($id, $suspended, $lastaccess, $username, $deleted, $auth, $checker = '') {
+    public function __construct($id, $suspended, $lastaccess, $username, $deleted,
+                                $auth, $timecreated, $checker = '') {
         $this->id = $id;
         $this->suspended = $suspended;
         $this->lastaccess = $lastaccess;
         $this->username = $username;
         $this->deleted = $deleted;
         $this->auth = $auth;
+        $this->timecreated = $timecreated;
         $this->checker = $checker;
     }
 

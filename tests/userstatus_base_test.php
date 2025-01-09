@@ -60,9 +60,15 @@ abstract class userstatus_base_test extends cleanupusers_testcase
     // ---------------------------------------------
     // SUSPEND
     // ---------------------------------------------
+    /**
+     * default scenario for suspension
+     * @return void
+     * @throws \coding_exception
+     * @throws \dml_exception
+     */
     public function test_simple_suspend() {
         $user = $this->typical_scenario_for_suspension();
-        $suspened = $user->suspended;
+        $suspended = $user->suspended;
         $this->assertEqualsUsersArrays($this->checker->get_to_suspend(), $user);
         // $this->assertEquals(0, $user->suspended);
 
@@ -95,9 +101,80 @@ abstract class userstatus_base_test extends cleanupusers_testcase
         $this->assertEquals($user->firstname, $record->firstname);
         $this->assertEquals($user->lastname, $record->lastname);
         $this->assertEquals($user->auth, $record->auth); // not modified
-        $this->assertEquals($suspened, $record->suspended);
+        $this->assertEquals($suspended, $record->suspended);
         $this->assertEquals($user->lastaccess, $record->lastaccess);
         $this->assertEquals($user->timecreated, $record->timecreated);
+    }
+
+    public function _test_suspend_backdate($backdatedays = 10) {
+        $this->set_config('backdate', '1', 'tool_cleanupusers');
+        $this->set_config('backdating_extra', $backdatedays, 'tool_cleanupusers');
+
+        $user = $this->typical_scenario_for_suspension();
+        $suspended = $user->suspended;
+        $this->assertEqualsUsersArrays($this->checker->get_to_suspend(), $user);
+        // $this->assertEquals(0, $user->suspended);
+
+        // run cron
+        $cronjob = new \tool_cleanupusers\task\archive_user_task();
+        $cronjob->execute();
+
+        // check if all users have been suspended
+        $this->assertEquals(0, count($this->checker->get_to_suspend()));
+
+        // check if user won't be activated now.
+        $this->assertEquals(0, count($this->checker->get_to_reactivate()));
+
+        global $DB;
+        $record = $DB->get_record('user', ['id' => $user->id]);
+        $this->assertEquals(1, $record->suspended);
+        $this->assertStringStartsWith('anonym', $record->username);
+        $this->assertEquals('Anonym', $record->firstname);
+        $this->assertEquals('', $record->lastname);
+        $this->assertEquals($user->auth, $record->auth); // not modified
+
+        $record = $DB->get_record('tool_cleanupusers', ['id' => $user->id]);
+        $checker = substr($this->get_plugin_name(), strlen('userstatus_'));
+        $this->assertEquals($checker, $record->checker);
+        $this->assertEquals(1, $record->archived);
+
+        // Check matching suspend time
+        if (isset($user->lastaccess) && $user->lastaccess > 0) {
+            $timestamp = $user->lastaccess + ($backdatedays * DAYSECS);
+            if ($timestamp > time()) {
+                //echo 'now1';
+                $this->assertTimeCurrent($record->timestamp);
+            } else {
+                //echo 'lastaccess';
+                $this->assertEquals($timestamp, $record->timestamp);
+            }
+        } else {
+            // no last login time set => use current time
+            $timestamp = $user->timecreated + ($backdatedays * DAYSECS);
+            if ($timestamp > time()) {
+                //echo 'now2';
+                $this->assertTimeCurrent($record->timestamp);
+            } else {
+                //echo 'timecreated';
+                $this->assertEquals($timestamp, $record->timestamp);
+            }
+        }
+
+        $record = $DB->get_record('tool_cleanupusers_archive', ['id' => $user->id]);
+        $this->assertEquals($user->username, $record->username);
+        $this->assertEquals($user->firstname, $record->firstname);
+        $this->assertEquals($user->lastname, $record->lastname);
+        $this->assertEquals($user->auth, $record->auth); // not modified
+        $this->assertEquals($suspended, $record->suspended);
+        $this->assertEquals($user->lastaccess, $record->lastaccess);
+        $this->assertEquals($user->timecreated, $record->timecreated);
+    }
+
+    public function test_suspend_backdate_1() {
+        $this->_test_suspend_backdate(1000);
+    }
+    public function test_suspend_backdate_2() {
+        $this->_test_suspend_backdate(1);
     }
 
     public function test_config_auth_plus_suspend() {

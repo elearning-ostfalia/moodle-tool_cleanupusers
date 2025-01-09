@@ -225,7 +225,7 @@ abstract class userstatuschecker {
 
         list($sqlcondition, $paramcondition) = $this->condition_suspend_sql();
         // Select users who are not yet deleted, not yet archived and match condition for sub-plugin.
-        $sql = "SELECT id, suspended, lastaccess, username, deleted, auth, firstname, lastname
+        $sql = "SELECT id, suspended, lastaccess, username, deleted, auth, firstname, lastname, timecreated
                 FROM {user}
                 WHERE " . $this->get_auth_sql('') . "
                     AND deleted = 0
@@ -246,7 +246,8 @@ abstract class userstatuschecker {
                     $user->username,
                     $user->deleted,
                     $user->auth,
-                    $this->get_name()
+                    $user->timecreated,
+                    $this->get_name(),
                 );
                 // Add further attributes neede for export in csv file.
                 $suspenduser->firstname = $user->firstname;
@@ -314,6 +315,7 @@ abstract class userstatuschecker {
                     $user->username,
                     $user->deleted,
                     $user->auth,
+                    null, // timecreated not needed for deletion
                     $this->get_name()
                 );
                 $todelete[$key] = $deleteuser;
@@ -368,6 +370,7 @@ abstract class userstatuschecker {
                     $user->username,
                     $user->deleted,
                     $user->auth,
+                    null, // timecreated not needed for reactivation
                     $this->get_name()
                 );
                 $toactivate[$key] = $activateuser;

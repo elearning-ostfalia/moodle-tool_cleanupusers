@@ -152,11 +152,14 @@ Actions
    * suspended
    * deleted
 
+# Tests
+
+## phpunit tests
+
+        vendor/bin/phpunit --configuration admin/tool/cleanupusers/phpunit.xml --testsuite cleanupusers_files_testsuite
+
 # TODO:
 
-* Soll der Zeitstempel des Archivierens so gesetzt werden, als wenn das Archivieren auch zu
-  dem Zeitpunkt stattgefunden hat, wenn es hätte stattfinden können?
-  (Ziel: Wenn das Plugin installiert wird, müssen ja alte Nutzerdaten abgearbeitet werden)
 * Reaktivierte Nutzer haben beim Reaktivieren denselben Status wie vorher (sind also ggf. immer noch suspended!!)
   Ist das sinnvoll???? Testfall: test_already_suspended_suspend
 

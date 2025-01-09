@@ -24,7 +24,7 @@
 
 require_once(__DIR__ . '/../../../config.php');
 require_once($CFG->libdir . '/filelib.php');
-require_once($CFG->libdir . '/dataformatlib.php');
+// require_once($CFG->libdir . '/dataformatlib.php');
 
 $dataformat = required_param('dataformat', PARAM_ALPHA);
 $type = required_param('type', PARAM_ALPHA);

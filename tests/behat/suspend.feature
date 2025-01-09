@@ -338,6 +338,7 @@ Feature: Cleanup settings
     # export users to be archived as HTML table
     And I select "HTML table" from the "dataformat" singleselect
     # empty export for archive
+    # And I pause
     And I click on "(//button[contains(text(), 'Download')])[2]" "xpath_element"
     And I should see "There is nothing to be downloaded"
     And I press the "back" button in the browser

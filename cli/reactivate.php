@@ -37,6 +37,7 @@ Options:
     -h --help                   Print this help.
     --show-all                  Displays a list of all archived users.
     --users=<user ids>          A comma separated list of users to be reactivated or 'all' if all users shall be reactivated.
+                                user id can be id from user table or email.
     --run                       Execute reactivate. If this option is not set, then the script will be run in a dry mode.
     --showsql                   Show sql queries before they are executed.
     --showdebugging             Show developer level debugging information.
@@ -127,8 +128,15 @@ if ($options['users']) {
     } else {
         $users = explode(',', $options['users']);
         foreach ($users as $id) {
-            $record = $DB->get_record('tool_cleanupusers_archive', ['id' => $id],
-                'id, username, firstname, lastname, suspended, lastaccess, auth, deleted');
+            if (filter_var($id, FILTER_VALIDATE_EMAIL) !== false) {
+                // user id as identifier
+                $record = $DB->get_record('tool_cleanupusers_archive', ['id' => $id],
+                        'id, username, firstname, lastname, suspended, lastaccess, auth, deleted');
+            } else {
+                // email as identifier
+                $record = $DB->get_record('tool_cleanupusers_archive', ['email' => $id],
+                        'id, username, firstname, lastname, suspended, lastaccess, auth, deleted');
+            }
             if ($record === false) {
                 cli_writeln('Unknown user: ' . $id);
             } else {

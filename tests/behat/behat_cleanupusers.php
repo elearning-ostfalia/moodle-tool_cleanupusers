@@ -105,8 +105,13 @@ class behat_cleanupusers extends behat_base {
 
         // element might not be visible. So the window is maximized.
         $this->getSession()->getDriver()->maximizeWindow();
-
-        $this->execute('behat_general::i_click_on', ['.fa-floppy-o.imggroup-' . $record->id, 'css']);
+        global $CFG;
+        if ($CFG->version > 2024100700) {
+            // From Moodle 4.5 on different trash classes
+            $this->execute('behat_general::i_click_on', ['.fa-floppy-disk.imggroup-' . $record->id, 'css']);
+        } else {
+            $this->execute('behat_general::i_click_on', ['.fa-floppy-o.imggroup-' . $record->id, 'css']);
+        }
     }
 
     /**
@@ -121,7 +126,13 @@ class behat_cleanupusers extends behat_base {
         $record = $DB->get_record('tool_cleanupusers_archive', ['username' => $username], 'id',
             MUST_EXIST);
 
-        $this->execute('behat_general::i_click_on', ['.fa-trash.imggroup-' . $record->id, 'css']);
+        global $CFG;
+        if ($CFG->version > 2024100700) {
+            // From Moodle 4.5 on different trash classes
+            $this->execute('behat_general::i_click_on', ['.fa-trash-can.imggroup-' . $record->id, 'css']);
+        } else {
+            $this->execute('behat_general::i_click_on', ['.fa-trash.imggroup-' . $record->id, 'css']);
+        }
     }
 
     /**

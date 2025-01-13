@@ -149,13 +149,32 @@ final class userstatus_lastloginchecker_test extends \tool_cleanupusers\userstat
      */
     public function test_11_days_ago_and_teacher_suspend() {
         set_config('keepteachers', 0, 'userstatus_lastloginchecker');
+        set_config('suspendtimeteacher', 100, 'userstatus_lastloginchecker');
 
         $course = $this->generator->create_course();
         $user = $this->create_user_and_enrol('username', $course, 'editingteacher');
         global $DB;
-        $user->lastaccess = ELEVENDAYSAGO;
+        $user->lastaccess = time() - (200 * DAYSECS);
         $DB->update_record('user', $user);
         $this->assertEqualsUsersArrays($this->checker->get_to_suspend(), $user);
+    }
+
+
+    /**
+     * suspend user although he is editing teacher in his course because of configuration
+     * @return void
+     * @throws \dml_exception
+     */
+    public function test_11_days_ago_and_teacher_and_last_access_no_suspend() {
+        set_config('keepteachers', 0, 'userstatus_lastloginchecker');
+        set_config('suspendtimeteacher', 200, 'userstatus_lastloginchecker');
+
+        $course = $this->generator->create_course();
+        $user = $this->create_user_and_enrol('username', $course, 'editingteacher');
+        global $DB;
+        $user->lastaccess = time() - (150 * DAYSECS);;
+        $DB->update_record('user', $user);
+        $this->assertEquals(0, count($this->checker->get_to_suspend()));
     }
 
     public function test_9_days_ago_change_suspend_time_suspend() {

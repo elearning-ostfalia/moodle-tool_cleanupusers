@@ -26,4 +26,6 @@ $string['condition'] = 'User has not logged in for a long time';
 $string['suspendtime'] = 'Number of days without log in until a user is suspended';
 $string['keepteachers'] = 'Do not suspend teachers';
 $string['keepteachers_info'] = 'Do not suspend users who are enrolled as a teacher in one of her or his courses.';
+$string['suspendtime_teacher'] = 'Suspendtime for teachers';
+$string['suspendtime_teacher_info'] = 'Teachers should have a longer suspend time than students. Otherwise the student suspend time will be used.';
 

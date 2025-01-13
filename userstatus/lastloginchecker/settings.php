@@ -33,4 +33,14 @@ if ($hassiteconfig) {
             get_string('keepteachers', 'userstatus_lastloginchecker'),
             get_string('keepteachers_info', 'userstatus_lastloginchecker'),
             1));
+
+    $settings->add(new admin_setting_configtext('userstatus_lastloginchecker/suspendtimeteacher',
+            get_string('suspendtime_teacher', 'userstatus_lastloginchecker'),
+            get_string('suspendtime_teacher_info', 'userstatus_lastloginchecker'),
+            '200',
+            PARAM_INT
+    ));
+
+    $settings->hide_if('userstatus_lastloginchecker/suspendtimeteacher',
+            'userstatus_lastloginchecker/keepteachers', 'eq', '1');
 }

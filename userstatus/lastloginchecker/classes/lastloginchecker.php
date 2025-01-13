@@ -56,16 +56,24 @@ class lastloginchecker extends userstatuschecker {
     }
 
     public function shall_suspend($user): bool {
-        if (!get_config('userstatus_lastloginchecker', 'keepteachers')) {
-            // teachers shall also be suspended
-            return true;
+        if (get_config('userstatus_lastloginchecker', 'keepteachers')) {
+            // teachers shall not be suspended ...
+            if ($this->is_teacher($user)) {
+                // .. and user is a teacher in a course and teachers shall not be suspended
+                // => quit function
+                return false;
+            }
+        } else {
+            if (get_config('userstatus_lastloginchecker', 'suspendtimeteacher') >
+                    $this->get_suspendtime()) {
+                // Teachers have a longer suspend time
+                $timelimit = time() - (get_config('userstatus_lastloginchecker', 'suspendtimeteacher') * DAYSECS);
+                if ($user->lastaccess > $timelimit and $this->is_teacher($user)) {
+                    return false;
+                }
+            }
         }
 
-        if ($this->is_teacher($user)) {
-            // user is a teacher in a course and teachers shall not be suspended
-            // => quit function
-            return false;
-        }
         return true;
     }
 }

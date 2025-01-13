@@ -129,6 +129,10 @@ $string['nodownload'] = 'There is nothing to be downloaded';
 $string['downloadarchivepreview'] = 'Download archive preview as';
 $string['downloaddeletepreview'] = 'Download deletion preview as';
 $string['showcompletetable'] = 'show complete table';
+$string['teacherroles'] = 'teacher roles';
+$string['teacherroles_info'] = 'Users who are enrolled in a course with one of the selected roles (teachers) 
+may not be suspended at all or may be suspended later. If no role has been selected, all users are treated equally in Moodle.<br>
+Note that the roles must be valid in the course context.';
 
 
 

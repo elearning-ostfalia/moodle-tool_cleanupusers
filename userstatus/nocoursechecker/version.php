@@ -23,7 +23,7 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->version   = 2024090400;     // The current plugin version (Date: YYYYMMDDXX).
+$plugin->version   = 2025011300;     // The current plugin version (Date: YYYYMMDDXX).
 $plugin->requires  = 2016052300;     // Requires 31 Moodle version.
 $plugin->component = 'userstatus_nocoursechecker'; // Full name of the plugin (used for diagnostics).
 $plugin->release = 'v0.1';

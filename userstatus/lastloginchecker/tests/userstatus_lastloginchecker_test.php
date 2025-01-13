@@ -127,6 +127,11 @@ final class userstatus_lastloginchecker_test extends \tool_cleanupusers\userstat
         $this->assertEqualsUsersArrays($this->checker->get_to_suspend(), $user);
     }
 
+    /**
+     * do not suspend user because he is editing teacher in his course
+     * @return void
+     * @throws \dml_exception
+     */
     public function test_11_days_ago_and_teacher_no_suspend() {
         $course = $this->generator->create_course();
         $user = $this->create_user_and_enrol('username', $course, 'editingteacher');
@@ -134,6 +139,23 @@ final class userstatus_lastloginchecker_test extends \tool_cleanupusers\userstat
         $user->lastaccess = ELEVENDAYSAGO;
         $DB->update_record('user', $user);
         $this->assertEquals(0, count($this->checker->get_to_suspend()));
+    }
+
+
+    /**
+     * suspend user although he is editing teacher in his course because of configuration
+     * @return void
+     * @throws \dml_exception
+     */
+    public function test_11_days_ago_and_teacher_suspend() {
+        set_config('keepteachers', 0, 'userstatus_lastloginchecker');
+
+        $course = $this->generator->create_course();
+        $user = $this->create_user_and_enrol('username', $course, 'editingteacher');
+        global $DB;
+        $user->lastaccess = ELEVENDAYSAGO;
+        $DB->update_record('user', $user);
+        $this->assertEqualsUsersArrays($this->checker->get_to_suspend(), $user);
     }
 
     public function test_9_days_ago_change_suspend_time_suspend() {

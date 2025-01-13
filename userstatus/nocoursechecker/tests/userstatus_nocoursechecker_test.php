@@ -146,18 +146,25 @@ final class userstatus_nocoursechecker_test extends \tool_cleanupusers\userstatu
     public function test_invisible_course_suspend() {
         $invisible_course = $this->generator->create_course(['startdate' => YESTERDAY, 'visible' => false]);
         $user = $this->create_user_and_enrol('username', $invisible_course);
+        $this->assertEqualsUsersArrays($this->checker->get_to_suspend(), $user);
+    }
 
-        $checker = new \userstatus_nocoursechecker\nocoursechecker();
-        $returnsuspend = $checker->get_to_suspend();
-
-        $this->assertEqualsUsersArrays($returnsuspend, $user);
+    public function test_invisible_course_teacher_no_suspend() {
+        $invisible_course = $this->generator->create_course(['startdate' => YESTERDAY, 'visible' => false]);
+        $user = $this->create_user_and_enrol('username', $invisible_course, 'editingteacher');
+        $this->assertEquals(0, count($this->checker->get_to_suspend()));
     }
 
     public function test_past_course_suspend() {
         $past_course = $this->generator->create_course(['startdate' => LAST_MONTH, 'enddate' => YESTERDAY, 'visible' => true]);
         $user = $this->create_user_and_enrol('username', $past_course);
-
         $this->assertEqualsUsersArrays($this->checker->get_to_suspend(), $user);
+    }
+
+    public function test_past_course_teacher_no_suspend() {
+        $past_course = $this->generator->create_course(['startdate' => LAST_MONTH, 'enddate' => YESTERDAY, 'visible' => true]);
+        $user = $this->create_user_and_enrol('username', $past_course, 'editingteacher');
+        $this->assertEquals(0, count($this->checker->get_to_suspend()));
     }
 
     /**

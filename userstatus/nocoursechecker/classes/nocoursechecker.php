@@ -41,6 +41,14 @@ class nocoursechecker extends userstatuschecker {
     }
 
     public function shall_suspend($user): bool {
+        if (get_config('userstatus_nocoursechecker', 'keepteachers')) {
+            // teacher handling
+            if ($this->is_teacher($user)) {
+                return false;
+            }
+        }
+
+        // student handling
         $courses = enrol_get_all_users_courses($user->id, true, "startdate, enddate, visible");
 
         foreach ($courses as $course) {

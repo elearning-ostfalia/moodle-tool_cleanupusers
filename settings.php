@@ -74,6 +74,11 @@ if ($hassiteconfig) {
     $settings->hide_if('tool_cleanupusers/backdating_extra',
         'tool_cleanupusers/backdate', 'neq', '1');
 
+    $settings->add(new admin_setting_pickroles('tool_cleanupusers/teacherroles',
+            get_string('teacherroles', 'tool_cleanupusers'),
+            get_string('teacherroles_info', 'tool_cleanupusers'),
+            array('editingteacher')));
+
     // Log folder.
     $settings->add(new admin_setting_configtext('userstatus_ldapchecker/log_folder',
             get_string('sett_log_folder', 'tool_cleanupusers'),

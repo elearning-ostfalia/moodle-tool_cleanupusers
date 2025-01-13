@@ -56,32 +56,15 @@ class lastloginchecker extends userstatuschecker {
     }
 
     public function shall_suspend($user): bool {
-        // Get all courses the user is enrolled into
-        $courses = enrol_get_all_users_courses($user->id, true, "id");
-        // Get all teacher roles
-        global $CFG;
-        // var_dump($CFG->cleanuplastloginroles);
-        $roleids = explode(',', $CFG->cleanuplastloginroles);
-        // $roleids = array_keys(get_archetype_roles('editingteacher'));
+        if (!get_config('userstatus_lastloginchecker', 'keepteachers')) {
+            // teachers shall also be suspended
+            return true;
+        }
 
-        foreach ($courses as $course) {
-            foreach($roleids as $roleid) {
-                // Get all users who are enrolled in course as teacher
-                $users = get_role_users($roleid, \context_course::instance($course->id));
-                foreach($users as $courseparticipant) {
-                    // check if user belongs to teachers
-                    // (seems to be more complicated then needed)
-                    if ($courseparticipant->id == $user->id) {
-                        return false;
-                    }
-
-                }
-
-            }
-
-//            if (is_enrolled(\context_course::instance($course->id), $user->id)) {
-
-//            }
+        if ($this->is_teacher($user)) {
+            // user is a teacher in a course and teachers shall not be suspended
+            // => quit function
+            return false;
         }
         return true;
     }

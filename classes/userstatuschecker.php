@@ -56,6 +56,36 @@ abstract class userstatuschecker {
         $this->config = get_config('userstatus_' . $name);
     }
 
+    /**
+     * checks if the teacher roles are defined and the given user is a teacher in one
+     * of the courses he or she is enrolled into
+     * @param $user
+     * @return bool
+     */
+    protected function is_teacher($user) : bool {
+        // Check if user is enrolled as teacher in one of his or her courses.
+        // Get all teacher roles
+        $roles = get_config('tool_cleanupusers', 'teacherroles');
+        if ($roles !== false) {
+            $roleids = explode(',', $roles);
+            // Get all courses the user is enrolled into
+            $courses = enrol_get_all_users_courses($user->id, false, "id");
+            foreach ($courses as $course) {
+                foreach($roleids as $roleid) {
+                    // Get all users who are enrolled in course as teacher
+                    $users = get_role_users($roleid, \context_course::instance($course->id));
+                    foreach($users as $courseparticipant) {
+                        // check if user belongs to teachers
+                        // (seems to be more complicated then needed)
+                        if ($courseparticipant->id == $user->id) {
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+        return false;
+    }
 
     /**
      * returns the condition for the subplugin

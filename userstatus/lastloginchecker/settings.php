@@ -29,17 +29,8 @@ global $CFG, $PAGE;
 require_once($CFG->libdir . '/adminlib.php');
 
 if ($hassiteconfig) {
-    /*
-    $yesno = array(
-            new lang_string('no'),
-            new lang_string('yes'),
-    );
-    $settings->add(new admin_setting_configselect('userstatus_lastloginchecker/suspendteachers',
-        get_string('suspendteachers', 'userstatus_lastloginchecker'),
-        get_string('suspendteachers_info', 'userstatus_lastloginchecker'), 0 , $yesno));
-*/
-    $settings->add(new admin_setting_pickroles('cleanuplastloginroles',
-            new lang_string('keeproles', 'userstatus_lastloginchecker'),
-            new lang_string('keeproles_info', 'userstatus_lastloginchecker'),
-            array('editingteacher')));
+    $settings->add(new admin_setting_configcheckbox('userstatus_lastloginchecker/keepteachers',
+            get_string('keepteachers', 'userstatus_lastloginchecker'),
+            get_string('keepteachers_info', 'userstatus_lastloginchecker'),
+            1));
 }

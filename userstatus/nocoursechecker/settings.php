@@ -13,18 +13,24 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
 /**
- * This file contains language strings used in the nocoursechecker sub-plugin.
- *
- * @package userstatus_nocoursechecker
- * @copyright 2024 Ostfalia
+ * Settings.php
+ * @package   userstatus_nochecker
+ * @copyright 2025 Ostfalia
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-$string['pluginname'] = 'No active course Checker';
-$string['condition'] = 'User is not enrolled in an active course';
-// $string['suspendtime'] = 'Time since user is created [days]';
-$string['keepteachers'] = 'Do not suspend teachers';
-$string['keepteachers_info'] = 'Do not suspend users who are enrolled as a teacher in one of her or his courses.';
+defined('MOODLE_INTERNAL') || die();
 
+// Included in admin/tool/cleanupusers/classes/plugininfo/userstatus.php, therefore, need to include global variables.
+global $CFG, $PAGE;
 
+require_once($CFG->libdir . '/adminlib.php');
+
+if ($hassiteconfig) {
+    $settings->add(new admin_setting_configcheckbox('userstatus_nocoursechecker/keepteachers',
+            get_string('keepteachers', 'userstatus_nocoursechecker'),
+            get_string('keepteachers_info', 'userstatus_nocoursechecker'),
+            1));
+}

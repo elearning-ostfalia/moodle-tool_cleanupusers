@@ -24,9 +24,6 @@
 $string['pluginname'] = 'Last Login Checker';
 $string['condition'] = 'User has not logged in for a long time';
 $string['suspendtime'] = 'Number of days without log in until a user is suspended';
-$string['suspendteachers'] = 'Also suspend teachers';
-$string['suspendteachers_info'] = 'If not set, all users who are NOT enrolled in ANY course as a teacher will be suspended. In other words, anyone who is registered as a teacher anywhere will not be suspended. Otherwise (if set), teachers are also suspended.';
+$string['keepteachers'] = 'Do not suspend teachers';
+$string['keepteachers_info'] = 'Do not suspend users who are enrolled as a teacher in one of her or his courses.';
 
-$string['keeproles'] = 'Do not suspend users with roles';
-$string['keeproles_info'] = 'Users who are enrolled with the selected roles will not be suspended by last login checker.<br>
-Note that the roles must be valid in the course context.';

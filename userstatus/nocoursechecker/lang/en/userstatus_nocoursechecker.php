@@ -26,5 +26,11 @@ $string['condition'] = 'User is not enrolled in an active course';
 // $string['suspendtime'] = 'Time since user is created [days]';
 $string['keepteachers'] = 'Do not suspend teachers';
 $string['keepteachers_info'] = 'Do not suspend users who are enrolled as a teacher in one of her or his courses.';
+$string['waitingperiod'] = 'Waiting period after registration [days]';
+$string['waitingperiod_info'] = 'Time that is waited after the registration of a user until 
+the check is carried out for the first time if there is no course enrollment.
+Should be equal to neverlogin suspend period. 
+This period is needed to ensure that users are not immediately suspended 
+when they are registered.';
 
 

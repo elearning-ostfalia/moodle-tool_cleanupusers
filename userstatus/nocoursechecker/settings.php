@@ -33,4 +33,11 @@ if ($hassiteconfig) {
             get_string('keepteachers', 'userstatus_nocoursechecker'),
             get_string('keepteachers_info', 'userstatus_nocoursechecker'),
             1));
+
+    $settings->add(new admin_setting_configtext('userstatus_nocoursechecker/waitingperiod',
+            get_string('waitingperiod', 'userstatus_nocoursechecker'),
+            get_string('waitingperiod_info', 'userstatus_nocoursechecker'),
+            '30',
+            PARAM_INT
+    ));
 }

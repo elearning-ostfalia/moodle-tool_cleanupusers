@@ -370,7 +370,7 @@ abstract class userstatuschecker {
         global $DB;
 
         list($sqlcondition, $paramcondition) = $this->condition_reactivate_sql('tca', 'tc');
-        $sql = "SELECT tca.id, tca.suspended, tca.lastaccess, tca.username, tca.deleted, tca.auth
+        $sql = "SELECT tca.id, tca.suspended, tca.lastaccess, tca.username, tca.deleted, tca.auth, tca.timecreated
                 FROM {user} u
                 JOIN {tool_cleanupusers_archive} tca ON u.id = tca.id
                 JOIN {tool_cleanupusers} tc ON u.id = tc.id and tc.checker = :checker
@@ -400,7 +400,7 @@ abstract class userstatuschecker {
                     $user->username,
                     $user->deleted,
                     $user->auth,
-                    null, // timecreated not needed for reactivation
+                    $user->timecreated,
                     $this->get_name()
                 );
                 $toactivate[$key] = $activateuser;

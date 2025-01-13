@@ -89,6 +89,7 @@ abstract class userstatus_base_test extends cleanupusers_testcase
         $this->assertEquals('Anonym', $record->firstname);
         $this->assertEquals('', $record->lastname);
         $this->assertEquals($user->auth, $record->auth); // not modified
+        // $this->assertNotEquals($user->timecreated, $record->timecreated); // may or may be not modified for privacy reasons
 
         $record = $DB->get_record('tool_cleanupusers', ['id' => $user->id]);
         $checker = substr($this->get_plugin_name(), strlen('userstatus_'));

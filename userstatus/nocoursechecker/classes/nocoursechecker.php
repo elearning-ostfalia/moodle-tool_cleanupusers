@@ -42,7 +42,7 @@ class nocoursechecker extends userstatuschecker {
 
     public function shall_suspend($user): bool {
         if (get_config('userstatus_nocoursechecker', 'keepteachers')) {
-            // teacher handling
+            // do not suspend the teacher
             if ($this->is_teacher($user)) {
                 return false;
             }
@@ -88,6 +88,24 @@ class nocoursechecker extends userstatuschecker {
                 // => ????
             }
         }
+
+        // Teacher start state:
+        // Teacher is registered in Moodle but does not yet have a course yet
+        $courses = enrol_get_all_users_courses($user->id, false, "startdate, enddate, visible");
+        if (count($courses) == 0) {
+            // check if user has just been registered
+            $period = get_config('userstatus_nocoursechecker', 'waitingperiod');
+            if ($period > 0) {
+                if ($user->timecreated + ($period * DAYSECS) < time()) {
+                    return false;
+                }
+            } else {
+                // no valid configuration value
+                debugging('wrong configuration value for \'waitingperiod\'');
+                return false;
+            }
+        }
+
         return true;
     }
 

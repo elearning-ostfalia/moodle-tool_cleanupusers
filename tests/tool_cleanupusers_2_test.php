@@ -65,6 +65,8 @@ final class tool_cleanupusers_2_test extends cleanupusers_testcase {
         set_config(CONFIG_DELETETIME, 20, 'userstatus_neverloginchecker');
         set_config(CONFIG_SUSPENDTIME, 10, 'userstatus_nocoursechecker');
         set_config(CONFIG_DELETETIME, 20, 'userstatus_nocoursechecker');
+        set_config('keepteachers', 1, 'userstatus_nocoursechecker');
+        // set_config('waitingperiod', 10, 'userstatus_nocoursechecker');
 
         $this->checker_login = new \userstatus_neverloginchecker\neverloginchecker();
         $this->checker_course = new \userstatus_nocoursechecker\nocoursechecker();

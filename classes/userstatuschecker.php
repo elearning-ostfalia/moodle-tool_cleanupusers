@@ -58,18 +58,25 @@ abstract class userstatuschecker {
 
     /**
      * checks if the teacher roles are defined and the given user is a teacher in one
-     * of the courses he or she is enrolled into
+     * of the courses he or she is enrolled into.
+     *
      * @param $user
+     * @param null $courses Reading all courses is very expensive. So it can be given as argument
      * @return bool
+     * @throws \coding_exception
+     * @throws \dml_exception
      */
-    protected function is_teacher($user) : bool {
+    protected static function is_teacher($user, $courses = null) : bool {
         // Check if user is enrolled as teacher in one of his or her courses.
         // Get all teacher roles
         $roles = get_config('tool_cleanupusers', 'teacherroles');
         if ($roles !== false) {
             $roleids = explode(',', $roles);
             // Get all courses the user is enrolled into
-            $courses = enrol_get_all_users_courses($user->id, false, "id");
+            if (!isset($courses)) {
+                // Read
+                $courses = enrol_get_all_users_courses($user->id, false, "id");
+            }
             foreach ($courses as $course) {
                 foreach($roleids as $roleid) {
                     // Get all users who are enrolled in course as teacher

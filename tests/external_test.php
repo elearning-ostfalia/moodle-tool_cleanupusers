@@ -196,6 +196,54 @@ final class external_test extends \externallib_advanced_testcase {
         $this->assertIsReactivated($this->user2, $this->checker_course);
     }
 
+    public function test_reactivate_unknown_user(): void {
+        $returnvalue = $this->execute_webservice(['test@moodle.org']);
 
+        $this->assertTrue(is_array($returnvalue));
+        $this->assertEquals(0, count($returnvalue));
 
+        // User1 und user2 remain in old state
+        $this->assertIsNotReactivated($this->user1, $this->checker_login);
+        $this->assertIsNotReactivated($this->user2, $this->checker_course);
+    }
+
+    public function test_reactivate_empty_param(): void {
+        $returnvalue = $this->execute_webservice(['']);
+
+        $this->assertTrue(is_array($returnvalue));
+        $this->assertEquals(0, count($returnvalue));
+
+        // User1 und user2 remain in old state
+        $this->assertIsNotReactivated($this->user1, $this->checker_login);
+        $this->assertIsNotReactivated($this->user2, $this->checker_course);
+    }
+
+    /**
+     * Scenario: reactivate user who is not suspended
+     * @return void
+     * @throws \coding_exception
+     * @throws \dml_exception
+     * @throws \moodle_exception
+     */
+    public function test_reactivate_user1_twice(): void {
+        $returnvalue = $this->execute_webservice([$this->user1->email]);
+
+        $this->assertTrue(is_array($returnvalue));
+        $this->assertEquals(1, count($returnvalue));
+        $this->assertEquals($this->user1->email, $returnvalue[0]);
+
+        // User1 is reacivated
+        // => would be suspended immediately
+        $this->assertIsReactivated($this->user1, $this->checker_login);
+        // User2 is not reactivated
+        $this->assertIsNotReactivated($this->user2, $this->checker_course);
+
+        $returnvalue = $this->execute_webservice([$this->user1->email]);
+        $this->assertTrue(is_array($returnvalue));
+        $this->assertEquals(0, count($returnvalue));
+
+        $this->assertIsReactivated($this->user1, $this->checker_login);
+        // User2 is not reactivated
+        $this->assertIsNotReactivated($this->user2, $this->checker_course);
+    }
 }

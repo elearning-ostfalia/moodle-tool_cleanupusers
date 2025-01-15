@@ -108,8 +108,8 @@ class reactivate_users extends \core_external\external_api {
                     $transaction->rollback($e);
                 } catch (\Exception $e) {
                     $warning = [];
-                    $warning['item'] = 'user';
-                    $warning['itemid'] = $useremail;
+                    $warning['item'] = $useremail;
+                    // $warning['itemid'] = $useremail;
                     if ($e instanceof \moodle_exception) {
                         $warning['warningcode'] = $e->errorcode;
                     } else {

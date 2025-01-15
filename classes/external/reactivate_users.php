@@ -53,11 +53,6 @@ class reactivate_users extends \core_external\external_api {
             ),
             'warnings' => new \core_external\external_warnings()
         ]);
-
-
-/*        return new \core_external\external_multiple_structure(
-                new \core_external\external_value(core_user::get_property_type('email'), 'user email'),
-        );*/
     }
 
     /**
@@ -86,7 +81,7 @@ class reactivate_users extends \core_external\external_api {
                 $transaction = $DB->start_delegated_transaction();
 
                 if (trim($useremail) == '') {
-                    throw new \invalid_parameter_exception('Invalid email');
+                    throw new \invalid_parameter_exception('Email is empty');
                 }
                 if ($DB->get_record('user', ['email' => $useremail])) {
                     throw new \invalid_parameter_exception("User with the email {$useremail} already exists");
@@ -95,12 +90,12 @@ class reactivate_users extends \core_external\external_api {
                 // finally reactivate
                 $record = $DB->get_record('tool_cleanupusers_archive', ['email' => $useremail],
                         'id, username, firstname, lastname, suspended, lastaccess, auth, deleted, timecreated');
-
-                if ($record !== false) {
-                    $result = helper::change_user_deprovisionstatus([$useremail => $record], 'reactivate', '');
-                    if ($result['countersuccess'] == 1) {
-                        $reactivatedusers[] = $useremail;
-                    }
+                if ($record === false) {
+                    throw new \invalid_parameter_exception("User with the email {$useremail} not found in archive");
+                }
+                $result = helper::change_user_deprovisionstatus([$useremail => $record], 'reactivate', '');
+                if ($result['countersuccess'] == 1) {
+                    $reactivatedusers[] = $useremail;
                 }
                 $transaction->allow_commit();
             } catch (\Exception $e) {

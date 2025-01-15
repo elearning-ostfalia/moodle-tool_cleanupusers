@@ -42,14 +42,22 @@ class reactivate_users extends \core_external\external_api {
     public static function execute_parameters() {
         return new \core_external\external_function_parameters([
             'useremails' => new \core_external\external_multiple_structure(
-                        new \core_external\external_value(core_user::get_property_type('email'), 'user email')),
+                    new \core_external\external_value(core_user::get_property_type('email'), 'user email')),
         ]);
     }
 
     public static function execute_returns() {
-        return new \core_external\external_multiple_structure(
+        return new \core_external\external_single_structure([
+            'useremails' => new \core_external\external_multiple_structure(
+                    new \core_external\external_value(core_user::get_property_type('email'), 'user email')
+            ),
+            'warnings' => new \core_external\external_warnings()
+        ]);
+
+
+/*        return new \core_external\external_multiple_structure(
                 new \core_external\external_value(core_user::get_property_type('email'), 'user email'),
-        );
+        );*/
     }
 
     /**
@@ -69,33 +77,50 @@ class reactivate_users extends \core_external\external_api {
         self::validate_context($context);
         require_capability('moodle/user:update', $context);
 
-        $transaction = $DB->start_delegated_transaction();
-        // If an exception is thrown in the below code, all DB queries in this code will be rollback.
-
         $reactivatedusers = [];
+        $warnings = [];
 
         foreach ($params['useremails'] as $useremail) {
-            if (trim($useremail) == '') {
-                throw new \invalid_parameter_exception('Invalid email');
-            }
-            if ($DB->get_record('user', ['email' => $useremail])) {
-                throw new \invalid_parameter_exception('User with the same email already exists');
-            }
+            // Catch any exception while updating a user and return it as a warning.
+            try {
+                $transaction = $DB->start_delegated_transaction();
 
-            // finally reactivate
-            $record = $DB->get_record('tool_cleanupusers_archive', ['email' => $useremail],
-                    'id, username, firstname, lastname, suspended, lastaccess, auth, deleted, timecreated');
+                if (trim($useremail) == '') {
+                    throw new \invalid_parameter_exception('Invalid email');
+                }
+                if ($DB->get_record('user', ['email' => $useremail])) {
+                    throw new \invalid_parameter_exception("User with the email {$useremail} already exists");
+                }
 
-            if ($record !== false) {
-                $result = helper::change_user_deprovisionstatus([$useremail => $record], 'reactivate', '');
-                if ($result['countersuccess'] == 1) {
-                    $reactivatedusers[] = $useremail;
+                // finally reactivate
+                $record = $DB->get_record('tool_cleanupusers_archive', ['email' => $useremail],
+                        'id, username, firstname, lastname, suspended, lastaccess, auth, deleted, timecreated');
+
+                if ($record !== false) {
+                    $result = helper::change_user_deprovisionstatus([$useremail => $record], 'reactivate', '');
+                    if ($result['countersuccess'] == 1) {
+                        $reactivatedusers[] = $useremail;
+                    }
+                }
+                $transaction->allow_commit();
+            } catch (\Exception $e) {
+                try {
+                    $transaction->rollback($e);
+                } catch (\Exception $e) {
+                    $warning = [];
+                    $warning['item'] = 'user';
+                    $warning['itemid'] = $useremail;
+                    if ($e instanceof \moodle_exception) {
+                        $warning['warningcode'] = $e->errorcode;
+                    } else {
+                        $warning['warningcode'] = $e->getCode();
+                    }
+                    $warning['message'] = $e->getMessage();
+                    $warnings[] = $warning;
                 }
             }
         }
 
-        $transaction->allow_commit();
-
-        return $reactivatedusers;
+        return ['warnings' => $warnings, 'useremails' => $reactivatedusers];
     }
 }

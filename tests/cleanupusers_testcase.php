@@ -25,12 +25,12 @@
 
 namespace tool_cleanupusers;
 
-define('YEARAGO',       (time() - (86400 * 366)));
-define('LAST_MONTH',    (time() - (86400 * 30)));
-define('ELEVENDAYSAGO', (time() - (86400 * 11)));
-define('NINEDAYSAGO',   (time() - (86400 * 9)));
-define('YESTERDAY',     (time() - 86400));
-define('TOMORROW',      (time() + 86400));
+define('YEARAGO',       (time() - (DAYSECS * 366)));
+define('LAST_MONTH',    (time() - (DAYSECS * 30)));
+define('ELEVENDAYSAGO', (time() - (DAYSECS * 11)));
+define('NINEDAYSAGO',   (time() - (DAYSECS * 9)));
+define('YESTERDAY',     (time() - DAYSECS));
+define('TOMORROW',      (time() + DAYSECS));
 
 define('AUTH_METHOD', 'shibboleth');
 

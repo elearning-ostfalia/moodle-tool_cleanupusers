@@ -26,7 +26,7 @@ use tool_cleanupusers\helper;
 
 define('CLI_SCRIPT', true);
 
-require_once(__DIR__ . '/../../../config.php');
+require_once(__DIR__ . '/../../../../config.php');
 global $CFG;
 require_once($CFG->libdir . '/clilib.php');
 require_once($CFG->libdir . '/adminlib.php');
@@ -78,7 +78,8 @@ $plugininfo = $pluginman->get_plugins();
 
 if ($options['show-all']) {
     global $DB;
-    $records = $DB->get_records('tool_cleanupusers_archive', null, 'id', 'id, username, firstname, lastname');
+    $records = $DB->get_records('tool_cleanupusers_archive', null, 'id',
+        'id, username, firstname, lastname, timecreated');
     foreach ($records as $record) {
         cli_writeln($record->id . ': ' . $record->username . ' ' . $record->firstname . ' ' . $record->lastname);
     }
@@ -111,9 +112,9 @@ if ($options['users']) {
     if ($options['users'] == 'all') {
         // reactivate ALL users
         $records = $DB->get_records('tool_cleanupusers_archive', null, 'id',
-            'id, username, firstname, lastname, suspended, lastaccess, auth, deleted');
+            'id, username, firstname, lastname, suspended, lastaccess, auth, deleted, timecreated');
         if ($options['run']) {
-            $input = cli_input('Are you sure you wish to reactivate all users from archive? (y/N)', 'N', ['y', 'Y', 'n', 'N']);
+            $input = cli_input('Are you sure you really want to reactivate ALL users from archive? (y/N)', 'N', ['y', 'Y', 'n', 'N']);
             if (strtolower($input) != 'y') {
                 exit(0);
             }
@@ -129,13 +130,13 @@ if ($options['users']) {
         $users = explode(',', $options['users']);
         foreach ($users as $id) {
             if (filter_var($id, FILTER_VALIDATE_EMAIL) !== false) {
+                // user email as identifier
+                $record = $DB->get_record('tool_cleanupusers_archive', ['email' => $id],
+                        'id, username, firstname, lastname, suspended, lastaccess, auth, deleted, timecreated');
+            } else {
                 // user id as identifier
                 $record = $DB->get_record('tool_cleanupusers_archive', ['id' => $id],
-                        'id, username, firstname, lastname, suspended, lastaccess, auth, deleted');
-            } else {
-                // email as identifier
-                $record = $DB->get_record('tool_cleanupusers_archive', ['email' => $id],
-                        'id, username, firstname, lastname, suspended, lastaccess, auth, deleted');
+                        'id, username, firstname, lastname, suspended, lastaccess, auth, deleted, timecreated');
             }
             if ($record === false) {
                 cli_writeln('Unknown user: ' . $id);

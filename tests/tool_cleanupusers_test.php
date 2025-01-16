@@ -25,7 +25,6 @@
 namespace tool_cleanupusers;
 
 use advanced_testcase;
-use False\MyClass;
 
 /**
  * Testcase class for executing phpunit test for the moodle tool_cleanupusers plugin.

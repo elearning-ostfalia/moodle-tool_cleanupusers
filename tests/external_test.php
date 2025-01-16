@@ -31,10 +31,6 @@ require_once($CFG->dirroot . '/webservice/tests/helpers.php');
 
 require_once(__DIR__ . '/../classes/userstatuschecker.php');
 
-define('AUTH_METHOD', 'email');
-define('AUTH_METHOD_2', 'manual');
-define('LAST_MONTH',    (time() - (DAYSECS * 30)));
-
 // use tool_cleanupusers\userstatuschecker;
 /**
  * External function submit_selected_courses_form_test.
@@ -44,7 +40,7 @@ define('LAST_MONTH',    (time() - (DAYSECS * 30)));
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  * @covers \tool_dataprivacy\api
  */
-final class external_test extends \externallib_advanced_testcase {
+class external_test extends \externallib_advanced_testcase {
 
     protected $checker_login;
     protected $checker_course;
@@ -59,9 +55,13 @@ final class external_test extends \externallib_advanced_testcase {
         $this->setAdminUser();
 
         // set enabled plugin for running task
+
+        $AUTH_METHOD = 'email';
+        $AUTH_METHOD_2 = 'manual';
+
         set_config(CONFIG_ENABLED, "neverloginchecker,nocoursechecker");
-        set_config(CONFIG_AUTH_METHOD, AUTH_METHOD, 'userstatus_neverloginchecker');
-        set_config(CONFIG_AUTH_METHOD, AUTH_METHOD_2, 'userstatus_nocoursechecker');
+        set_config(CONFIG_AUTH_METHOD, $AUTH_METHOD, 'userstatus_neverloginchecker');
+        set_config(CONFIG_AUTH_METHOD, $AUTH_METHOD_2, 'userstatus_nocoursechecker');
         set_config(CONFIG_SUSPENDTIME, 10, 'userstatus_neverloginchecker');
         set_config(CONFIG_DELETETIME, 20, 'userstatus_neverloginchecker');
         set_config(CONFIG_SUSPENDTIME, 10, 'userstatus_nocoursechecker');
@@ -72,10 +72,9 @@ final class external_test extends \externallib_advanced_testcase {
         $this->checker_course = new \userstatus_nocoursechecker\nocoursechecker();
 
         $generator = self::getDataGenerator();
-
-        $timecreated = LAST_MONTH;
-        $user1 = $generator->create_user(['username' => 'user1', 'auth' => AUTH_METHOD, 'timecreated' => $timecreated]);
-        $user2 = $generator->create_user(['username' => 'user2', 'auth' => AUTH_METHOD_2, 'timecreated' => $timecreated]);
+        $timecreated = time() - (DAYSECS * 30); // 30 days before
+        $user1 = $generator->create_user(['username' => 'user1', 'auth' => $AUTH_METHOD, 'timecreated' => $timecreated]);
+        $user2 = $generator->create_user(['username' => 'user2', 'auth' => $AUTH_METHOD_2, 'timecreated' => $timecreated]);
         $this->assertEquals($timecreated, $user1->timecreated);
         $this->assertEquals($timecreated, $user2->timecreated);
 
@@ -124,8 +123,43 @@ final class external_test extends \externallib_advanced_testcase {
         $this->assertFalse($DB->get_record('user', ['email' => $user->email]));
         $this->assertNotFalse($DB->get_record('tool_cleanupusers_archive', ['email' => $user->email]));
     }
+    /**
+     * @param $warnings
+     * @return void
+     */
+    protected function assertNoWarning($returnvalue): void {
+        $this->assertEquals(0, count($returnvalue['warnings']));
+    }
 
-    protected function execute_webservice($param) {
+    /**
+     * check that reactivate result matches expected email
+     * @param $resturnValue
+     * @param $email
+     * @param int $index
+     * @param int $totalEmails
+     * @return void
+     */
+    protected function assertEmailInResult($resturnValue, $email, $index = 0, $totalEmails = 1): void {
+        $this->assertEquals($totalEmails, count($resturnValue['useremails']));
+        $this->assertEquals($email, $resturnValue['useremails'][$index]);
+    }
+
+    /**
+     * @param mixed $returnvalue
+     * @return void
+     */
+    protected function assertWarning(mixed $returnvalue, $email, $error): void {
+        $this->assertEquals(0, count($returnvalue['useremails']));
+        $this->assertEquals(1, count($returnvalue['warnings']));
+        $warning = [
+            'item' => $email,
+            'warningcode' => 'invalidparameter',
+            'message' => "Invalid parameter value detected ({$error})"
+        ];
+        $this->assertEquals($warning, $returnvalue['warnings'][0]);
+    }
+
+    protected function execute($param) {
         // Call the external service function.
         $returnvalue = reactivate_users::execute($param);
 
@@ -137,6 +171,9 @@ final class external_test extends \externallib_advanced_testcase {
         );
         return $returnvalue;
     }
+
+    ///////// T E S T S
+
     /**
      * Scenario: User1 is suspended and can be reactivated
      * @return void
@@ -146,11 +183,10 @@ final class external_test extends \externallib_advanced_testcase {
      * @throws \moodle_exception
      */
     public function test_reactivate_user1(): void {
-        $returnvalue = $this->execute_webservice([$this->user1->email]);
+        $returnvalue = $this->execute([$this->user1->email]);
 
-        $this->assertEquals(1, count($returnvalue['useremails']));
-        $this->assertEquals(0, count($returnvalue['warnings']));
-        $this->assertEquals($this->user1->email, $returnvalue['useremails'][0]);
+        $this->assertNoWarning($returnvalue);
+        $this->assertEmailInResult($returnvalue, $this->user1->email);
 
         // User1 is reacivated
         // => would be suspended immediately
@@ -168,12 +204,10 @@ final class external_test extends \externallib_advanced_testcase {
      * @throws \moodle_exception
      */
     public function test_reactivate_user2(): void {
-        $returnvalue = $this->execute_webservice([$this->user2->email]);
+        $returnvalue = $this->execute([$this->user2->email]);
 
-        $this->assertEquals(1, count($returnvalue['useremails']));
-        $this->assertEquals(0, count($returnvalue['warnings']));
-        $this->assertEquals($this->user2->email, $returnvalue['useremails'][0]);
-
+        $this->assertNoWarning($returnvalue);
+        $this->assertEmailInResult($returnvalue, $this->user2->email);
 
         // User2 is reacivated
         // => would be suspended immediately
@@ -183,12 +217,11 @@ final class external_test extends \externallib_advanced_testcase {
     }
 
     public function test_reactivate_user1_and_user2(): void {
-        $returnvalue = $this->execute_webservice([$this->user1->email, $this->user2->email]);
+        $returnvalue = $this->execute([$this->user1->email, $this->user2->email]);
 
         $this->assertEquals(2, count($returnvalue['useremails']));
-        $this->assertEquals(0, count($returnvalue['warnings']));
-        $this->assertEquals($this->user1->email, $returnvalue['useremails'][0]);
-        $this->assertEquals($this->user2->email, $returnvalue['useremails'][1]);
+        $this->assertEmailInResult($returnvalue, $this->user1->email, 0, 2);
+        $this->assertEmailInResult($returnvalue, $this->user2->email, 1, 2);
 
         // User1 und user2 are reacivated
         // => would be suspended immediately
@@ -198,16 +231,10 @@ final class external_test extends \externallib_advanced_testcase {
     }
 
     public function test_reactivate_unknown_user(): void {
-        $returnvalue = $this->execute_webservice(['test@moodle.org']);
+        $returnvalue = $this->execute(['test@moodle.org']);
 
-        $this->assertEquals(0, count($returnvalue['useremails']));
-        $this->assertEquals(1, count($returnvalue['warnings']));
-        $warning = [
-            'item' => 'test@moodle.org',
-            'warningcode' => 'invalidparameter',
-            'message' => 'Invalid parameter value detected (User with the email test@moodle.org not found in archive)'
-        ];
-        $this->assertEquals($warning, $returnvalue['warnings'][0]);
+        $this->assertWarning($returnvalue, 'test@moodle.org',
+            'User with the email test@moodle.org not found in archive');
 
         // User1 und user2 remain in old state
         $this->assertIsNotReactivated($this->user1, $this->checker_login);
@@ -215,7 +242,7 @@ final class external_test extends \externallib_advanced_testcase {
     }
 
     public function test_reactivate_empty_param(): void {
-        $returnvalue = $this->execute_webservice(['']);
+        $returnvalue = $this->execute(['']);
 
         $this->assertEquals(0, count($returnvalue['useremails']));
         $this->assertEquals(1, count($returnvalue['warnings']));
@@ -239,11 +266,10 @@ final class external_test extends \externallib_advanced_testcase {
      * @throws \moodle_exception
      */
     public function test_reactivate_user1_twice(): void {
-        $returnvalue = $this->execute_webservice([$this->user1->email]);
+        $returnvalue = $this->execute([$this->user1->email]);
 
-        $this->assertEquals(1, count($returnvalue['useremails']));
-        $this->assertEquals(0, count($returnvalue['warnings']));
-        $this->assertEquals($this->user1->email, $returnvalue['useremails'][0]);
+        $this->assertNoWarning($returnvalue);
+        $this->assertEmailInResult($returnvalue, $this->user1->email);
 
         // User1 is reacivated
         // => would be suspended immediately
@@ -251,7 +277,7 @@ final class external_test extends \externallib_advanced_testcase {
         // User2 is not reactivated
         $this->assertIsNotReactivated($this->user2, $this->checker_course);
 
-        $returnvalue = $this->execute_webservice([$this->user1->email]);
+        $returnvalue = $this->execute([$this->user1->email]);
 
         $this->assertEquals(0, count($returnvalue['useremails']));
         $this->assertEquals(1, count($returnvalue['warnings']));

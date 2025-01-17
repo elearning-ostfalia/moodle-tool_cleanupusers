@@ -14,7 +14,8 @@ Feature: Cleanup settings
       | user8    | Student   | Miller8   | 1                 | ## -12 days##  | 0  | 0                 |                        |
       | user9    | Student   | Miller9   | 1                 | ## -12 days##  | ## -9 days##  | 1      | Suspended              |
       | user0    | Student   | Miller10  | 1                 | ## -15 days##  | 0  | 0                 | neverlogin AND nocouse |
-      | user_1a  | Teacher   | Miller1   | 1                 | ## -320 days## | ## -11 days ## | 0     | Last Login, teacher             |
+      | user_1a  | Teacher   | Miller1   | 1                 | ## -320 days## | ## -31 days ## | 0     | Last Login, teacher             |
+      | user_1b  | Teacher   | Miller1   | 1                 | ## -320 days## | ## -11 days ## | 0     | Last Login waiting, teacher             |
       | user_5a  | Teacher   | Miller5   | 1                 | ## -12 days##  | 0  | 0                 | No active course, teacher       |
       | user_5b  | Student   | Miller5   | 1                 | ## -12 days##  | 0  | 0                 | No (active) course, waiting       |
       | user_5c  | Student   | Miller5   | 1                 | ## -40 days##  | 0  | 0                 | No (active) course      |
@@ -35,7 +36,8 @@ Feature: Cleanup settings
       # user1 as student is handled by lastlogin checker
       # in order to see handling with different role
       # user_1a is added (same attribute but teacher role)
-      | user_1a    | CA1     | editingteacher |
+      | user_1a  | CA1     | editingteacher |
+      | user_1b  | CA1     | editingteacher |
       | user2    | CA2     | student |
       | user3    | CA3     | editingteacher |
       | user4    | CA4     | student |
@@ -55,6 +57,8 @@ Feature: Cleanup settings
       | auth_method | manual  | userstatus_lastloginchecker |
       | suspendtime | 10  | userstatus_lastloginchecker |
       | deletetime | 100  | userstatus_lastloginchecker |
+      | keepteachers | 0 | userstatus_lastloginchecker |
+      | suspendtimeteacher | 20  | userstatus_lastloginchecker |
     And the following config values are set as admin:
       | suspendtime | 14  | userstatus_neverloginchecker |
       | deletetime | 200  | userstatus_neverloginchecker |
@@ -124,7 +128,8 @@ Feature: Cleanup settings
     And I navigate to "Users > Clean up users > Users to be archived" in site administration
     And I select "Last Login Checker" checker on archiving page
     And I should see "user1"
-    And I should not see "user_1a"
+    And I should see "user_1a"
+    And I should not see "user_1b"
     And I should not see "user2"
     And I should not see "user3"
     And I should not see "user4"
@@ -143,6 +148,7 @@ Feature: Cleanup settings
     And I should see "user4"
     And I should not see "user1"
     And I should not see "user_1a"
+    And I should not see "user_1b"
     And I should not see "user2"
     And I should see "user5"
     And I should not see "user_5a"
@@ -164,6 +170,7 @@ Feature: Cleanup settings
     And I should not see "user8"
     And I should not see "user1"
     And I should not see "user_1a"
+    And I should not see "user_1b"
     And I should not see "user2"
     And I should not see "user3"
     And I should not see "user4"
@@ -189,6 +196,7 @@ Feature: Cleanup settings
     And I navigate to "Users > Clean up users > Archived users" in site administration
     And I should see "user1"
     And I should see "user_1a"
+    And I should see "user_1b"
     And I should see "user3"
     And I should see "user4"
     And I should see "user5"
@@ -287,8 +295,9 @@ Feature: Cleanup settings
 
     When I navigate to "Users > Clean up users > Pending cleanup actions" in site administration
 
-    And I should not see "user_1a" in the "users_lastloginchecker" "table"
+    And I should see "user_1a" in the "users_lastloginchecker" "table"
     And I should see "user1" in the "users_lastloginchecker" "table"
+    And I should not see "user_1b" in the "users_lastloginchecker" "table"
     And I should not see "user2" in the "users_lastloginchecker" "table"
     And I should not see "user3" in the "users_lastloginchecker" "table"
     And I should not see "user4" in the "users_lastloginchecker" "table"
@@ -312,6 +321,7 @@ Feature: Cleanup settings
     And I should not see "user0" in the "users_nocoursechecker" "table"
     And I should not see "user1" in the "users_nocoursechecker" "table"
     And I should not see "user_1a" in the "users_nocoursechecker" "table"
+    And I should not see "user_1b" in the "users_nocoursechecker" "table"
     And I should not see "user2" in the "users_nocoursechecker" "table"
     And I should not see "user3" in the "users_nocoursechecker" "table"
     And I should not see "user4" in the "users_nocoursechecker" "table"
@@ -322,6 +332,7 @@ Feature: Cleanup settings
     And I should see "user0" in the "users_neverloginchecker" "table"
     And I should not see "user1" in the "users_neverloginchecker" "table"
     And I should not see "user_1a" in the "users_neverloginchecker" "table"
+    And I should not see "user_1b" in the "users_neverloginchecker" "table"
     And I should not see "user2" in the "users_neverloginchecker" "table"
     And I should see "user5" in the "users_neverloginchecker" "table"
     And I should not see "user_5a" in the "users_neverloginchecker" "table"
@@ -377,6 +388,7 @@ Feature: Cleanup settings
 
     And I should see "user1"
     And I should see "user_1a"
+    And I should see "user_1b"
     And I should see "user2"
     And I should see "user3"
     And I should see "user4"

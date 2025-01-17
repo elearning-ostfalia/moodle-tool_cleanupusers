@@ -3,17 +3,24 @@ Feature: Cleanup settings
 
   Background:
     Given the following "users" exist:
-      | username | firstname | lastname  | relativedatesmode | timecreated    | lastaccess | suspended |
-      | user1    | Teacher   | Miller1   | 1                 | ## -320 days## | ## -11 days ## | 0     |
-      | user_t   | Teacher   | Miller1   | 1                 | ## -320 days## | ## -11 days ## | 0     |
-      | user2    | Teaching  | Miller2   | 1                 | ## -32 days##  | ## -9 days## | 0       |
-      | user3    | Student   | Miller3   | 1                 | ## -15 days##  | 0  | 0                 |
-      | user4    | Student   | Miller4   | 1                 | ## -14 days##  | 0  | 0                 |
-      | user5    | Student   | Miller5   | 1                 | ## -12 days##  | 0  | 0                 |
-      | user6    | Student   | Miller6   | 1                 | ## -12 days##  | 0  | 0                 |
-      | user7    | Student   | Miller7   | 1                 | ## -12 days##  | 0  | 0                 |
-      | user8    | Student   | Miller8   | 1                 | ## -12 days##  | 0  | 0                 |
-      | user9    | Student   | Miller9   | 1                 | ## -12 days##  | ## -9 days##  | 1      |
+      | username | firstname | lastname  | relativedatesmode | timecreated    | lastaccess | suspended | description            |
+      | user1    | Student   | Miller1   | 1                 | ## -320 days## | ## -11 days ## | 0     | Last Login, student            |
+      | user2    | Teaching  | Miller2   | 1                 | ## -32 days##  | ## -9 days## | 0       |                        |
+      | user3    | Student   | Miller3   | 1                 | ## -15 days##  | 0  | 0                 | Never Login            |
+      | user4    | Student   | Miller4   | 1                 | ## -14 days##  | 0  | 0                 |                        |
+      | user5    | Student   | Miller5   | 1                 | ## -40 days##  | 0  | 0                 | No active course       |
+      | user6    | Student   | Miller6   | 1                 | ## -12 days##  | 0  | 0                 |                        |
+      | user7    | Student   | Miller7   | 1                 | ## -12 days##  | 0  | 0                 |                        |
+      | user8    | Student   | Miller8   | 1                 | ## -12 days##  | 0  | 0                 |                        |
+      | user9    | Student   | Miller9   | 1                 | ## -12 days##  | ## -9 days##  | 1      | Suspended              |
+      | user0    | Student   | Miller10  | 1                 | ## -15 days##  | 0  | 0                 | neverlogin AND nocouse |
+      | user_1a  | Teacher   | Miller1   | 1                 | ## -320 days## | ## -31 days ## | 0     | Last Login, teacher             |
+      | user_1b  | Teacher   | Miller1   | 1                 | ## -320 days## | ## -11 days ## | 0     | Last Login waiting, teacher             |
+      | user_5a  | Teacher   | Miller5   | 1                 | ## -12 days##  | 0  | 0                 | No active course, teacher       |
+      | user_5b  | Student   | Miller5   | 1                 | ## -12 days##  | 0  | 0                 | No (active) course, waiting       |
+      | user_5c  | Student   | Miller5   | 1                 | ## -40 days##  | 0  | 0                 | No (active) course      |
+      | newadmin | New       | AdminUser | 1                 | ## -15 days##  | 0  | 0                 | new admin |
+
     And the following "courses" exist:
       | fullname  | shortname  | category  | relativedatesmode  | startdate      | enddate     | visible |
       | Active1   | CA1         | 0         | 1                  | ##-32 days##  |             | 1       |
@@ -26,11 +33,16 @@ Feature: Cleanup settings
     And the following "course enrolments" exist:
       | user     | course | role           |
       | user1    | CA1     | student |
-      | user_t   | CA1     | editingteacher |
+      # user1 as student is handled by lastlogin checker
+      # in order to see handling with different role
+      # user_1a is added (same attribute but teacher role)
+      | user_1a  | CA1     | editingteacher |
+      | user_1b  | CA1     | editingteacher |
       | user2    | CA2     | student |
       | user3    | CA3     | editingteacher |
       | user4    | CA4     | student |
-      | user5    | CI1     | editingteacher |
+      | user5    | CI1     | student |
+      | user_5a  | CI1     | editingteacher |
       | user6    | CI2     | student |
 
     # Values are set per checker as otherwise only one value
@@ -38,12 +50,15 @@ Feature: Cleanup settings
     And the following config values are set as admin:
       | userstatus_plugins_enabled | lastloginchecker,nocoursechecker,neverloginchecker,suspendedchecker  | |
       | auth_method | manual  | userstatus_nocoursechecker |
-#      | suspendtime | 20  | userstatus_nocoursechecker |
+      | keepteachers | 1  | userstatus_nocoursechecker |
       | deletetime | 15  | userstatus_nocoursechecker |
+      | waitingperiod | 30  | userstatus_nocoursechecker |
     And the following config values are set as admin:
       | auth_method | manual  | userstatus_lastloginchecker |
       | suspendtime | 10  | userstatus_lastloginchecker |
       | deletetime | 100  | userstatus_lastloginchecker |
+      | keepteachers | 0 | userstatus_lastloginchecker |
+      | suspendtimeteacher | 20  | userstatus_lastloginchecker |
     And the following config values are set as admin:
       | suspendtime | 14  | userstatus_neverloginchecker |
       | deletetime | 200  | userstatus_neverloginchecker |
@@ -74,14 +89,15 @@ Feature: Cleanup settings
     When I delete "user1"
     Then "Completely delete user" "dialogue" should exist
     And I should see "Do you really want to delete"
-    And I should see "Teacher Miller1"
+    And I should see "Student Miller1"
 
     When I click on "Cancel" "button" in the "Completely delete user" "dialogue"
     Then I should see "user1"
 
+    # seems to fail in behat test but works in manual test ..
     When I delete "user1"
     Then "Completely delete user" "dialogue" should exist
-    And I should see "Teacher Miller1"
+    And I should see "Student Miller1"
 
     When I press "Delete"
     Then I should see "User 'user1' has been deleted."
@@ -105,14 +121,14 @@ Feature: Cleanup settings
     When I delete "user1"
     Then "Completely delete user" "dialogue" should exist
     And I should see "Do you really want to delete"
-    And I should see "Teacher Miller1"
+    And I should see "Student Miller1"
 
     When I click on "Cancel" "button" in the "Completely delete user" "dialogue"
     Then I should see "user1"
 
     When I delete "user1"
     Then "Completely delete user" "dialogue" should exist
-    And I should see "Teacher Miller1"
+    And I should see "Student Miller1"
 
     When I press "Delete"
     Then I should see "User 'user1' has been deleted."
@@ -158,9 +174,8 @@ Feature: Cleanup settings
     And I navigate to "Users to be deleted" archive page
     When I select "No active course Checker" checker on archive page
     Then I should see "user5"
+    And I should see "user_5c"
     And I should see "user6"
-    And I should see "user7"
-    And I should see "user8"
 
     # make invisible course visble
     And I go to the courses management page
@@ -175,7 +190,7 @@ Feature: Cleanup settings
   @javascript
   Scenario: Delete correct users
     # Precondtion: several users can be deleted by several checkers
-    # ensure that only the appropriate uesrs are deleted
+    # ensure that only the appropriate users are deleted
     # (disable checker and check if the users belonging to that checker are not deleted)
     Given I log in as "admin"
     And I run the scheduled task "\tool_cleanupusers\task\archive_user_task"
@@ -205,9 +220,8 @@ Feature: Cleanup settings
 
     When I select "No active course Checker" checker on archive page
     Then I should see "user5"
+    And I should see "user_5c"
     And I should see "user6"
-    And I should see "user7"
-    And I should see "user8"
 
     # update settings so that No active course Checker will not delete
     And the following config values are set as admin:
@@ -230,8 +244,7 @@ Feature: Cleanup settings
 
     When I navigate to "All archived users" archive page
     Then I should see "user5"
+    And I should see "user_5c"
     And I should see "user6"
-    And I should see "user7"
-    And I should see "user8"
-    Then I should not see "user3"
+    And I should not see "user3"
     And I should not see "user4"

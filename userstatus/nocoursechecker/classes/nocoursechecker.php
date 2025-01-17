@@ -39,31 +39,28 @@ class nocoursechecker extends userstatuschecker {
     protected $waitingperiod;
     public function __construct() {
         parent::__construct(self::class);
-        if (!get_config('userstatus_nocoursechecker', 'keepteachers')) {
-            $this->waitingperiod = get_config('userstatus_nocoursechecker', 'waitingperiod');
-            if ($this->waitingperiod < 0) {
-                // no valid configuration value
-                debugging('negative configuration value for \'waitingperiod\'');
-                $this->waitingperiod = 0;
-            }
+        $this->waitingperiod = get_config('userstatus_nocoursechecker', 'waitingperiod');
+        if ($this->waitingperiod < 0) {
+            // no valid configuration value
+            debugging('negative configuration value for \'waitingperiod\'');
+            $this->waitingperiod = 10;
         }
     }
 
     public function shall_suspend($user): bool {
         // Read all courses that the user is enrolled into with ACTIVE enrolment
         $courses = enrol_get_all_users_courses($user->id, true, "startdate, enddate, visible");
-        if (get_config('userstatus_nocoursechecker', 'keepteachers')) {
-            // do not suspend the teacher
-            if (userstatuschecker::is_teacher($user, $courses)) {
+        if (count($courses) == 0) {
+            // User is registered in Moodle but does not yet have a course yet =>
+            // cannot determine if user is a teacher since he or she is not enrolled anywhere
+            if (($user->timecreated + ($this->waitingperiod * DAYSECS)) > time()) {
                 return false;
             }
-        } else {
-            if (count($courses) == 0) {
-                // User is registered in Moodle but does not yet have a course yet
-                // cannot determine if user is a teacher since he or she is not enrolled anywhere
-                if ($user->timecreated + ($this->waitingperiod * DAYSECS) > time()) {
-                    return false;
-                }
+        }
+        if (get_config('userstatus_nocoursechecker', 'keepteachers')) {
+            // do not suspend teachers
+            if (userstatuschecker::is_teacher($user, $courses)) {
+                return false;
             }
         }
 

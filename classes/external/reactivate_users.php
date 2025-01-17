@@ -89,7 +89,7 @@ class reactivate_users extends \core_external\external_api {
 
                 // finally reactivate
                 $record = $DB->get_record('tool_cleanupusers_archive', ['email' => $useremail],
-                        'id, username, firstname, lastname, suspended, lastaccess, auth, deleted, timecreated');
+                        'id, username, firstname, lastname, suspended, lastaccess, auth, deleted, timecreated, email');
                 if ($record === false) {
                     throw new \invalid_parameter_exception("User with the email {$useremail} not found in archive");
                 }

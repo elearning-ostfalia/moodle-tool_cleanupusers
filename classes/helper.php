@@ -182,6 +182,7 @@ class helper {
                     $user->username,
                     $user->deleted,
                     $user->auth,
+                    $user->email,
                     $user->timecreated,
                     $checker
                 );

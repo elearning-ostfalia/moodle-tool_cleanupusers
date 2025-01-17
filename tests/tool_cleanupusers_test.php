@@ -88,8 +88,9 @@ final class tool_cleanupusers_test extends advanced_testcase {
             $data['user']->lastaccess,
             $data['user']->realusername,
             $data['user']->deleted,
+            $data['user']->auth,
+            $data['user']->email,
             $data['user']->timecreated,
-            $data['user']->auth
         );
 
         $user->archive_me("checker1", true, time());
@@ -166,8 +167,9 @@ final class tool_cleanupusers_test extends advanced_testcase {
             $data['usersuspendedbyplugin']->lastaccess,
             $data['usersuspendedbyplugin']->realusername,
             $data['usersuspendedbyplugin']->deleted,
-            $data['usersuspendedbyplugin']->timecreated,
-            $data['usersuspendedbyplugin']->auth
+            $data['usersuspendedbyplugin']->auth,
+            $data['usersuspendedbyplugin']->email,
+            $data['usersuspendedbyplugin']->timecreated
         );
 
         // Test dry run.
@@ -213,6 +215,8 @@ final class tool_cleanupusers_test extends advanced_testcase {
             $data['usersuspendedbypluginandmanually']->lastaccess,
             $data['usersuspendedbypluginandmanually']->realusername,
             $data['usersuspendedbypluginandmanually']->deleted,
+            $data['usersuspendedbypluginandmanually']->auth,
+            $data['usersuspendedbypluginandmanually']->email,
             $data['usersuspendedbypluginandmanually']->timecreated,
             $data['usersuspendedbypluginandmanually']->auth
         );
@@ -237,8 +241,9 @@ final class tool_cleanupusers_test extends advanced_testcase {
             $data['usersuspendedbyplugin']->lastaccess,
             $data['usersuspendedbyplugin']->realusername,
             $data['usersuspendedbyplugin']->deleted,
-            null,
-            $data['usersuspendedbyplugin']->auth
+            null, // $data['usersuspendedbyplugin']->auth,
+            $data['usersuspendedbyplugin']->email,
+            $data['usersuspendedbyplugin']->timecreated
         );
         $usersuspendedbyplugin->activate_me();
         $recordtooltable = $DB->get_record('tool_cleanupusers', ['id' => $data['usersuspendedbyplugin']->id]);
@@ -308,8 +313,9 @@ final class tool_cleanupusers_test extends advanced_testcase {
             $data['userdeleted']->lastaccess,
             $data['userdeleted']->realusername,
             $data['userdeleted']->deleted,
+            $data['userdeleted']->auth,
+            $data['userdeleted']->email,
             $data['userdeleted']->timecreated,
-            $data['userdeleted']->auth
         );
         // $this->expectException(cleanupusers_exception::class);
         try {
@@ -342,8 +348,9 @@ final class tool_cleanupusers_test extends advanced_testcase {
             $data['userinconsistentsuspended']->lastaccess,
             $data['userinconsistentsuspended']->realusername,
             $data['userinconsistentsuspended']->deleted,
+            $data['userinconsistentsuspended']->auth,
+            $data['userinconsistentsuspended']->email,
             null,
-            $data['userinconsistentsuspended']->auth
         );
         try {
             $userinconsistentsuspended->delete_me(false);
@@ -372,8 +379,9 @@ final class tool_cleanupusers_test extends advanced_testcase {
             $data['usersuspendedmanually']->lastaccess,
             $data['usersuspendedmanually']->realusername,
             $data['usersuspendedmanually']->deleted,
+            $data['usersuspendedmanually']->auth,
+            $data['usersuspendedmanually']->email,
             null,
-            $data['usersuspendedmanually']->auth
         );
         // $this->expectException(cleanupusers_exception::class);
         try {
@@ -418,7 +426,9 @@ final class tool_cleanupusers_test extends advanced_testcase {
             $data['userinconsistentsuspended']->realusername,
             $data['userinconsistentsuspended']->deleted,
             null,
-            $data['userinconsistentsuspended']->auth
+            //$data['userinconsistentsuspended']->auth,
+            $data['userinconsistentsuspended']->email,
+            $data['userinconsistentsuspended']->timecreated
         );
 
         try {
@@ -454,8 +464,9 @@ final class tool_cleanupusers_test extends advanced_testcase {
             $data['originaluser']->lastaccess,
             $data['userduplicatedname']->realusername,
             $data['originaluser']->deleted,
-            null,
-            $data['originaluser']->auth
+            $data['originaluser']->auth,
+            $data['originaluser']->email,
+            $data['originaluser']->timecreated
         );
 
         try {
@@ -495,8 +506,9 @@ final class tool_cleanupusers_test extends advanced_testcase {
             $data['usersuspendedmanually']->lastaccess,
             $data['usersuspendedmanually']->realusername,
             $data['usersuspendedmanually']->deleted,
-            null,
-            $data['usersuspendedmanually']->auth
+            $data['usersuspendedmanually']->auth,
+            $data['usersuspendedmanually']->email,
+            $data['usersuspendedmanually']->timecreated
         );
 
         try {

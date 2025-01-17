@@ -57,6 +57,9 @@ class archiveduser {
     /** @var int user authentication method */
     public $auth;
 
+    /** @var string user email (needed for display) */
+    public $email;
+
     /** @var string userstatus checker */
     public $checker;
 
@@ -75,13 +78,14 @@ class archiveduser {
      * @param $checker
      */
     public function __construct($id, $suspended, $lastaccess, $username, $deleted,
-                                $auth, $timecreated, $checker = '') {
+                                $auth, $email, $timecreated, $checker = '') {
         $this->id = $id;
         $this->suspended = $suspended;
         $this->lastaccess = $lastaccess;
         $this->username = $username;
         $this->deleted = $deleted;
         $this->auth = $auth;
+        $this->email = $email;
         $this->timecreated = $timecreated;
         $this->checker = $checker;
     }
@@ -315,7 +319,7 @@ class archiveduser {
         }
 
         // extract a few attributes in order to save memory.
-        $wantedkeys = ['id', 'username', 'firstname', 'lastname', 'lastaccess', 'auth', 'suspended', 'timecreated'];
+        $wantedkeys = ['id', 'username', 'firstname', 'lastname', 'lastaccess', 'auth', 'suspended', 'timecreated', 'email'];
         return array_intersect_key($archiveduser, array_flip($wantedkeys));
     }
 }

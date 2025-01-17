@@ -50,7 +50,7 @@ class users_table extends \table_sql {
         $this->returnurl = $returnurl;
 
         // Define the list of columns to show.
-        $columns = ['id', 'username', 'fullname', 'lastaccess', 'timecreated',  'auth', 'suspend'];
+        $columns = ['id', 'username', 'fullname', 'email', 'lastaccess', 'timecreated',  'auth', 'suspend'];
         $this->define_columns($columns);
         $this->set_attribute('id', 'users_' . $checker);
 
@@ -61,12 +61,13 @@ class users_table extends \table_sql {
             get_string('id', 'tool_cleanupusers'),
             get_string('username'), // $header,
             get_string('fullname'),
+            get_string('email'),
             get_string('lastaccess', 'tool_cleanupusers'),
             get_string('timecreated', 'tool_cleanupusers'),
             get_string('authmethod', 'tool_cleanupusers'),
             ''];
         $this->define_headers($headers);
-        $this->set_sql('id, username, lastaccess, auth, suspended, timecreated, ' .
+        $this->set_sql('id, username, email, lastaccess, timecreated, auth, suspended, ' .
             implode(', ', fields::get_name_fields()), '{user}', $sqlwhere, $param);
     }
 
@@ -146,6 +147,10 @@ class users_table extends \table_sql {
 
     public function col_auth($user) {
         return $this->display_usersuspended($user, $user->auth);
+    }
+
+    public function col_email($user) {
+        return $this->display_usersuspended($user, $user->email);
     }
 
     public function col_timestamp($user) {

@@ -262,7 +262,8 @@ abstract class userstatuschecker {
 
         list($sqlcondition, $paramcondition) = $this->condition_suspend_sql();
         // Select users who are not yet deleted, not yet archived and match condition for sub-plugin.
-        $sql = "SELECT id, suspended, lastaccess, username, deleted, auth, firstname, lastname, timecreated
+        $sql = "SELECT id, suspended, lastaccess, username, deleted, auth, 
+                    firstname, lastname, timecreated, email
                 FROM {user}
                 WHERE " . $this->get_auth_sql('') . "
                     AND deleted = 0
@@ -283,6 +284,7 @@ abstract class userstatuschecker {
                     $user->username,
                     $user->deleted,
                     $user->auth,
+                    $user->email,
                     $user->timecreated,
                     $this->get_name(),
                 );
@@ -335,7 +337,8 @@ abstract class userstatuschecker {
         global $DB;
         // Full join means that only users will be handled who are already
         // suspended with the cleanupusers plugin
-        $sql = 'SELECT tca.id, tca.suspended, tca.lastaccess, tca.username, tca.deleted, tca.auth
+        $sql = 'SELECT tca.id, tca.suspended, tca.lastaccess, tca.username, 
+                    tca.deleted, tca.auth, tca.email
                 FROM {tool_cleanupusers_archive} tca
                 JOIN {tool_cleanupusers} tc ON tc.id = tca.id and tc.checker = :checker
                 JOIN {user} u ON u.id = tc.id and u.suspended = 1 and u.deleted = 0
@@ -352,6 +355,7 @@ abstract class userstatuschecker {
                     $user->username,
                     $user->deleted,
                     $user->auth,
+                    $user->email,
                     null, // timecreated not needed for deletion
                     $this->get_name()
                 );
@@ -377,7 +381,8 @@ abstract class userstatuschecker {
         global $DB;
 
         list($sqlcondition, $paramcondition) = $this->condition_reactivate_sql('tca', 'tc');
-        $sql = "SELECT tca.id, tca.suspended, tca.lastaccess, tca.username, tca.deleted, tca.auth, tca.timecreated
+        $sql = "SELECT tca.id, tca.suspended, tca.lastaccess, tca.username, tca.deleted, 
+                    tca.auth, tca.timecreated, tca.email
                 FROM {user} u
                 JOIN {tool_cleanupusers_archive} tca ON u.id = tca.id
                 JOIN {tool_cleanupusers} tc ON u.id = tc.id and tc.checker = :checker
@@ -407,6 +412,7 @@ abstract class userstatuschecker {
                     $user->username,
                     $user->deleted,
                     $user->auth,
+                    $user->email,
                     $user->timecreated,
                     $this->get_name()
                 );

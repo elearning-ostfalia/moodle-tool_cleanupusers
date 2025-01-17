@@ -112,7 +112,7 @@ if ($options['users']) {
     if ($options['users'] == 'all') {
         // reactivate ALL users
         $records = $DB->get_records('tool_cleanupusers_archive', null, 'id',
-            'id, username, firstname, lastname, suspended, lastaccess, auth, deleted, timecreated');
+            'id, username, firstname, lastname, suspended, lastaccess, auth, deleted, timecreated, email');
         if ($options['run']) {
             $input = cli_input('Are you sure you really want to reactivate ALL users from archive? (y/N)', 'N', ['y', 'Y', 'n', 'N']);
             if (strtolower($input) != 'y') {
@@ -132,11 +132,11 @@ if ($options['users']) {
             if (filter_var($id, FILTER_VALIDATE_EMAIL) !== false) {
                 // user email as identifier
                 $record = $DB->get_record('tool_cleanupusers_archive', ['email' => $id],
-                        'id, username, firstname, lastname, suspended, lastaccess, auth, deleted, timecreated');
+                        'id, username, firstname, lastname, suspended, lastaccess, auth, deleted, timecreated, email');
             } else {
                 // user id as identifier
                 $record = $DB->get_record('tool_cleanupusers_archive', ['id' => $id],
-                        'id, username, firstname, lastname, suspended, lastaccess, auth, deleted, timecreated');
+                        'id, username, firstname, lastname, suspended, lastaccess, auth, deleted, timecreated, email');
             }
             if ($record === false) {
                 cli_writeln('Unknown user: ' . $id);

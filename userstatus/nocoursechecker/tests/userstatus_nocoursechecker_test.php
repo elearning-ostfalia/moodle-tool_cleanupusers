@@ -51,7 +51,11 @@ final class userstatus_nocoursechecker_test extends \tool_cleanupusers\userstatu
         set_config(CONFIG_ENABLED, "nocoursechecker");
         set_config(CONFIG_AUTH_METHOD, AUTH_METHOD, 'userstatus_nocoursechecker');
         set_config(CONFIG_DELETETIME, 365, 'userstatus_nocoursechecker');
-        $this->checker = new \userstatus_nocoursechecker\nocoursechecker();
+        $this->checker = $this->create_checker();
+    }
+
+    protected function create_checker() {
+        return new \userstatus_nocoursechecker\nocoursechecker();
     }
 
     /**
@@ -65,6 +69,7 @@ final class userstatus_nocoursechecker_test extends \tool_cleanupusers\userstatu
      * @throws moodle_exception
      */
     public function typical_scenario_for_reactivation(): ?\stdClass {
+        // User is enrolled into an invisible course...
         $invisible_course = $this->generator->create_course(['startdate' => YESTERDAY, 'visible' => false]);
         $user = $this->create_user_and_enrol('username', $invisible_course);
 
@@ -74,18 +79,19 @@ final class userstatus_nocoursechecker_test extends \tool_cleanupusers\userstatu
         $cronjob = new \tool_cleanupusers\task\archive_user_task();
         $cronjob->execute();
 
+        // ... and course is made visible
         global $DB;
         $invisible_course->visible = true;
         $DB->update_record('course', $invisible_course);
         return $user;
     }
 
+    /**
+     * User is not enrolled in any course and is created long time ago
+     * @return \stdClass
+     */
     public function typical_scenario_for_suspension(): \stdClass {
-        return $this->create_user_and_enrol('username');
-    }
-
-    protected function create_checker() {
-        return new \userstatus_nocoursechecker\nocoursechecker();
+        return $this->create_test_user('username', ['timecreated' => YEARAGO]);
     }
 
     // TESTS
@@ -100,10 +106,7 @@ final class userstatus_nocoursechecker_test extends \tool_cleanupusers\userstatu
     }
 
     public function test_other_auth_method_no_suspend() {
-        $user = $this->create_user_and_enrol('username');
-        global $DB;
-        $user->auth = 'email';
-        $DB->update_record('user', $user);
+        return $this->create_test_user('username', ['timecreated' => YEARAGO, 'auth' => 'email']);
         $this->assertEquals(0, count($this->checker->get_to_suspend()));
     }
 
@@ -132,16 +135,17 @@ final class userstatus_nocoursechecker_test extends \tool_cleanupusers\userstatu
         $this->assertEquals(0, count($this->checker->get_to_suspend()));
 
         // Suspended enrolment => do suspend.
-        $user2 = $this->create_test_user('username2');
+        $user2 = $this->create_test_user('username2', ['timecreated' => YEARAGO]);
         $this->generator->enrol_user($user2->id, $active_course->id, null, 'manual',
             0, 0, ENROL_USER_SUSPENDED);
         $this->assertEqualsUsersArrays($this->checker->get_to_suspend(), $user2);
     }
 
     public function test_no_course_suspend() {
-        $user = $this->create_user_and_enrol('username');
+        $user = $this->create_test_user('username', ['timecreated' => YEARAGO]);
         $this->assertEqualsUsersArrays($this->checker->get_to_suspend(), $user);
     }
+
 
     public function test_invisible_course_suspend() {
         $invisible_course = $this->generator->create_course(['startdate' => YESTERDAY, 'visible' => false]);
@@ -152,6 +156,22 @@ final class userstatus_nocoursechecker_test extends \tool_cleanupusers\userstatu
     public function test_invisible_course_teacher_no_suspend() {
         $invisible_course = $this->generator->create_course(['startdate' => YESTERDAY, 'visible' => false]);
         $user = $this->create_user_and_enrol('username', $invisible_course, 'editingteacher');
+        $this->assertEquals(0, count($this->checker->get_to_suspend()));
+    }
+
+    public function test_invisible_course_teacher_config_changed_suspend() {
+        // change configuration: do not keep teachers
+        set_config('keepteachers', 0, 'userstatus_nocoursechecker');
+        // create new checker instance in order to read changes values
+        $this->checker = $this->create_checker();
+
+        $invisible_course = $this->generator->create_course(['startdate' => YESTERDAY, 'visible' => false]);
+        $user = $this->create_user_and_enrol('username', $invisible_course, 'editingteacher');
+        $this->assertEqualsUsersArrays($this->checker->get_to_suspend(), $user);
+    }
+
+    public function test_waiting_time_no_suspend() {
+        $user = $this->create_test_user('username', ['timecreated' => YESTERDAY]);
         $this->assertEquals(0, count($this->checker->get_to_suspend()));
     }
 

@@ -95,7 +95,8 @@ class reactivate_users extends \core_external\external_api {
                 }
                 $result = helper::change_user_deprovisionstatus([$useremail => $record], 'reactivate', '');
                 if ($result['countersuccess'] == 1) {
-                    $reactivatedusers[] = $useremail;
+                    $reactivatedusers['id'] = $record->id;
+                    $reactivatedusers['email'] = $useremail;
                 }
                 $transaction->allow_commit();
             } catch (\Exception $e) {
@@ -116,6 +117,6 @@ class reactivate_users extends \core_external\external_api {
             }
         }
 
-        return ['warnings' => $warnings, 'useremails' => $reactivatedusers];
+        return ['warnings' => $warnings, 'ids' => $reactivatedusers];
     }
 }

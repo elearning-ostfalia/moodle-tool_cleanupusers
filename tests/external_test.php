@@ -140,8 +140,9 @@ class external_test extends \externallib_advanced_testcase {
      * @return void
      */
     protected function assertEmailInResult($resturnValue, $email, $index = 0, $totalEmails = 1): void {
-        $this->assertEquals($totalEmails, count($resturnValue['useremails']));
-        $this->assertEquals($email, $resturnValue['useremails'][$index]);
+        $this->assertEquals($totalEmails, count($resturnValue['ids']));
+        $item = $resturnValue['ids'][$index];
+        $this->assertEquals($email, $item['email']);
     }
 
     /**
@@ -149,7 +150,7 @@ class external_test extends \externallib_advanced_testcase {
      * @return void
      */
     protected function assertWarning(mixed $returnvalue, $email, $error): void {
-        $this->assertEquals(0, count($returnvalue['useremails']));
+        $this->assertEquals(0, count($returnvalue['ids']));
         $this->assertEquals(1, count($returnvalue['warnings']));
         $warning = [
             'item' => $email,
@@ -219,7 +220,7 @@ class external_test extends \externallib_advanced_testcase {
     public function test_reactivate_user1_and_user2(): void {
         $returnvalue = $this->execute([$this->user1->email, $this->user2->email]);
 
-        $this->assertEquals(2, count($returnvalue['useremails']));
+        $this->assertEquals(2, count($returnvalue['ids']));
         $this->assertEmailInResult($returnvalue, $this->user1->email, 0, 2);
         $this->assertEmailInResult($returnvalue, $this->user2->email, 1, 2);
 
@@ -244,7 +245,7 @@ class external_test extends \externallib_advanced_testcase {
     public function test_reactivate_empty_param(): void {
         $returnvalue = $this->execute(['']);
 
-        $this->assertEquals(0, count($returnvalue['useremails']));
+        $this->assertEquals(0, count($returnvalue['ids']));
         $this->assertEquals(1, count($returnvalue['warnings']));
         $warning = [
             'item' => '',
@@ -279,7 +280,7 @@ class external_test extends \externallib_advanced_testcase {
 
         $returnvalue = $this->execute([$this->user1->email]);
 
-        $this->assertEquals(0, count($returnvalue['useremails']));
+        $this->assertEquals(0, count($returnvalue['ids']));
         $this->assertEquals(1, count($returnvalue['warnings']));
         $warning = [
             'item' => $this->user1->email,

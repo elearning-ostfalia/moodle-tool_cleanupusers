@@ -48,8 +48,12 @@ class reactivate_users extends \core_external\external_api {
 
     public static function execute_returns() {
         return new \core_external\external_single_structure([
-            'useremails' => new \core_external\external_multiple_structure(
-                    new \core_external\external_value(core_user::get_property_type('email'), 'user email')
+            'ids' => new \core_external\external_multiple_structure(
+                new \core_external\external_single_structure([
+                    'id' => new \core_external\external_value(PARAM_INT),
+                    'email' => new \core_external\external_value(PARAM_TEXT),
+                ], 'user id'),
+                'list of reactivated ids'
             ),
             'warnings' => new \core_external\external_warnings()
         ]);
@@ -95,8 +99,10 @@ class reactivate_users extends \core_external\external_api {
                 }
                 $result = helper::change_user_deprovisionstatus([$useremail => $record], 'reactivate', '');
                 if ($result['countersuccess'] == 1) {
-                    $reactivatedusers['id'] = $record->id;
-                    $reactivatedusers['email'] = $useremail;
+                    $reactivateduser = [];
+                    $reactivateduser['id'] = $record->id;
+                    $reactivateduser['email'] = $useremail;
+                    $reactivatedusers[] = $reactivateduser;
                 }
                 $transaction->allow_commit();
             } catch (\Exception $e) {
@@ -117,6 +123,6 @@ class reactivate_users extends \core_external\external_api {
             }
         }
 
-        return ['warnings' => $warnings, 'ids' => $reactivatedusers];
+        return ['ids' => $reactivatedusers, 'warnings' => $warnings];
     }
 }

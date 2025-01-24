@@ -1,0 +1,85 @@
+<?php
+
+use tool_cleanupusers\external\external_test;
+use Symfony\Component\Process\Process;
+
+require_once(__DIR__ . '/external_test.php');
+
+final class cli_test extends external_test {
+    /**
+     * @param $warnings
+     * @return void
+     */
+    protected function assertNoWarning($returnvalue): void {
+        // $this->assertEquals(0, count($returnvalue['warnings']));
+    }
+
+    /**
+     * check that reactivate result matches expected email
+     * @param $resturnValue
+     * @param $email
+     * @param int $index
+     * @param int $totalEmails
+     * @return void
+     */
+    protected function assertEmailInResult($resturnValue, $email, $index = 0, $totalEmails = 1): void {
+        // $this->assertEquals($totalEmails, count($resturnValue['useremails']));
+        // $this->assertEquals($email, $resturnValue['useremails'][$index]);
+    }
+
+    /**
+     * @param mixed $returnvalue
+     * @return void
+     */
+    protected function assertWarning(mixed $returnvalue, $email, $error): void {
+        /*$this->assertEquals(0, count($returnvalue['useremails']));
+        $this->assertEquals(1, count($returnvalue['warnings']));
+        $warning = [
+            'item' => $email,
+            'warningcode' => 'invalidparameter',
+            'message' => "Invalid parameter value detected ({$error})"
+        ];
+        $this->assertEquals($warning, $returnvalue['warnings'][0]);*/
+    }
+
+    protected function execute($param) {
+        global $DB;
+        var_dump($DB->get_record_sql("select count(*) from {tool_cleanupusers_archive}"));
+
+
+        $param = implode(' ', $param);
+        global $CFG;
+        $command = "php {$CFG->dirroot}/admin/tool/cleanupusers/cli/reactivate.php --phpunittest --run --users='" . $param . "'";
+        echo $command . PHP_EOL;
+
+        /*
+        ob_start();
+        include "{$CFG->dirroot}/admin/tool/cleanupusers/cli/reactivate.php";
+//        include "{$CFG->dirroot}/admin/tool/cleanupusers/cli/reactivate.php --phpunittest --users='{$param}'";
+        $output = ob_get_contents();
+        ob_end_clean();
+        echo $output . PHP_EOL;
+*/
+
+        $output = shell_exec($command);
+        echo $output . PHP_EOL;
+/*
+        // Erstellen Sie einen Prozess, um das Skript auszuführen.
+        $process = new Process(explode(' ', $command)); // ['php', $scriptPath, '--test']);
+        $process->run();
+        $output = $process->getOutput();
+        var_dump($output);
+
+
+        // Stellen Sie sicher, dass der Prozess erfolgreich beendet wurde.
+        $this->assertTrue($process->isSuccessful(), $process->getErrorOutput());
+
+        // Überprüfen Sie die Ausgabe.
+        $this->assertStringContainsString('erwarteter Teil der Ausgabe', $output);
+
+*/
+        // $returnvalue = shell_exec($command);
+        return $output;
+    }
+}
+

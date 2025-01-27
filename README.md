@@ -91,7 +91,11 @@ To check the technical implementation, look at `/lib/moodlelib.php`.
 
 There is a simple CLI script for reactivating users on command line (reactivate.php).
 
-There is also a web service function in order to reactivate users by webservice. 
+There is also a web service function
+
+        tool_cleanupusers_reactivate_users
+
+in order to reactivate users by webservice. 
 
 ## Sub-plugins
 

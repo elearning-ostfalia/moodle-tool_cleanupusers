@@ -270,9 +270,14 @@ class archiveduser {
 
         $cloneuser->username = $config->suspendusername . $id; // 'anonym' . $id;
         $cloneuser->firstname = $config->suspendfirstname; // 'Anonym';
+        $config->suspendemail = trim($config->suspendemail);
+        if (strlen($config->suspendemail) > 0) {
+            $cloneuser->email = $cloneuser->username . '@' . $config->suspendemail;
+        } else {
+            $cloneuser->email = '';
+        }
         $cloneuser->lastname = $config->suspendlastname; // '';
         $cloneuser->suspended = 1;
-        $cloneuser->email = '';
         $cloneuser->phone1 = '';
         $cloneuser->phone2 = '';
         $cloneuser->institution = '';

@@ -57,6 +57,13 @@ if ($hassiteconfig) {
         '',
         PARAM_TEXT
     ));
+    $settings->add(new admin_setting_configtext(
+            'tool_cleanupusers/suspendemail',
+            get_string('sett_suspendemail', 'tool_cleanupusers'),
+            get_string('sett_suspendemail_description', 'tool_cleanupusers'),
+            '',
+            PARAM_TEXT
+    ));
 
     // Setting to enable/disable backdating.
     $settings->add(new admin_setting_configcheckbox('tool_cleanupusers/backdate',

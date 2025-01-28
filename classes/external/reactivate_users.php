@@ -47,16 +47,23 @@ class reactivate_users extends \core_external\external_api {
                     new \core_external\external_value(PARAM_RAW, 'user identifier (username or email according to type)')),
         ]);
     }
-/*
-    public static function execute_parameters() {
+
+    public static function execute_username_parameters() {
         return new \core_external\external_function_parameters([
-                'useremails' => new \core_external\external_multiple_structure(
-                        new \core_external\external_value(core_user::get_property_type('email'), 'user email', VALUE_DEFAULT, null)),
-                'usernames' => new \core_external\external_multiple_structure(
-                        new \core_external\external_value(core_user::get_property_type('username'), 'username', VALUE_DEFAULT, null)),
+                'type' => new \core_external\external_value(PARAM_ALPHA, 'username, email'),
+                'user' => new \core_external\external_multiple_structure(
+                        new \core_external\external_value(core_user::get_property_type('username'), 'username')),
         ]);
     }
-*/
+
+    public static function execute_email_parameters() {
+        return new \core_external\external_function_parameters([
+                'type' => new \core_external\external_value(PARAM_ALPHA, 'username, email'),
+                'user' => new \core_external\external_multiple_structure(
+                        new \core_external\external_value(core_user::get_property_type('email'), 'email')),
+        ]);
+    }
+
 
     public static function execute_returns() {
         return new \core_external\external_single_structure([
@@ -86,16 +93,30 @@ class reactivate_users extends \core_external\external_api {
                 'user' => $userids
         ]);
 
+        if ($params['type'] == 'username') {
+            $params = self::validate_parameters(self::execute_username_parameters(), [
+                    'type' => $type,
+                    'user' => $userids
+            ]);
+        } elseif ($params['type'] == 'email') {
+            $params = self::validate_parameters(self::execute_email_parameters(), [
+                    'type' => $type,
+                    'user' => $userids
+            ]);
+        } else {
+            throw new \invalid_parameter_exception('User identification type is invalid: ' . $params['type']);
+        }
+
+        if ($params['type'] != 'username' && $params['type'] != 'email') {
+            // twice just in case...
+            throw new \invalid_parameter_exception('User identification type is invalid: (2) ' . $params['type']);
+        }
+
         // now security checks
         $context = \context_system::instance();
         self::validate_context($context);
         require_capability('moodle/user:update', $context);
 
-        $type = strtolower(trim($type));
-
-        if ($type !== 'email' && $type != 'username') {
-            throw new \invalid_parameter_exception('User identification type is invalid: ' . $type);
-        }
 
         if (count($params['user']) == 0) {
             throw new \invalid_parameter_exception('User list must not be empty');
@@ -112,7 +133,7 @@ class reactivate_users extends \core_external\external_api {
                 if (trim($userid) == '') {
                     throw new \invalid_parameter_exception('User identification is empty');
                 }
-                if ($type == 'email') {
+                if ($params['type'] == 'email') {
                     if ($DB->get_record('user', ['email' => $userid])) {
                         throw new \invalid_parameter_exception("User with the email {$userid} already exists");
                     }
@@ -161,7 +182,7 @@ class reactivate_users extends \core_external\external_api {
                     // $warning['itemid'] = $username;
                     if ($e instanceof \moodle_exception) {
                         $warning['warningcode'] = $e->errorcode;
-                        $warning['message'] = $e->getMessage() . ': ' . $e->debuginfo;
+                        $warning['message'] = $e->getMessage(); //  . ': ' . $e->debuginfo;
                     } else {
                         $warning['warningcode'] = $e->getCode();
                         $warning['message'] = $e->getMessage();

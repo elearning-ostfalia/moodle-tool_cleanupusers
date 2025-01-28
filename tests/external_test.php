@@ -297,22 +297,14 @@ class external_test extends \externallib_advanced_testcase {
         $this->assertIsNotReactivated($this->user2, $this->checker_course);
     }
 
-    public function test_reactivate_empty_param_TODO(): void {
-        // TODO: how to expect exception in test???
+    public function test_reactivate_empty_param(): void {
+        $this->expectException(\invalid_parameter_exception::class);
         $returnvalue = $this->execute([]);
+    }
 
-        $this->assertEquals(0, count($returnvalue['ids']));
-        $this->assertEquals(1, count($returnvalue['warnings']));
-        $warning = [
-            'item' => '',
-            'warningcode' => 'invalidparameter',
-            'message' => 'Invalid parameter value detected (Email is empty)'
-        ];
-        $this->assertEquals($warning, $returnvalue['warnings'][0]);
-
-        // User1 und user2 remain in old state
-        $this->assertIsNotReactivated($this->user1, $this->checker_login);
-        $this->assertIsNotReactivated($this->user2, $this->checker_course);
+    public function test_reactivate_invalid_type(): void {
+        $this->expectException(\invalid_parameter_exception::class);
+        reactivate_users::execute('abc', [$this->user1->username]);
     }
 
     public function test_reactivate_empty_param_by_username(): void {

@@ -106,6 +106,34 @@ if (!empty($action) && confirm_sesskey()) {
 
 // process actions end
 
+
+if ($task = \core\task\manager::get_scheduled_task('\tool_cleanupusers\task\archive_user_task')) {
+    if ($task->get_disabled())
+    {
+        $link = new \moodle_url(
+                '/admin/tool/task/scheduledtasks.php',
+                array('action' => 'edit', 'task' => get_class($task))
+        );
+        \core\notification::error(get_string('archivetaskdisabled', 'tool_cleanupusers', $link->out()));
+
+    }
+}
+
+if ($task = \core\task\manager::get_scheduled_task('\tool_cleanupusers\task\delete_user_task')) {
+    if (!$task->get_disabled())
+    {
+        $link = new \moodle_url(
+                '/admin/tool/task/scheduledtasks.php',
+                array('action' => 'edit', 'task' => get_class($task))
+        );
+        \core\notification::warning(get_string('deletetaskenabled', 'tool_cleanupusers'));
+    } else {
+        \core\notification::info(get_string('deletetaskdisabled', 'tool_cleanupusers'));
+
+    }
+}
+
+
 $content .= $renderer->render_subplugin_table();
 
 echo $content;

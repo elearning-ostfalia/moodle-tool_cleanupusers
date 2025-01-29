@@ -135,6 +135,10 @@ $string['teacherroles'] = 'teacher roles';
 $string['teacherroles_info'] = 'Users who are enrolled in a course with one of the selected roles (teachers) 
 may not be suspended at all or may be suspended later. If no role has been selected, all users are treated equally in Moodle.<br>
 Note that the roles must be valid in the course context.';
+$string['archivetaskdisabled'] = 'The archiving task is disabled. Users will <b>not be archived</b> automatically. 
+The archiving task should have been enabled. <a href="{$a}">Enable task</a>';
+$string['deletetaskenabled'] = 'Note: The deletion task is enabled. <b>Users will be deleted automatically!</b> Data from deleted users cannot be restored.';
+$string['deletetaskdisabled'] = 'The deletion task is disabled. Users will be not deleted automatically.<br>';
 
 
 

@@ -58,6 +58,10 @@ class archive_user_task extends scheduled_task {
      * @return true
      */
     public function execute() {
+        if (!defined('PHPUNIT_COMPOSER_INSTALL')) {
+            mtrace("Start archiving users");
+            mtrace("Retrieving users to be archived");
+        }
         list($unabletoarchive, $userarchived, $archievdusers, $unabletoactivate, $useractivated) =
             helper::archive_users();
 
@@ -67,6 +71,11 @@ class archive_user_task extends scheduled_task {
         $messagetext = get_string('e-mail-archived', 'tool_cleanupusers', $userarchived) .
             "\r\n" . get_string('e-mail-activated', 'tool_cleanupusers', $useractivated);
 
+        if (!defined('PHPUNIT_COMPOSER_INSTALL')) {
+            mtrace("{$userarchived} users to be archived, {$useractivated} users activated");
+            mtrace("{$unabletoarchive} users could not be archived");
+            mtrace("{$unabletoactivate} users could not be activated");
+        }
         // No Problems occured during the cron-job.
         if (empty($unabletoactivate) && empty($unabletoarchive)) {
             $messagetext .= "\r\n\r\n" . get_string('e-mail-noproblem', 'tool_cleanupusers');
@@ -94,6 +103,10 @@ class archive_user_task extends scheduled_task {
 
         // Log users archived in the last task
         $this->write_csv($archievdusers);
+
+        if (!defined('PHPUNIT_COMPOSER_INSTALL')) {
+            mtrace("Archiving users is finished");
+        }
 
         return true;
     }

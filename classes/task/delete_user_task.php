@@ -60,6 +60,10 @@ class delete_user_task extends scheduled_task {
      * @return true
      */
     public function execute() {
+        if (!defined('PHPUNIT_COMPOSER_INSTALL')) {
+            mtrace("Start deleting users");
+        }
+
         // wrong order!
         // $pluginsenabled =  \core_plugin_manager::instance()->get_enabled_plugins("userstatus");
         // correct order:
@@ -113,6 +117,10 @@ class delete_user_task extends scheduled_task {
         $context = \context_system::instance();
         $event = deprovisionusercronjob_completed::create_simple($context, [], $userdeleted);
         $event->trigger();
+
+        if (!defined('PHPUNIT_COMPOSER_INSTALL')) {
+            mtrace("Deleting users is finished");
+        }
 
         return true;
     }

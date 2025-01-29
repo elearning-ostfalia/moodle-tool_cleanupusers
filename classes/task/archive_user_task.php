@@ -73,8 +73,8 @@ class archive_user_task extends scheduled_task {
 
         if (!defined('PHPUNIT_COMPOSER_INSTALL')) {
             mtrace("{$userarchived} users to be archived, {$useractivated} users activated");
-            mtrace("{$unabletoarchive} users could not be archived");
-            mtrace("{$unabletoactivate} users could not be activated");
+            mtrace("{count($unabletoarchive)} users could not be archived");
+            mtrace("{count($unabletoactivate)} users could not be activated");
         }
         // No Problems occured during the cron-job.
         if (empty($unabletoactivate) && empty($unabletoarchive)) {

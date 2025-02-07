@@ -56,7 +56,7 @@ class helper {
      * @throws coding_exception
      * @throws dml_exception
      */
-    public static function render_auth_editable($plugin, string $newvaluetext, mixed $newvalue1): \core\output\inplace_editable {
+    public static function render_auth_editable($plugin, string $newvaluetext, $newvalue1): \core\output\inplace_editable {
         $auths = get_enabled_auth_plugins();
         $templ = new \core\output\inplace_editable(
             'tool_cleanupusers',

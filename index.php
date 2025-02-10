@@ -126,7 +126,7 @@ if ($task = \core\task\manager::get_scheduled_task('\tool_cleanupusers\task\dele
                 '/admin/tool/task/scheduledtasks.php',
                 array('action' => 'edit', 'task' => get_class($task))
         );
-        \core\notification::warning(get_string('deletetaskenabled', 'tool_cleanupusers'));
+        \core\notification::warning(get_string('deletetaskenabled', 'tool_cleanupusers', $link->out()));
     } else {
         \core\notification::info(get_string('deletetaskdisabled', 'tool_cleanupusers'));
 

@@ -89,6 +89,7 @@ abstract class userstatus_base_test extends cleanupusers_testcase
         $this->assertEquals('Anonym', $record->firstname);
         $this->assertEquals('', $record->lastname);
         $this->assertEquals($user->auth, $record->auth); // not modified
+        $this->assertEquals('', $record->idnumber); // idnumber shall be empty
         // $this->assertNotEquals($user->timecreated, $record->timecreated); // may or may be not modified for privacy reasons
 
         $record = $DB->get_record('tool_cleanupusers', ['id' => $user->id]);
@@ -116,14 +117,14 @@ abstract class userstatus_base_test extends cleanupusers_testcase
         $this->assertEqualsUsersArrays($this->checker->get_to_suspend(), $user);
         // $this->assertEquals(0, $user->suspended);
 
-        // run cron
+        // run cron => archive user
         $cronjob = new \tool_cleanupusers\task\archive_user_task();
         $cronjob->execute();
 
-        // check if all users have been suspended
+        // check if all users have been suspended => no more users to be suspended
         $this->assertEquals(0, count($this->checker->get_to_suspend()));
 
-        // check if user won't be activated now.
+        // check if user won't be activated right now.
         $this->assertEquals(0, count($this->checker->get_to_reactivate()));
 
         global $DB;
@@ -133,6 +134,7 @@ abstract class userstatus_base_test extends cleanupusers_testcase
         $this->assertEquals('Anonym', $record->firstname);
         $this->assertEquals('', $record->lastname);
         $this->assertEquals($user->auth, $record->auth); // not modified
+        $this->assertEquals('', $record->idnumber); // idnumber shall be empty
 
         $record = $DB->get_record('tool_cleanupusers', ['id' => $user->id]);
         $checker = substr($this->get_plugin_name(), strlen('userstatus_'));
@@ -231,6 +233,8 @@ abstract class userstatus_base_test extends cleanupusers_testcase
         $this->assertEquals($user->username, $record->username);
         $this->assertEquals($user->firstname, $record->firstname);
         $this->assertEquals($user->lastname, $record->lastname);
+        $this->assertEquals($user->idnumber, $record->idnumber);
+        $this->assertNotEquals('', $record->idnumber);
         $this->assertEquals($user->auth, $record->auth); // not modified
         $this->assertEquals(1, $record->suspended);
         $this->assertEquals($user->lastaccess, $record->lastaccess);
@@ -276,6 +280,8 @@ abstract class userstatus_base_test extends cleanupusers_testcase
         $this->assertEquals($user->firstname, $record->firstname);
         $this->assertEquals($user->lastname, $record->lastname);
         $this->assertEquals($user->auth, $record->auth); // not modified
+        $this->assertEquals($user->idnumber, $record->idnumber);
+        $this->assertNotEquals('', $record->idnumber);
         $this->assertEquals(0, $record->suspended);
         $this->assertEquals($user->lastaccess, $record->lastaccess);
         $this->assertEquals($user->timecreated, $record->timecreated);
@@ -408,21 +414,31 @@ abstract class userstatus_base_test extends cleanupusers_testcase
         $this->assertStringNotContainsStringIgnoringCase($user->username, $record->firstname);
         $this->assertStringNotContainsStringIgnoringCase($user->username, $record->lastname);
         $this->assertStringNotContainsStringIgnoringCase($user->username, $record->email);
+        $this->assertStringNotContainsStringIgnoringCase($user->username, $record->idnumber);
 
         $this->assertStringNotContainsStringIgnoringCase($user->firstname, $record->username);
         $this->assertStringNotContainsStringIgnoringCase($user->firstname, $record->firstname);
         $this->assertStringNotContainsStringIgnoringCase($user->firstname, $record->lastname);
         $this->assertStringNotContainsStringIgnoringCase($user->firstname, $record->email);
+        $this->assertStringNotContainsStringIgnoringCase($user->firstname, $record->idnumber);
 
         $this->assertStringNotContainsStringIgnoringCase($user->lastname, $record->username);
         $this->assertStringNotContainsStringIgnoringCase($user->lastname, $record->firstname);
         $this->assertStringNotContainsStringIgnoringCase($user->lastname, $record->lastname);
         $this->assertStringNotContainsStringIgnoringCase($user->lastname, $record->email);
+        $this->assertStringNotContainsStringIgnoringCase($user->lastname, $record->idnumber);
 
         $this->assertStringNotContainsStringIgnoringCase($user->email, $record->username);
         $this->assertStringNotContainsStringIgnoringCase($user->email, $record->firstname);
         $this->assertStringNotContainsStringIgnoringCase($user->email, $record->lastname);
         $this->assertStringNotContainsStringIgnoringCase($user->email, $record->email);
+        $this->assertStringNotContainsStringIgnoringCase($user->email, $record->idnumber);
+
+        $this->assertStringNotContainsStringIgnoringCase($user->idnumber, $record->username);
+        $this->assertStringNotContainsStringIgnoringCase($user->idnumber, $record->firstname);
+        $this->assertStringNotContainsStringIgnoringCase($user->idnumber, $record->lastname);
+        $this->assertStringNotContainsStringIgnoringCase($user->idnumber, $record->email);
+        $this->assertStringNotContainsStringIgnoringCase($user->idnumber, $record->idnumber);
     }
 
     /**

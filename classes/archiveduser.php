@@ -283,6 +283,7 @@ class archiveduser {
         $cloneuser->institution = '';
         $cloneuser->department = '';
         $cloneuser->address = '';
+        $cloneuser->idnumber = '';
         $cloneuser->city = '';
         $cloneuser->country = '';
         $cloneuser->lang = '';

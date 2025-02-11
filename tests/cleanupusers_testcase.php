@@ -82,8 +82,9 @@ abstract class cleanupusers_testcase extends \advanced_testcase
     }
 
     protected function create_test_user($username, $extra_attributes = []) {
+
         return $this->generator->create_user(array_merge(
-            ['username' => $username, 'auth' => AUTH_METHOD],
+            ['username' => $username, 'auth' => AUTH_METHOD, 'idnumber' => rand(1, 99999999)],
             $extra_attributes));
     }
 

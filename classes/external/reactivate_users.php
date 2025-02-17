@@ -182,7 +182,12 @@ class reactivate_users extends \core_external\external_api {
                     // $warning['itemid'] = $username;
                     if ($e instanceof \moodle_exception) {
                         $warning['warningcode'] = $e->errorcode;
-                        $warning['message'] = $e->getMessage(); //  . ': ' . $e->debuginfo;
+                        // debug info is required in order to simplify debugging
+                        if (str_contains($e->getMessage(), $e->debuginfo)) {
+                            $warning['message'] = $e->getMessage();
+                        } else {
+                            $warning['message'] = $e->getMessage() . ': ' . $e->debuginfo;
+                        }
                     } else {
                         $warning['warningcode'] = $e->getCode();
                         $warning['message'] = $e->getMessage();

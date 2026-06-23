@@ -127,12 +127,7 @@ class behat_cleanupusers extends behat_base {
             MUST_EXIST);
 
         global $CFG;
-        if ($CFG->version > 2024100700) {
-            // From Moodle 4.5 on different trash classes
-            $this->execute('behat_general::i_click_on', ['.fa-trash-can.imggroup-' . $record->id, 'css']);
-        } else {
-            $this->execute('behat_general::i_click_on', ['.fa-trash.imggroup-' . $record->id, 'css']);
-        }
+        $this->execute('behat_general::i_click_on', ['.fa-trash-can.imggroup-' . $record->id, 'css']);
     }
 
     /**

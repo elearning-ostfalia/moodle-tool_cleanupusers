@@ -68,6 +68,7 @@ Feature: Cleanup settings
       | suspendtime | 0  | userstatus_suspendedchecker |
       | deletetime | 100  | userstatus_suspendedchecker |
 
+
   @javascript
   Scenario: Preview cleanup users 2
     Given I log in as "admin"
@@ -93,8 +94,8 @@ Feature: Cleanup settings
 
     When I click on "Cancel" "button" in the "Completely delete user" "dialogue"
     Then I should see "user1"
+    And I press "Close block drawer"
 
-    # seems to fail in behat test but works in manual test ..
     When I delete "user1"
     Then "Completely delete user" "dialogue" should exist
     And I should see "Student Miller1"
@@ -112,8 +113,9 @@ Feature: Cleanup settings
     And I run the scheduled task "\tool_cleanupusers\task\archive_user_task"
     And simulate that "101" days have passed since archiving of "user1"
 
-
+    And I wait "2" seconds
     And I navigate to "Users > Clean up users > Archived users" in site administration
+    And I pause
     And I navigate to "Users to be deleted" archive page
     And I select "Last Login Checker" checker on archive page
     And I should see "user1"

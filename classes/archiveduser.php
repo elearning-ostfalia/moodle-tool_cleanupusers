@@ -66,6 +66,12 @@ class archiveduser {
     /** @var int timecreated, temporary value */
     public $timecreated;
 
+    /** @var string firstname */
+    public $firstname;
+
+    /** @var string lastname */
+    public $lastname;
+
     /**
      * Archiveduser constructor.
      * @param $id

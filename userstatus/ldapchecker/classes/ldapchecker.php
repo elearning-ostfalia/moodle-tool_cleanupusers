@@ -49,7 +49,7 @@ class ldapchecker extends userstatuschecker {
      * @throws \dml_exception
      */
     public function __construct($testing = false) {
-        parent::__construct(get_class(), $testing);
+        parent::__construct(get_class($this), $testing);
 
         // Calculates days to seconds.
         $this->testing = $testing;

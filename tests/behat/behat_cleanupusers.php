@@ -185,7 +185,13 @@ class behat_cleanupusers extends behat_base {
      * @return void
      */
     public function navigate_to_new_archive_page($title) {
-        $xpath = "//div[label[contains(., 'Users to be reactivated') or contains(., 'All archived users') or contains(., 'Users to be deleted')]]/div";
+        // Moodle version 5.1 is >= 2025021700
+
+//        $xpath = "//div[label[contains(., 'Users to be reactivated') or contains(., 'All archived users') or contains(., 'Users to be deleted')]]/div";
+        // Das KI-generiert geht so noch nicht...
+        $xpath = "//ul[li='Users to be reactivated' and li='Users to be reactivated' and li='All archived users']/preceding-sibling::div[1]";
+        // $xpath = "//div//following-sibling:ul";
+//        $xpath = "//div//following-sibling:ul//li[contains(text(), 'Users to be reactivated') or contains(text(), 'All archived users') or contains(text(), 'Users to be deleted')]";
         $this->execute("behat_general::i_click_on", [$xpath, 'xpath_element']);
 
         $xpath = "//*[contains(text(), '{$title}')]";

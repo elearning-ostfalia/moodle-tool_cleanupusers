@@ -1,4 +1,8 @@
 {
+    "subplugintypes": {
+        "userstatus": "userstatus"
+    },
+
     "plugintypes": {
         "userstatus": "admin/tool/cleanupusers/userstatus"
     }

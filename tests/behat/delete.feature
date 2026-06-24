@@ -115,7 +115,6 @@ Feature: Cleanup settings
 
     And I wait "2" seconds
     And I navigate to "Users > Clean up users > Archived users" in site administration
-    And I pause
     And I navigate to "Users to be deleted" archive page
     And I select "Last Login Checker" checker on archive page
     And I should see "user1"

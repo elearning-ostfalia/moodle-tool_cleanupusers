@@ -106,12 +106,7 @@ class behat_cleanupusers extends behat_base {
         // element might not be visible. So the window is maximized.
         $this->getSession()->getDriver()->maximizeWindow();
         global $CFG;
-        if ($CFG->version > 2024100700) {
-            // From Moodle 4.5 on different trash classes
-            $this->execute('behat_general::i_click_on', ['.fa-floppy-disk.imggroup-' . $record->id, 'css']);
-        } else {
-            $this->execute('behat_general::i_click_on', ['.fa-floppy-o.imggroup-' . $record->id, 'css']);
-        }
+        $this->execute('behat_general::i_click_on', ['.fa-floppy-disk.imggroup-' . $record->id, 'css']);
     }
 
     /**
@@ -171,7 +166,15 @@ class behat_cleanupusers extends behat_base {
      * @return void
      */
     public function select_archiving_checker($checker) {
-        $xpath = "//div[label[contains(., 'Users to be archived')]]/div";
+        global $CFG;
+        if ($CFG->version > 2025021700) {
+            // Moodle version 5.1
+            $xpath = "//div[preceding-sibling::span[contains(normalize-space(.), 'Users to be archived')]]";
+            // $xpath = "//div[following-sibling::ul[li[normalize-space(.) = 'Checker']]]";
+        } else {
+            $xpath = "//div[label[contains(., 'Users to be archived')]]/div";
+        }
+
         $this->execute("behat_general::i_click_on", [$xpath, 'xpath_element']);
 
         $xpath = "//*[contains(text(), '{$checker}')]";
@@ -185,13 +188,13 @@ class behat_cleanupusers extends behat_base {
      * @return void
      */
     public function navigate_to_new_archive_page($title) {
-        // Moodle version 5.1 is >= 2025021700
-
-//        $xpath = "//div[label[contains(., 'Users to be reactivated') or contains(., 'All archived users') or contains(., 'Users to be deleted')]]/div";
-        // Das KI-generiert geht so noch nicht...
-        $xpath = "//ul[li='Users to be reactivated' and li='Users to be reactivated' and li='All archived users']/preceding-sibling::div[1]";
-        // $xpath = "//div//following-sibling:ul";
-//        $xpath = "//div//following-sibling:ul//li[contains(text(), 'Users to be reactivated') or contains(text(), 'All archived users') or contains(text(), 'Users to be deleted')]";
+        global $CFG;
+        if ($CFG->version > 2025021700) {
+            // Moodle version 5.1
+            $xpath = "//div[following-sibling::ul[li[normalize-space(.) = 'Users to be reactivated']]]";
+        } else {
+            $xpath = "//div[label[contains(., 'Users to be reactivated') or contains(., 'All archived users') or contains(., 'Users to be deleted')]]/div";
+        }
         $this->execute("behat_general::i_click_on", [$xpath, 'xpath_element']);
 
         $xpath = "//*[contains(text(), '{$title}')]";
@@ -205,7 +208,14 @@ class behat_cleanupusers extends behat_base {
      * @return void
      */
     public function select_archive_checker($checker) {
-        $xpath = "//div[label[starts-with(., 'by ')]]/div";
+        global $CFG;
+        if ($CFG->version > 2025021700) {
+            // Moodle version 5.1
+            $xpath = "//div[following-sibling::ul[li[normalize-space(.) = '" . $checker . "']]]";
+        } else {
+            $xpath = "//div[label[starts-with(., 'by ')]]/div";
+        }
+
         $this->execute("behat_general::i_click_on", [$xpath, 'xpath_element']);
 
         $xpath = "//*[contains(text(), '{$checker}')]";

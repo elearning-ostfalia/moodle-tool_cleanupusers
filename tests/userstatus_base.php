@@ -17,7 +17,7 @@
 /**
  * The class contains a base class for the moodle userstatus_xxx classes
  *
- * @package    userstatus_base_test
+ * @package    userstatus_base
  * @copyright  2024 Ostfalia
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -27,7 +27,7 @@ namespace tool_cleanupusers;
 
 require_once(__DIR__ . '/cleanupusers_testcase.php');
 
-abstract class userstatus_base_test extends cleanupusers_testcase
+abstract class userstatus_base extends cleanupusers_testcase
 {
     protected $generator = null;
     protected $checker = null;

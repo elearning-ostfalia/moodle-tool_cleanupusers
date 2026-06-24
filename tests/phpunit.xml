@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <phpunit
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xsi:noNamespaceSchemaLocation="../../../lib/phpunit/phpunit.xsd"
-        bootstrap="../../../lib/phpunit/bootstrap.php"
+        xsi:noNamespaceSchemaLocation="../../../../../lib/phpunit/phpunit.xsd"
+        bootstrap="../../../../lib/phpunit/bootstrap.php"
         convertErrorsToExceptions="true"
         convertNoticesToExceptions="true"
         convertWarningsToExceptions="true"
@@ -26,14 +26,9 @@
     </php>
 
     <testsuites>
-        <testsuite name="cleanupusers_files_testsuite">
-            <directory suffix="_test.php">tests</directory>
-            <directory suffix="_test.php">userstatus</directory>
-<!--
-            <directory>./userstatus/nocoursechecker/tests</directory>
-            <directory>./userstatus/ldapchecker/tests</directory>
-            <directory suffix="_test.php">./userstatus/timechecker/tests</directory>
-            <directory suffix="_test.php">./userstatus/neverloginchecker/tests</directory> -->
+        <testsuite name="cleanupusers_testsuite">
+            <directory suffix="_test.php">../tests</directory>
+            <directory suffix="_test.php">../userstatus</directory>
         </testsuite>
     </testsuites>
 

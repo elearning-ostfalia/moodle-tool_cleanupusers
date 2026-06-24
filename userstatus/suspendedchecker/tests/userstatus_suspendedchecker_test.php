@@ -24,7 +24,7 @@
 
 namespace userstatus_suspendedchecker;
 
-require_once(__DIR__.'/../../../tests/userstatus_base_test.php');
+require_once(__DIR__.'/../../../tests/userstatus_base.php');
 
 use advanced_testcase;
 
@@ -39,7 +39,7 @@ use advanced_testcase;
  *
  */
 #[CoversClass(\userstatus_suspendedchecker\suspendedchecker::class)]
-final class userstatus_suspendedchecker_test extends \tool_cleanupusers\userstatus_base_test {
+final class userstatus_suspendedchecker_test extends \tool_cleanupusers\userstatus_base {
 
     protected function setup(): void {
         $this->generator = advanced_testcase::getDataGenerator();

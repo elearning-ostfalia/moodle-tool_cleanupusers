@@ -24,7 +24,7 @@
 
 namespace userstatus_lastloginchecker;
 
-require_once(__DIR__.'/../../../tests/userstatus_base_test.php');
+require_once(__DIR__.'/../../../tests/userstatus_base.php');
 
 use advanced_testcase;
 
@@ -37,7 +37,7 @@ use advanced_testcase;
  * @copyright  2016/17 N Herrmann
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-final class userstatus_lastloginchecker_test extends \tool_cleanupusers\userstatus_base_test {
+final class userstatus_lastloginchecker_test extends \tool_cleanupusers\userstatus_base {
 
     protected function setup(): void {
         $this->generator = advanced_testcase::getDataGenerator();

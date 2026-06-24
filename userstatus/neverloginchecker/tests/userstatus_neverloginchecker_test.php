@@ -24,7 +24,7 @@
 
 namespace userstatus_neveloginchecker;
 
-require_once(__DIR__.'/../../../tests/userstatus_base_test.php');
+require_once(__DIR__.'/../../../tests/userstatus_base.php');
 
 
 use advanced_testcase;
@@ -41,7 +41,7 @@ use advanced_testcase;
  *
  */
 #[CoversClass(\userstatus_neverloginchecker\neverloginchecker::class)]
-class userstatus_neverloginchecker_test extends \tool_cleanupusers\userstatus_base_test {
+class userstatus_neverloginchecker_test extends \tool_cleanupusers\userstatus_base {
 
     protected function setup(): void {
         // set enabled plugin for running task

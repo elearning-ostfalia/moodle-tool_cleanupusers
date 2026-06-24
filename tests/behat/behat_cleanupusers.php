@@ -170,7 +170,6 @@ class behat_cleanupusers extends behat_base {
         if ($CFG->version > 2025021700) {
             // Moodle version 5.1
             $xpath = "//div[preceding-sibling::span[contains(normalize-space(.), 'Users to be archived')]]";
-            // $xpath = "//div[following-sibling::ul[li[normalize-space(.) = 'Checker']]]";
         } else {
             $xpath = "//div[label[contains(., 'Users to be archived')]]/div";
         }

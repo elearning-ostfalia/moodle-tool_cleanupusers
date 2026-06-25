@@ -54,11 +54,13 @@ class archiveduser {
     /** @var int user deleted? */
     public $deleted;
 
+
+
     /** @var int user authentication method */
-    public $auth;
+//    public $auth;
 
     /** @var string user email (needed for display) */
-    public $email;
+//    public $email;
 
     /** @var string userstatus checker */
     public $checker;
@@ -67,10 +69,10 @@ class archiveduser {
     public $timecreated;
 
     /** @var string firstname */
-    public $firstname;
+//    public $firstname;
 
     /** @var string lastname */
-    public $lastname;
+//    public $lastname;
 
     /**
      * Archiveduser constructor.
@@ -83,15 +85,15 @@ class archiveduser {
      * @param $timecreated is only required for suspension and backdate
      * @param $checker
      */
-    public function __construct($id, $suspended, $lastaccess, $username, $deleted,
-                                $auth, $email, $timecreated, $checker = '') {
+    public function __construct($id, $suspended, $lastaccess, $username, $deleted, /*
+                                $auth, $email, */ $timecreated, $checker = '') {
         $this->id = $id;
         $this->suspended = $suspended;
         $this->lastaccess = $lastaccess;
         $this->username = $username;
         $this->deleted = $deleted;
-        $this->auth = $auth;
-        $this->email = $email;
+//        $this->auth = $auth;
+//        $this->email = $email;
         $this->timecreated = $timecreated;
         $this->checker = $checker;
     }
@@ -121,13 +123,7 @@ class archiveduser {
                 $shadowuser = clone $user;
                 // The user might be logged in, so we must kill his/her session.
                 $user->suspended = 1;
-                global $CFG;
-                if ($CFG->version > 2024100700) {
-                    // from Moodle 4.5 use destroy instead of kill
-                    manager::destroy_user_sessions($user->id);
-                } else {
-                    manager::kill_user_sessions($user->id);
-                }
+                manager::destroy_user_sessions($user->id);
                 user_update_user($user, false);
                 // Document time of editing user in Database.
                 // In case there is no entry in the tool table make a new one.
@@ -241,13 +237,7 @@ class archiveduser {
             }
             $user->username = $newusername;
             user_update_user($user, false);
-            global $CFG;
-            if ($CFG->version > 2024100700) {
-                // from Moodle 4.5 use destroy instead of kill
-                manager::destroy_user_sessions($user->id);
-            } else {
-                manager::kill_user_sessions($user->id);
-            }
+            manager::destroy_user_sessions($user->id);
             // Core Function has to be executed finally.
             // It can not be executed earlier since moodle then prevents further operations on the user.
             // The Function adds @unknownemail.invalid. and a timestamp to the username.

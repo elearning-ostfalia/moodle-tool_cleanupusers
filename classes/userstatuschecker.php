@@ -283,14 +283,14 @@ abstract class userstatuschecker {
                     $user->lastaccess,
                     $user->username,
                     $user->deleted,
-                    $user->auth,
-                    $user->email,
+//                    $user->auth,
+//                    $user->email,
                     $user->timecreated,
                     $this->get_name(),
                 );
-                // Add further attributes neede for export in csv file.
-                $suspenduser->firstname = $user->firstname;
-                $suspenduser->lastname = $user->lastname;
+                // Add further attributes neede for export in csv file (... not actually needed!).
+//                $suspenduser->firstname = $user->firstname;
+//                $suspenduser->lastname = $user->lastname;
                 $tosuspend[$key] = $suspenduser;
                 $this->log("[get_to_suspend] " . $user->username . " marked");
             }
@@ -354,8 +354,8 @@ abstract class userstatuschecker {
                     $user->lastaccess,
                     $user->username,
                     $user->deleted,
-                    $user->auth,
-                    $user->email,
+//                    $user->auth,
+//                    $user->email,
                     null, // timecreated not needed for deletion
                     $this->get_name()
                 );
@@ -411,8 +411,8 @@ abstract class userstatuschecker {
                     $user->lastaccess,
                     $user->username,
                     $user->deleted,
-                    $user->auth,
-                    $user->email,
+//                    $user->auth,
+//                    $user->email,
                     $user->timecreated,
                     $this->get_name()
                 );

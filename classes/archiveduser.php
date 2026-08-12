@@ -54,13 +54,7 @@ class archiveduser {
     /** @var int user deleted? */
     public $deleted;
 
-
-
-    /** @var int user authentication method */
-//    public $auth;
-
-    /** @var string user email (needed for display) */
-//    public $email;
+    private static $xor_key = 'pseudonym';
 
     /** @var string userstatus checker */
     public $checker;
@@ -68,11 +62,74 @@ class archiveduser {
     /** @var int timecreated, temporary value */
     public $timecreated;
 
-    /** @var string firstname */
-//    public $firstname;
+    /**
+     * Encodes all text userfields so that the content is not readable easily
+     * and cohort groups cannot be selected by fields of anonymous users
+     *
+     * @param $userid
+     * @return void
+     */
+    public static function encode_fields($userid) {
+        global $DB;
+        $sql = 'select d.id, d.data 
+            from {user_info_data} d 
+            join {user_info_field} f on d.fieldid = f.id 
+            where userid = :userid and d.data is not null' ;
+        $records = $DB->get_records_sql($sql, ['userid' => $userid]);
+        foreach ($records as $record) {
+            if (!empty($record->data)) {
+                // Additional Xor.
+                $result = '';
+                $keyLength = strlen(self::$xor_key);
+                $length = strlen($record->data);
 
-    /** @var string lastname */
-//    public $lastname;
+                for ($i = 0; $i < $length; $i++) {
+                    $result .= chr(ord($record->data[$i]) ^ ord(self::$xor_key[$i % $keyLength]));
+                }
+
+                // Encode as base64.
+                $record->data = base64_encode($result);
+
+                if (!$DB->update_record('user_info_data', $record)) {
+                    throw new \Exception('Could not update user field data for user ' . $userid . ' in field ' . $record->id);
+                }
+            }
+        }
+    }
+
+    /**
+     * Decodes all text userfields
+     *
+     * @param $userid
+     * @return void
+     */
+    public static function decode_fields($userid) {
+        global $DB;
+        $sql = 'select d.id, d.data 
+            from {user_info_data} d 
+            join {user_info_field} f on d.fieldid = f.id 
+            where userid = :userid and d.data is not null' ;
+        $records = $DB->get_records_sql($sql, ['userid' => $userid]);
+        foreach ($records as $record) {
+            if (!empty($record->data)) {
+                // Undo base64.
+                $record->data = base64_decode($record->data);
+                // Undo XOR.
+                $decodedXor = '';
+                $keyLength = strlen(self::$xor_key);
+                $encodedLength = strlen($record->data);
+
+                for ($i = 0; $i < $encodedLength; $i++) {
+                    $decodedXor .= chr(ord($record->data[$i]) ^ ord(self::$xor_key[$i % $keyLength]));
+                }
+
+                $record->data = $decodedXor;
+                if (!$DB->update_record('user_info_data', $record)) {
+                    throw new \Exception('Could not update user field data for user ' . $userid . ' in field ' . $record->id);
+                }
+            }
+        }
+    }
 
     /**
      * Archiveduser constructor.

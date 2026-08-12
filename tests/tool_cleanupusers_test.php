@@ -883,4 +883,64 @@ final class tool_cleanupusers_test extends advanced_testcase {
         $this->assertEquals(2, $DB->count_records('user', []));
         $this->assertEquals(0, $DB->count_records('tool_cleanupusers', []));
     }
+
+
+    private function add_user_info_data($userid, $fieldid, $data) {
+        global $DB;
+        $userinfodata = array(
+                'userid' => $userid,
+                'fieldid' => $fieldid,
+                'data' => $data,
+                'dataformat' => 0
+        );
+
+        $DB->insert_record('user_info_data', $userinfodata);
+    }
+
+    /**
+     * Add dummy profile field.
+     *
+     * @param int $categoryid The ID of the profile category
+     * @param string $datatype The datatype of the profile field
+     * @return int The ID of the profile field
+     */
+    private function add_profile_field($categoryid, $datatype) {
+        $data = $this->getDataGenerator()->create_custom_profile_field([
+                'datatype' => $datatype,
+                'shortname' => 'tstField',
+                'name' => 'Test field',
+                'description' => 'This is a test.',
+                'categoryid' => $categoryid,
+        ]);
+        return $data->id;
+    }
+
+    public function test_encode_profile_fields(): void {
+        $this->resetAfterTest();
+        global $DB;
+        // Create profile category.
+        $category = $this->getDataGenerator()->create_custom_profile_field_category(['name' => 'Test category']);
+        // Create profile field.
+        $profilefieldid = $this->add_profile_field($category->id, 'text');
+
+        // Create a user.
+        $user = $this->getDataGenerator()->create_user();
+        $this->add_user_info_data($user->id, $profilefieldid, 'test data');
+
+        $userinfodata = $DB->get_records('user_info_data', ['userid' => $user->id]);
+        $this->assertCount(1, $userinfodata);
+        $this->assertEquals('test data', reset($userinfodata)->data);
+
+        archiveduser::encode_fields($user->id);
+
+        $userinfodata = $DB->get_records('user_info_data', ['userid' => $user->id]);
+        $this->assertNotEquals('test data', reset($userinfodata)->data);
+
+        archiveduser::decode_fields($user->id);
+
+        $userinfodata = $DB->get_records('user_info_data', ['userid' => $user->id]);
+        $this->assertEquals('test data', reset($userinfodata)->data);
+
+    }
+
 }

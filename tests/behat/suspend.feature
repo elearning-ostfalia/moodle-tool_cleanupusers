@@ -2,24 +2,30 @@
 Feature: Cleanup settings
 
   Background:
-    Given the following "users" exist:
-      | username | firstname | lastname  | relativedatesmode | timecreated    | lastaccess | suspended | description            |
-      | user1    | Student   | Miller1   | 1                 | ## -320 days## | ## -11 days ## | 0     | Last Login, student            |
-      | user2    | Teaching  | Miller2   | 1                 | ## -32 days##  | ## -9 days## | 0       |                        |
-      | user3    | Student   | Miller3   | 1                 | ## -15 days##  | 0  | 0                 | Never Login            |
-      | user4    | Student   | Miller4   | 1                 | ## -14 days##  | 0  | 0                 |                        |
-      | user5    | Student   | Miller5   | 1                 | ## -40 days##  | 0  | 0                 | No active course       |
-      | user6    | Student   | Miller6   | 1                 | ## -12 days##  | 0  | 0                 |                        |
-      | user7    | Student   | Miller7   | 1                 | ## -12 days##  | 0  | 0                 |                        |
-      | user8    | Student   | Miller8   | 1                 | ## -12 days##  | 0  | 0                 |                        |
-      | user9    | Student   | Miller9   | 1                 | ## -12 days##  | ## -9 days##  | 1      | Suspended              |
-      | user0    | Student   | Miller10  | 1                 | ## -15 days##  | 0  | 0                 | neverlogin AND nocouse |
-      | user_1a  | Teacher   | Miller1   | 1                 | ## -320 days## | ## -31 days ## | 0     | Last Login, teacher             |
-      | user_1b  | Teacher   | Miller1   | 1                 | ## -320 days## | ## -11 days ## | 0     | Last Login waiting, teacher             |
-      | user_5a  | Teacher   | Miller5   | 1                 | ## -12 days##  | 0  | 0                 | No active course, teacher       |
-      | user_5b  | Student   | Miller5   | 1                 | ## -12 days##  | 0  | 0                 | No (active) course, waiting       |
-      | user_5c  | Student   | Miller5   | 1                 | ## -40 days##  | 0  | 0                 | No (active) course      |
-      | newadmin | New       | AdminUser | 1                 | ## -15 days##  | 0  | 0                 | new admin |
+    Given the following "custom profile fields" exist:
+      | datatype | shortname     | name          | param2 |
+      | text     | studyprogram  | Study Program | 255    |
+      | checkbox | fool          | Foolish       |        |
+      | text     | employeetype  | Employee type  | 10     |
+
+    And the following "users" exist:
+      | username | firstname | lastname  | profile_field_employeetype | profile_field_studyprogram | relativedatesmode | timecreated    | lastaccess | suspended | description            |
+      | user1    | Student   | Miller1   | student                    | biology               | 1                 | ## -320 days## | ## -11 days ## | 0     | Last Login, student            |
+      | user2    | Teaching  | Miller2   | m                          |                       | 1                 | ## -32 days##  | ## -9 days## | 0       |                        |
+      | user3    | Student   | Miller3   | student                    | biology               | 1                 | ## -15 days##  | 0  | 0                 | Never Login            |
+      | user4    | Student   | Miller4   | student                    | chemistry             | 1                 | ## -14 days##  | 0  | 0                 |                        |
+      | user5    | Student   | Miller5   | student                    | chemistry             | 1                 | ## -40 days##  | 0  | 0                 | No active course       |
+      | user6    | Student   | Miller6   | student                    | chemistry             | 1                 | ## -12 days##  | 0  | 0                 |                        |
+      | user7    | Student   | Miller7   | student                    | chemistry             | 1                 | ## -12 days##  | 0  | 0                 |                        |
+      | user8    | Student   | Miller8   | student                    | chemistry             | 1                 | ## -12 days##  | 0  | 0                 |                        |
+      | user9    | Student   | Miller9   | student                    | chemistry             | 1                 | ## -12 days##  | ## -9 days##  | 1      | Suspended              |
+      | user0    | Student   | Miller10  | student                    | chemistry             | 1                 | ## -15 days##  | 0  | 0                 | neverlogin AND nocouse |
+      | user_1a  | Teacher   | Miller1   | m                          |                       | 1                 | ## -320 days## | ## -31 days ## | 0     | Last Login, teacher             |
+      | user_1b  | Teacher   | Miller1   | m                          |                       | 1                 | ## -320 days## | ## -11 days ## | 0     | Last Login waiting, teacher             |
+      | user_5a  | Teacher   | Miller5   | m                          |                       | 1                 | ## -12 days##  | 0  | 0                 | No active course, teacher       |
+      | user_5b  | Student   | Miller5   | student                    | biology               | 1                 | ## -12 days##  | 0  | 0                 | No (active) course, waiting       |
+      | user_5c  | Student   | Miller5   | student                    | mathematics           | 1                 | ## -40 days##  | 0  | 0                 | No (active) course      |
+      | newadmin | New       | AdminUser | m                          | 0                     | 1                 | ## -15 days##  | 0  | 0                 | new admin |
 
     And the following "courses" exist:
       | fullname  | shortname  | category  | relativedatesmode  | startdate      | enddate     | visible |
@@ -67,6 +73,9 @@ Feature: Cleanup settings
       | auth_method | manual  | userstatus_suspendedchecker |
       | suspendtime | 0  | userstatus_suspendedchecker |
       | deletetime | 100  | userstatus_suspendedchecker |
+    And the following config values are set as admin:
+      | suspendemail        | test.org | tool_cleanupusers |
+
 
   @javascript
   Scenario Outline: Two checkers match (manually archived)
@@ -121,7 +130,7 @@ Feature: Cleanup settings
 
 
   @javascript
-  Scenario: Run suspend task (long)
+  Scenario: Run suspend task (1: result set)
     Given I log in as "admin"
 
     # lastloginchecker
@@ -193,7 +202,28 @@ Feature: Cleanup settings
 
     And I should see "Nothing to display"
 
+  @javascript
+  Scenario: Run suspend task (2: archived users)
+    Given I log in as "admin"
+
+    # check precondition
+    And I am on the "user1" "user > editing" page logged in as "admin"
+    And I expand all fieldsets
+    Then the following fields match these values:
+      | Employee type | student |
+      | Study Program | biology |
+
+    # run task and check that all tables are empty
+    And I run the scheduled task "\tool_cleanupusers\task\archive_user_task"
+
+    And I am on the "anonym536000@test.org" "user > editing" page logged in as "admin"
+    And I expand all fieldsets
+    Then the following fields do not match these values:
+      | Employee type | student |
+      | Study Program | biology |
+
     And I navigate to "Users > Clean up users > Archived users" in site administration
+
     And I should see "user1"
     And I should see "user_1a"
     And I should see "user_1b"
@@ -206,6 +236,8 @@ Feature: Cleanup settings
     And I should see "user6"
     And I should see "user7"
     And I should see "user8"
+
+
 
   @javascript
   Scenario Outline: Do not suspend admin users

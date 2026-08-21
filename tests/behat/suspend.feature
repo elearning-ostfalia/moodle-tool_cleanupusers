@@ -210,14 +210,19 @@ Feature: Cleanup settings
     And I am on the "user1" "user > editing" page logged in as "admin"
     And I expand all fieldsets
     Then the following fields match these values:
+      | First name    | Student |
+      | Last name     | Miller1 |
       | Employee type | student |
       | Study Program | biology |
 
-    # run task and check that all tables are empty
+    # run task
     And I run the scheduled task "\tool_cleanupusers\task\archive_user_task"
 
-    And I am on the "anonym536000@test.org" "user > editing" page logged in as "admin"
+    And I reload the page
     And I expand all fieldsets
+    Then the following fields match these values:
+      | First name | Anonym |
+      | Last name  |        |
     Then the following fields do not match these values:
       | Employee type | student |
       | Study Program | biology |
@@ -236,7 +241,6 @@ Feature: Cleanup settings
     And I should see "user6"
     And I should see "user7"
     And I should see "user8"
-
 
 
   @javascript

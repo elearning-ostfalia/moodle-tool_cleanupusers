@@ -84,6 +84,10 @@ class archiveduser {
         $records = $DB->get_records_sql($sql, ['userid' => $userid]);
         foreach ($records as $record) {
             if (!empty($record->data)) {
+                if (str_starts_with($record->data, self::$fieldprefix)) {
+                    // Skip if already encoded.
+                    continue;
+                }
                 // Additional Xor.
                 $result = '';
                 $keyLength = strlen(self::$xorkey);
@@ -118,6 +122,10 @@ class archiveduser {
         $records = $DB->get_records_sql($sql, ['userid' => $userid]);
         foreach ($records as $record) {
             if (!empty($record->data)) {
+                if (!str_starts_with($record->data, self::$fieldprefix)) {
+                    // Skip if not encoded.
+                    continue;
+                }
                 // Remove prefix.
                 $record->data = substr($record->data, strlen(self::$fieldprefix));
                 // Undo base64.
@@ -208,6 +216,8 @@ class archiveduser {
                 // Replaces the current user with a pseudo_user that has no reference.
                 $cloneuser = $this->give_suspended_pseudo_user($shadowuser->id, $timestamp);
                 user_update_user($cloneuser, false);
+                // Encode profile fields
+                self::encode_fields($user->id);
 
                 $transaction->allow_commit();
             }
@@ -250,6 +260,8 @@ class archiveduser {
                     // Delete records from tool_cleanupusers and tool_cleanupusers_archive tables.
                     $DB->delete_records('tool_cleanupusers', ['id' => $user->id]);
                     $DB->delete_records('tool_cleanupusers_archive', ['id' => $user->id]);
+
+                    self::decode_fields($user->id);
 
                     $transaction->allow_commit();
                 }

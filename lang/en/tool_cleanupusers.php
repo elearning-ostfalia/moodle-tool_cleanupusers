@@ -57,6 +57,7 @@ $string['deleteuser'] = 'Delete User';
 $string['aresuspended'] = 'Users currently suspended';
 $string['archive_user_task'] = 'Archive Users';
 $string['delete_user_task'] = 'Delete Users';
+$string['migrate_profile_fields_task'] = 'Migration for profile fields';
 $string['willbe_archived'] = 'archived in the next cron-job';
 $string['pluginsettingstitle'] = 'Manage subplugins';
 $string['sett_suspendfirstname'] = 'Firstname for suspended';

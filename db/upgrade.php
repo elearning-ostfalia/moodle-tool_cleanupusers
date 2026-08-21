@@ -171,5 +171,13 @@ function xmldb_tool_cleanupusers_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2024102200, 'tool', 'cleanupusers');
     }
 
+    if ($oldversion < 2026082100) {
+        // Schedule ad-hoc task to migrate existing course completion data.
+        $task = new \tool_cleanupusers\task\migrate_profile_fields_task();
+        \core\task\manager::queue_adhoc_task($task, true);
+        // Datastore savepoint reached.
+        upgrade_plugin_savepoint(true, 2026082100, 'tool', 'cleanupusers');
+    }
+
     return true;
 }

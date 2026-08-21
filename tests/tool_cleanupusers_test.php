@@ -934,7 +934,9 @@ final class tool_cleanupusers_test extends advanced_testcase {
         archiveduser::encode_fields($user->id);
 
         $userinfodata = $DB->get_records('user_info_data', ['userid' => $user->id]);
-        $this->assertNotEquals('test data', reset($userinfodata)->data);
+        $result = reset($userinfodata)->data;
+        $this->assertNotEquals('test data', $result);
+        $this->assertEquals('##', substr($result, 0, 2));
 
         archiveduser::decode_fields($user->id);
 

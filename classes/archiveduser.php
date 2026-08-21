@@ -54,13 +54,19 @@ class archiveduser {
     /** @var int user deleted? */
     public $deleted;
 
-    private static $xor_key = 'pseudonym';
-
     /** @var string userstatus checker */
     public $checker;
 
     /** @var int timecreated, temporary value */
     public $timecreated;
+
+    /** @var string key for encoding */
+    private static $xorkey = 'pseudonym';
+
+    /** @var string prefix for encoded profile fields so that you can easily see
+     * if the field is encoded or not
+     */
+    private static $fieldprefix = '##';
 
     /**
      * Encodes all text userfields so that the content is not readable easily
@@ -80,15 +86,15 @@ class archiveduser {
             if (!empty($record->data)) {
                 // Additional Xor.
                 $result = '';
-                $keyLength = strlen(self::$xor_key);
+                $keyLength = strlen(self::$xorkey);
                 $length = strlen($record->data);
 
                 for ($i = 0; $i < $length; $i++) {
-                    $result .= chr(ord($record->data[$i]) ^ ord(self::$xor_key[$i % $keyLength]));
+                    $result .= chr(ord($record->data[$i]) ^ ord(self::$xorkey[$i % $keyLength]));
                 }
 
                 // Encode as base64.
-                $record->data = base64_encode($result);
+                $record->data = self::$fieldprefix . base64_encode($result);
 
                 if (!$DB->update_record('user_info_data', $record)) {
                     throw new \Exception('Could not update user field data for user ' . $userid . ' in field ' . $record->id);
@@ -112,15 +118,17 @@ class archiveduser {
         $records = $DB->get_records_sql($sql, ['userid' => $userid]);
         foreach ($records as $record) {
             if (!empty($record->data)) {
+                // Remove prefix.
+                $record->data = substr($record->data, strlen(self::$fieldprefix));
                 // Undo base64.
                 $record->data = base64_decode($record->data);
                 // Undo XOR.
                 $decodedXor = '';
-                $keyLength = strlen(self::$xor_key);
+                $keyLength = strlen(self::$xorkey);
                 $encodedLength = strlen($record->data);
 
                 for ($i = 0; $i < $encodedLength; $i++) {
-                    $decodedXor .= chr(ord($record->data[$i]) ^ ord(self::$xor_key[$i % $keyLength]));
+                    $decodedXor .= chr(ord($record->data[$i]) ^ ord(self::$xorkey[$i % $keyLength]));
                 }
 
                 $record->data = $decodedXor;

@@ -206,7 +206,19 @@ Feature: Cleanup settings
   Scenario: Run suspend task (2: archived users)
     Given I log in as "admin"
 
-    # check precondition
+    # check preconditions
+    # Active enrollments for users
+    Given I am on the "Active1" "enrolled users" page
+    When I set the field "Match" in the "Filter 1" "fieldset" to "All"
+    And I set the field "type" to "Status"
+    And I set the field "Type or select..." to "Active"
+    And I click on "Apply filters" "button"
+    Then the following should exist in the "participants" table:
+      | Email address           |
+      | user1@example.com       |
+      | user_1a@example.com     |
+      | user_1b@example.com     |
+
     And I am on the "user1" "user > editing" page logged in as "admin"
     And I expand all fieldsets
     Then the following fields match these values:
@@ -226,6 +238,21 @@ Feature: Cleanup settings
     Then the following fields do not match these values:
       | Employee type | student |
       | Study Program | biology |
+
+    # Enrolments are now inactive
+    Given I am on the "Active1" "enrolled users" page
+    When I set the field "Match" in the "Filter 1" "fieldset" to "All"
+    And I set the field "type" to "Status"
+    And I set the field "Type or select..." to "Active"
+    And I click on "Apply filters" "button"
+    Then I should see "Nothing to display"
+
+    When I set the field "Match" in the "Filter 1" "fieldset" to "All"
+    And I set the field "type" to "Status"
+    And I set the field "Type or select..." to "Inactive"
+    And I click on "Apply filters" "button"
+    Then I should not see "Nothing to display"
+
 
     And I navigate to "Users > Clean up users > Archived users" in site administration
 

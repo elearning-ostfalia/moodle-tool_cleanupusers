@@ -47,9 +47,9 @@ class nocoursechecker extends userstatuschecker {
         }
     }
 
-    public function shall_suspend($user): bool {
+    private function check_if_to_be_suspended($user, $active_enrolment) : bool {
         // Read all courses that the user is enrolled into with ACTIVE enrolment
-        $courses = enrol_get_all_users_courses($user->id, true, "startdate, enddate, visible");
+        $courses = enrol_get_all_users_courses($user->id, $active_enrolment, "startdate, enddate, visible");
         if (count($courses) == 0) {
             // User is registered in Moodle but does not yet have a course yet =>
             // cannot determine if user is a teacher since he or she is not enrolled anywhere
@@ -102,12 +102,15 @@ class nocoursechecker extends userstatuschecker {
                 // => ????
             }
         }
-
         return true;
     }
 
+    public function shall_suspend($user): bool {
+        return $this->check_if_to_be_suspended($user, true);
+   }
+
     public function shall_reactivate($user): bool {
-        return !$this->shall_suspend($user);
+        return !$this->check_if_to_be_suspended($user, false);
     }
 
     /** does not use suspend time value */

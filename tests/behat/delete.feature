@@ -1,6 +1,11 @@
 @tool @tool_cleanupusers
 Feature: Cleanup settings
 
+  # PROBLEM mit user6, der wird einerseits archiviert, weil der Kurs unsichtbar ist.
+  # Wenn er archiviert ist, wird er zum Reaktivieren angeboten, weil??
+  # er bei den eingeschriebenen Nutzern des Kurses nicht mehr enthalten ist,
+  # da die Einschreibung inaktiv ist.
+
   Background:
     Given the following "users" exist:
       | username | firstname | lastname  | relativedatesmode | timecreated    | lastaccess | suspended | description            |
@@ -176,6 +181,7 @@ Feature: Cleanup settings
     When I select "No active course Checker" checker on archive page
     Then I should see "user5"
     And I should see "user_5c"
+
     And I should see "user6"
 
     # make invisible course visble
@@ -190,7 +196,7 @@ Feature: Cleanup settings
 
   @javascript
   Scenario: Delete correct users
-    # Precondtion: several users can be deleted by several checkers
+    # Precondition: several users can be deleted by several checkers,
     # ensure that only the appropriate users are deleted
     # (disable checker and check if the users belonging to that checker are not deleted)
     Given I log in as "admin"
@@ -216,8 +222,6 @@ Feature: Cleanup settings
     When I select "Never Login Checker" checker on archive page
     Then I should see "user3"
     And I should see "user4"
-
-    # And I pause
 
     When I select "No active course Checker" checker on archive page
     Then I should see "user5"

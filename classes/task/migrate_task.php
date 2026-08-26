@@ -35,40 +35,55 @@ use tool_cleanupusers\archiveduser;
  * @copyright  2026 Ostfalia
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class migrate_profile_fields_task extends adhoc_task {
+class migrate_task extends adhoc_task {
     /**
      * Get a descriptive name for this task (shown to admins).
      *
      * @return string
      */
     public function get_name() {
-        return get_string('migrate_profile_fields_task', 'tool_cleanupusers');
+        return get_string('migrate_task', 'tool_cleanupusers');
     }
 
     /**
-     * Migration task for encoding all profile fields for all archived users
+     * Migration task for encoding all profile fields and deactivating enrolements
+     * for all archived users
      * @return true
      * @throws \coding_exception
      * @throws \dml_exception
      */
     public function execute() {
-        mtrace("Start encoding profile fields");
 
         global $DB;
         $transaction = $DB->start_delegated_transaction();
-        $records = $DB->get_records('tool_cleanupusers_archive');
+        $archivedusers = $DB->get_records('tool_cleanupusers_archive');
+
+        mtrace("Start encoding profile fields");
         try {
-            foreach ($records as $record) {
-                archiveduser::encode_fields($record->id);
+            foreach ($archivedusers as $user) {
+                archiveduser::encode_fields($user->id);
             }
-            $transaction->allow_commit();
         } catch(\Exception $e) {
             mtrace("Encoding profile fields failed: " . $e->getMessage());
             $transaction->rollback($e);
             throw $e;
         }
+        mtrace("Encoding profile fields succeeded");
 
-        mtrace("Encoding profile fields");
+        // Deactivate all enrolments for all archved users.
+        mtrace("Start deactivating enrolements");
+        try {
+            foreach ($archivedusers as $user) {
+                archiveduser::deactivate_enrolments($user->id);
+            }
+        } catch(\Exception $e) {
+            mtrace("Encoding profile fields failed: " . $e->getMessage());
+            $transaction->rollback($e);
+            throw $e;
+        }
+        mtrace("Deactivating enrolements succeeded");
+
+        $transaction->allow_commit();
         return true;
     }
 }

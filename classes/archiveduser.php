@@ -69,6 +69,37 @@ class archiveduser {
     private static $fieldprefix = '##';
 
     /**
+     * Inactivates enrolments in all courses
+     *
+     * @param $userid
+     * @return void
+     * @throws \dml_exception
+     */
+    public static function deactivate_enrolments($userid) : bool {
+        global $DB;
+        $sql = 'update {user_enrolments} 
+                set status = 1 
+                where userid = :userid and status = 0';
+        return $DB->execute($sql, ['userid' => $userid]);
+    }
+
+    /**
+     * Inactivates enrolments in all courses
+     *
+     * @param $userid
+     * @return void
+     * @throws \dml_exception
+     */
+    public static function activate_enrolments($userid) : bool {
+        global $DB;
+        $sql = 'update {user_enrolments} 
+                set status = 0 
+                where userid = :userid and status = 1';
+        return $DB->execute($sql, ['userid' => $userid]);
+    }
+
+
+    /**
      * Encodes all text userfields so that the content is not readable easily
      * and cohort groups cannot be selected by fields of anonymous users
      *
@@ -218,6 +249,8 @@ class archiveduser {
                 user_update_user($cloneuser, false);
                 // Encode profile fields
                 self::encode_fields($user->id);
+                // Deactivate enrolments.
+                self::deactivate_enrolments($user->id);
 
                 $transaction->allow_commit();
             }
@@ -262,6 +295,8 @@ class archiveduser {
                     $DB->delete_records('tool_cleanupusers_archive', ['id' => $user->id]);
 
                     self::decode_fields($user->id);
+                    // Activate enrolments.
+                    self::activate_enrolments($user->id);
 
                     $transaction->allow_commit();
                 }

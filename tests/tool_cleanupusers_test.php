@@ -942,7 +942,24 @@ final class tool_cleanupusers_test extends advanced_testcase {
 
         $userinfodata = $DB->get_records('user_info_data', ['userid' => $user->id]);
         $this->assertEquals('test data', reset($userinfodata)->data);
-
     }
 
+    public function test_deactivate_enrolments(): void {
+        $this->resetAfterTest();
+
+        // Create and enrol a user.
+        $course = $this->getDataGenerator()->create_course();
+        $user = $this->getDataGenerator()->create_and_enrol($course, 'student');
+        $context = \context_course::instance($course->id);
+
+        self::assertTrue(is_enrolled($context, $user, '', true));
+
+        archiveduser::deactivate_enrolments($user->id);
+
+        self::assertFalse(is_enrolled($context, $user, '', true));
+
+        archiveduser::activate_enrolments($user->id);
+
+        self::assertTrue(is_enrolled($context, $user, '', true));
+    }
 }

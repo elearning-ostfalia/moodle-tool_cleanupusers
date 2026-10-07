@@ -3,12 +3,8 @@
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="../../../../../lib/phpunit/phpunit.xsd"
         bootstrap="../../../../lib/phpunit/bootstrap.php"
-        convertErrorsToExceptions="true"
-        convertNoticesToExceptions="true"
-        convertWarningsToExceptions="true"
         processIsolation="false"
         backupGlobals="false"
-        backupStaticAttributes="false"
         stopOnError="false"
         stopOnFailure="false"
         stopOnIncomplete="false"
@@ -23,6 +19,10 @@
 >
 <!--    printerClass="Hint_ResultPrinter"
         testSuiteLoaderClass="phpunit_autoloader"
+        convertErrorsToExceptions="true"
+        convertNoticesToExceptions="true"
+        convertWarningsToExceptions="true"
+        backupStaticAttributes="false"
 -->
 
     <php>
@@ -37,7 +37,7 @@
         </testsuite>
     </testsuites>
 
-    <coverage>
+    <source>
         <include>
             <directory suffix=".php">./classes</directory>
             <directory suffix=".php">./lang</directory>
@@ -51,6 +51,6 @@
 <!--            <directory suffix="test.php">./userstatus</directory> -->
             <directory suffix=".php">./classes/table</directory>
         </exclude>
-    </coverage>
+    </source>
 
 </phpunit>

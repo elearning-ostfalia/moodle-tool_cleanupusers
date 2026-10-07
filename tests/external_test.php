@@ -32,14 +32,15 @@ require_once($CFG->dirroot . '/webservice/tests/helpers.php');
 require_once(__DIR__ . '/../classes/userstatuschecker.php');
 
 // use tool_cleanupusers\userstatuschecker;
+
 /**
  * External function submit_selected_courses_form_test.
  *
  * @package    tool_cleanupusers
  * @copyright  2025 Ostfalia
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- * @covers \tool_dataprivacy\api
  */
+#[CoversClass(\tool_dataprivacy\api::class)]
 class external_test extends \externallib_advanced_testcase {
 
     protected $checker_login;

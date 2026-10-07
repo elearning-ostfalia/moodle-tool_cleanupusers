@@ -324,9 +324,16 @@ abstract class userstatuschecker {
         }
 
         if ($this->delete_if_never_logged_in_on_suspendtime()) {
-            // If the user shall be deleted immediately if he or she has never
-            // logged in and is suspended then delete him (or her)
-            $condition = '(' . $condition . ' OR  tca.lastaccess = 0)';
+            // If the user shall be deleted immediately
+            // - if he or she has never logged in
+            // - and is not enrolled in any course
+            // - and is suspended then delete him (or her)
+            $condition = '(' . $condition . ' OR 
+                (tca.lastaccess = 0) OR 
+                NOT EXISTS (SELECT 1
+                    FROM {user_enrolments} ue
+                    WHERE ue.userid = u.id)
+            )';
         }
 
         if (empty($condition)) {

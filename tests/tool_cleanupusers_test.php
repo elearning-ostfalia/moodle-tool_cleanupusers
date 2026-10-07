@@ -30,16 +30,13 @@ use advanced_testcase;
  * Testcase class for executing phpunit test for the moodle tool_cleanupusers plugin.
  *
  * @package    tool_cleanupusers
- * @group      tool_cleanupusers
  * @copyright  2016/17 N Herrmann
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- *
- * @covers \tool_cleanupusers\archiveduser::archive_me()
- * @covers \tool_cleanupusers\archiveduser::delete_me()
- * @covers \tool_cleanupusers\archiveduser::activate_me()
- * @covers \tool_cleanupusers\task\archive_user_task::execute()
- *
  */
+#[CoversFunction('\tool_cleanupusers\archiveduser::archive_me()')]
+#[CoversFunction('\tool_cleanupusers\archiveduser::delete_me()')]
+#[CoversFunction('\tool_cleanupusers\archiveduser::activate_me()')]
+#[CoversFunction('\tool_cleanupusers\task\archive_user_task::execute()')]
 final class tool_cleanupusers_test extends advanced_testcase {
     /**
      * Get data from generator.

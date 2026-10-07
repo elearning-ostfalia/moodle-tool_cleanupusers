@@ -32,11 +32,8 @@ use advanced_testcase;
  * The class contains a test script for the moodle userstatus_nocoursechecker
  *
  * @package    userstatus_nocoursechecker
- * @group      tool_cleanupusers
- * @group      tool_cleanupusers_timechecker
  * @copyright  2016/17 N Herrmann / 2024 Ostfalia
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- *
  *
  * get to delete is not handled here as the suplugin is not envolved
  */

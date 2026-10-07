@@ -28,7 +28,6 @@ use advanced_testcase;
  * PHPUnit data class generator testcase
  *
  * @package    tool_cleanupusers
- * @group      tool_cleanupusers
  * @copyright  2016/17 Nina Herrmann
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -36,8 +35,8 @@ class generator_test extends advanced_testcase {
     /**
      * In the future might relly test the generator...
      * @return void
-     * @covers \tool_cleanupusers_generator::test_create_preparation
      */
+    #[CoversFunction('\tool_cleanupusers_generator::test_create_preparation')]
     public function test_generator() {
         $this->resetAfterTest(true);
     }

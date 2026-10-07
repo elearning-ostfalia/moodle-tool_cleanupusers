@@ -34,7 +34,6 @@ use advanced_testcase;
  * Testcase class for executing phpunit test for the moodle tool_cleanupusers plugin.
  *
  * @package    tool_cleanupusers
- * @group      tool_cleanupusers
  * @copyright  2024 Ostfalia
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */

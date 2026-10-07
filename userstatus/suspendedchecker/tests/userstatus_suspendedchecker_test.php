@@ -32,11 +32,8 @@ use advanced_testcase;
  * The class contains a test script for the moodle userstatus_suspendedchecker
  *
  * @package    userstatus_suspendedchecker
- * @group      tool_cleanupusers
- * @group      tool_cleanupusers_suspendedchecker
  * @copyright  2024 Ostfalia
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- *
  */
 #[CoversClass(\userstatus_suspendedchecker\suspendedchecker::class)]
 final class userstatus_suspendedchecker_test extends \tool_cleanupusers\userstatus_base {

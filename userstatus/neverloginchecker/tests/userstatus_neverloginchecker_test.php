@@ -33,8 +33,6 @@ use advanced_testcase;
  * The class contains a test script for the moodle userstatus_neveloginchecker
  *
  * @package    userstatus_neveloginchecker
- * @group      tool_cleanupusers
- * @group      tool_cleanupusers_timechecker
  * @copyright  2016/17 N Herrmann
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  *

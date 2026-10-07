@@ -93,6 +93,10 @@ final class userstatus_lastloginchecker_test extends \tool_cleanupusers\userstat
         return $this->create_test_user('username', ['lastaccess' => ELEVENDAYSAGO]);
     }
 
+    public function test_not_logged_in_configured_but_not_logged_in_delete() {
+        // user cannot be logged in and not logged in at the same time
+        return true;
+    }
     // TESTS
     // ---------------------------------------------
     // Suspend: scenarios not handled by this plugin

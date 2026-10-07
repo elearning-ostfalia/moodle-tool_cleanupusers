@@ -448,13 +448,72 @@ abstract class userstatus_base extends cleanupusers_testcase
      * @return void
      * @throws \coding_exception
      */
-    public function test_not_logged_in_configured_but_logged_in_no_delete() {
+    public function test_not_logged_in_configured_but_not_enrolled_delete() {
         $this->set_config(CONFIG_NEVER_LOGGED_IN, '1', $this->get_plugin_name());
 
         $user = $this->typical_scenario_for_suspension();
         global $DB;
         $user->lastaccess = time();
         $DB->update_record('user', $user);
+
+        if ($this->checker->get_to_suspend() != null) {
+            // This test can only be run if lastaccess is not part of
+            // condition
+            $this->assertEqualsUsersArrays($this->checker->get_to_suspend(), $user);
+            // run cron
+            $cronjob = new \tool_cleanupusers\task\archive_user_task();
+            $cronjob->execute();
+
+            $this->assertEquals(1, count($this->checker->get_to_delete()));
+        }
+    }
+
+    /**
+     * user is suspended and could be deleted at once if he or she never logged in.
+     * But user has logged in
+     *
+     * @return void
+     * @throws \coding_exception
+     */
+    public function test_not_logged_in_configured_but_not_logged_in_delete() {
+        $this->set_config(CONFIG_NEVER_LOGGED_IN, '1', $this->get_plugin_name());
+
+        $user = $this->typical_scenario_for_suspension();
+
+        // Enrol user
+        $course = $this->generator->create_course();
+        $this->generator->enrol_user($user->id, $course->id, 'student');
+
+        if ($this->checker->get_to_suspend() != null) {
+            // This test can only be run if lastaccess is not part of
+            // condition
+            $this->assertEqualsUsersArrays($this->checker->get_to_suspend(), $user);
+            // run cron
+            $cronjob = new \tool_cleanupusers\task\archive_user_task();
+            $cronjob->execute();
+
+            $this->assertEquals(1, count($this->checker->get_to_delete()));
+        }
+    }
+
+    /**
+     * user is suspended and could be deleted at once if he or she never logged in.
+     * But user has logged in
+     *
+     * @return void
+     * @throws \coding_exception
+     */
+    public function test_not_logged_in_configured_but_logged_in_and_enrolled_not_delete() {
+        $this->set_config(CONFIG_NEVER_LOGGED_IN, '1', $this->get_plugin_name());
+
+        $user = $this->typical_scenario_for_suspension();
+        global $DB;
+        $user->lastaccess = time();
+        $DB->update_record('user', $user);
+
+        // Enrol user
+        $course = $this->generator->create_course();
+        $this->generator->enrol_user($user->id, $course->id, 'student');
 
         if ($this->checker->get_to_suspend() != null) {
             // This test can only be run if lastaccess is not part of

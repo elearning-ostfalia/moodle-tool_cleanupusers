@@ -37,6 +37,16 @@ if ($hassiteconfig) {
         get_string('deletetime', 'userstatus_lastloginchecker'),
         get_string('timechecker_time_to_delete', 'userstatus_lastloginchecker'), 365, PARAM_INT));
 */
+    // Other settings.
+    $settings->add(new admin_setting_heading('userstatus_ldapchecker/othersettings',
+        get_string('othersettings', 'userstatus_ldapchecker'), ''));
+
+    // Suspend only users who are not enrolled in any course.
+    $settings->add(new admin_setting_configcheckbox('userstatus_ldapchecker/suspend_only_unenrolled',
+        get_string('suspend_only_unenrolled', 'userstatus_ldapchecker'),
+        get_string('suspend_only_unenrolled_info', 'userstatus_ldapchecker'),
+        0));
+
     // LDAP server settings.
     $settings->add(new admin_setting_heading('userstatus_ldapchecker/ldapserversettings',
         new lang_string('auth_ldap_server_settings', 'auth_ldap'), ''));

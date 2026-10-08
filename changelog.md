@@ -1,7 +1,7 @@
 2.1.10
 
 - check if user is enrolled in any course in addition to no access when offering immediate deletion
-  (TO BE TESTED)
+- possibility for checking enrolment suspending LDAP users
 
 2.1.9
 

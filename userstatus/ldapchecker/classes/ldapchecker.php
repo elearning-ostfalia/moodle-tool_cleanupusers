@@ -146,9 +146,17 @@ class ldapchecker extends userstatuschecker {
      * If this is not what is desired then the suspended checker should be
      * moved in front of the ldap checker
      *
+     * If suspend_only_unenrolled is set then only users who are not enrolled
+     * in any course are considered.
+     *
      * @return array
      */
     public function condition_suspend_sql(): array {
+        if (!empty($this->config->suspend_only_unenrolled)) {
+            return ["NOT EXISTS (SELECT 1
+                        FROM {user_enrolments} ue
+                        WHERE ue.userid = {user}.id)", null];
+        }
         return ["" , null];
     }
 
@@ -167,6 +175,18 @@ class ldapchecker extends userstatuschecker {
         return !$this->shall_suspend($user);
     }
 
+
+    /**
+     * returns the condition for the subplugin depending on the suspend_only_unenrolled setting
+     *
+     * @return string
+     */
+    public function get_condition_text(): string {
+        if (!empty($this->config->suspend_only_unenrolled)) {
+            return get_string('condition_unenrolled', 'userstatus_ldapchecker');
+        }
+        return parent::get_condition_text();
+    }
 
     /** does not use suspend time value */
     public function needs_suspendtime(): bool {

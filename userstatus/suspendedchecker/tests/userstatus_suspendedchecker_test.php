@@ -27,6 +27,7 @@ namespace userstatus_suspendedchecker;
 require_once(__DIR__.'/../../../tests/userstatus_base.php');
 
 use advanced_testcase;
+use PHPUnit\Framework\Attributes\CoversClass;
 
 /**
  * The class contains a test script for the moodle userstatus_suspendedchecker

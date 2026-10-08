@@ -31,6 +31,8 @@ require_once($CFG->dirroot . '/webservice/tests/helpers.php');
 
 require_once(__DIR__ . '/../classes/userstatuschecker.php');
 
+use PHPUnit\Framework\Attributes\CoversClass;
+
 // use tool_cleanupusers\userstatuschecker;
 
 /**

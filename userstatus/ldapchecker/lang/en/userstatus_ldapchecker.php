@@ -24,8 +24,12 @@
 $string['pluginname'] = 'LDAP Checker';
 $string['settingsinformation'] = 'Subplugin information';
 $string['condition'] = 'User is missing in LDAP';
+$string['condition_unenrolled'] = 'User is missing in LDAP and not enrolled in any course';
 $string['ldap_username'] = 'LDAP username attribute';
 $string['ldap_username_info'] = 'The LDAP attribute that is mapped to Moodle username';
 $string['ldap_filter'] = 'LDAP search filter for active users';
 $string['ldap_filter_info'] = 'LDAP search filter used for retrieving active moodle users managed by this plugin';
 $string['introsettingstext'] = 'In these settings, the LDAP connection parameters will be set.';
+$string['suspend_only_unenrolled'] = 'Suspend only if not enrolled in any course';
+$string['suspend_only_unenrolled_info'] = 'If enabled, users missing in LDAP are only suspended if they are not enrolled in any course.';
+$string['othersettings'] = 'Other settings';
